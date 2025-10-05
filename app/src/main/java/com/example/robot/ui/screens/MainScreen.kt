@@ -1,17 +1,13 @@
 package com.example.robot.ui.screens
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
@@ -19,17 +15,22 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.robot.ui.components.RobotChart
 import com.example.robot.ui.components.RobotTable
 import com.example.robot.ui.theme.NightBlue
@@ -38,6 +39,7 @@ import com.example.robot.ui.theme.DeepBlue
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.ui.theme.RobotTheme
+import com.example.robot.viewmodel.MaterialViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -45,18 +47,36 @@ fun MainScreen(
     onGoHome: () -> Unit,
     onExit: () -> Unit
 ) {
-
     var selectedScreen by remember { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState(
+        pageCount = { 2 },
+        initialPage = selectedScreen
+    )
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(pagerState.currentPage) {
+        selectedScreen = pagerState.currentPage
+    }
+
     val headers = listOf("Color", "Peso (g)", "¿Es metal?", "Categoría")
-    var rows by remember {
-        mutableStateOf(
-            listOf(
-                listOf("Rojo", "50g", "Verdadero", "Botella"),
-                listOf("Verde", "100g", "Falso", "Plástico"),
-                listOf("Azul", "800g", "Verdadero", "Botella")
-            )
+    val materialViewModel: MaterialViewModel = viewModel()
+    val materiales by materialViewModel.materiales.collectAsState()
+    val isLoading by materialViewModel.isLoading.collectAsState()
+
+
+    LaunchedEffect(Unit) {
+        materialViewModel.loadMateriales()
+    }
+
+    val rows = materiales.map { item ->
+        listOf(
+            item.color,
+            "${item.pesoGramos}g",
+            if (item.esMetal) "Si" else "No",
+            item.categoria
         )
     }
+
     RobotTheme {
         Scaffold(
             topBar = {
@@ -97,7 +117,7 @@ fun MainScreen(
                 ) {
                     NavigationBarItem(
                         selected = selectedScreen == 0,
-                        onClick = { selectedScreen = 0 },
+                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
                         icon = {
                             val scale by animateFloatAsState(
                                 targetValue = if (selectedScreen == 0) 1.2f else 1f,
@@ -136,7 +156,7 @@ fun MainScreen(
                     )
                     NavigationBarItem(
                         selected = selectedScreen == 1,
-                        onClick = { selectedScreen = 1 },
+                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
                         icon = {
                             val scale by animateFloatAsState(
                                 targetValue = if (selectedScreen == 1) 1.2f else 1f,
@@ -191,42 +211,64 @@ fun MainScreen(
                             end = Offset(0f, 1000f)
                         )
                     )
-
                     .padding(innerPadding)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 32.dp, start = 16.dp, end = 16.dp),
-                    verticalArrangement = Arrangement.Top
-                ) {
-                    AnimatedContent(
-                        targetState = selectedScreen,
-                        transitionSpec = {
-                            (slideInHorizontally { it } + fadeIn()).togetherWith(
-                                slideOutHorizontally { -it } + fadeOut())
-                        }
-                    ) { targetScreen ->
-                        when (targetScreen) {
-                            0 -> RobotTable(
-                                headers = headers,
-                                rows = rows,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f)
-                                    .padding(bottom = 16.dp)
-                            )
-                            1 -> RobotChart(
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = NeonBlue,
+                            trackColor = SpaceGray,
+                            strokeWidth = 5.dp
+                        )
+                    }
+                } else if (rows.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No hay datos disponibles.",
+                            color = NeonBlue,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                } else {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 32.dp, start = 12.dp, end = 12.dp)
+                    ) { page ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 32.dp, start = 12.dp, end = 12.dp),
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                            when (page) {
+                                0 -> RobotTable(
                                     headers = headers,
                                     rows = rows,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .weight(1f)
                                         .padding(bottom = 16.dp)
-                            )
+                                )
+
+                                1 -> RobotChart(
+                                    headers = headers,
+                                    rows = rows,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 16.dp)
+                                )
+                            }
                         }
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
