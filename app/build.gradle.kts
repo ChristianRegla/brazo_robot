@@ -87,6 +87,9 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
     implementation("com.google.firebase:firebase-analytics")
 
+    // Firestore
+    implementation("com.google.firebase:firebase-firestore-ktx:25.1.4")
+
     // Fonts
     implementation("androidx.compose.ui:ui-text-google-fonts:1.9.2")
 

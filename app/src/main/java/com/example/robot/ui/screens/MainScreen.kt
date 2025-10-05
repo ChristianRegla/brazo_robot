@@ -47,13 +47,13 @@ fun MainScreen(
 ) {
 
     var selectedScreen by remember { mutableIntStateOf(0) }
-    val headers = listOf("Sensor", "Valor", "Estado")
+    val headers = listOf("Color", "Peso (g)", "¿Es metal?", "Categoría")
     var rows by remember {
         mutableStateOf(
             listOf(
-                listOf("Distancia", "20cm", "Activo"),
-                listOf("Temperatura", "32°C", "Normal"),
-                listOf("Luz", "Baja", "Alerta")
+                listOf("Rojo", "50g", "Verdadero", "Botella"),
+                listOf("Verde", "100g", "Falso", "Plástico"),
+                listOf("Azul", "800g", "Verdadero", "Botella")
             )
         )
     }

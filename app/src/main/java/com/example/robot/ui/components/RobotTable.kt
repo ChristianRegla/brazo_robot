@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.size.Size
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.ui.theme.SpaceGray
@@ -42,7 +43,7 @@ fun RobotTable(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(NeonBlue.copy(alpha = 0.15f), RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-                    .padding(vertical = 12.dp)
+                    .padding(horizontal = 8.dp, vertical = 12.dp)
             ) {
                 headers.forEach { header ->
                     Text(
@@ -53,7 +54,8 @@ fun RobotTable(
                         color = Color.White,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+
                     )
                 }
             }
@@ -65,7 +67,11 @@ fun RobotTable(
 
             LazyColumn {
                 itemsIndexed(rows) { index, row ->
-                    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 8.dp)
+                    ) {
                         row.forEach { cell ->
                             Text(
                                 text = cell,
@@ -101,11 +107,11 @@ fun RobotTablePreview() {
                 .background(SpaceGray)
         ) {
             RobotTable(
-                headers = listOf("Sensor", "Valor", "Estado"),
+                headers = listOf("Color", "Peso (g)", "¿Es metal?", "Categoría"),
                 rows = listOf(
-                    listOf("Distancia", "20cm", "Activo"),
-                    listOf("Temperatura", "32°C", "Normal"),
-                    listOf("Luz", "Baja", "Alerta")
+                    listOf("Rojo", "50g", "Verdadero", "Botella"),
+                    listOf("Verde", "100g", "Falso", "Plástico"),
+                    listOf("Azul", "800g", "Verdadero", "Botella")
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
