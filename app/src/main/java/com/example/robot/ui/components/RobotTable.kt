@@ -12,8 +12,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.robot.ui.theme.NeonBlue
+import com.example.robot.ui.theme.RobotTheme
+import com.example.robot.ui.theme.SpaceGray
 
 @Composable
 fun RobotTable(
@@ -33,20 +38,23 @@ fun RobotTable(
                 .background(MaterialTheme.colorScheme.surface)
         ) {
             // Header row
-            Row(Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(NeonBlue.copy(alpha = 0.15f), RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                    .padding(vertical = 12.dp)
+            ) {
                 headers.forEach { header ->
-                    Box(
+                    Text(
+                        text = header,
                         modifier = Modifier
                             .weight(1f)
-                            .padding(8.dp)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.13f), RoundedCornerShape(6.dp))
-                    ) {
-                        Text(
-                            text = header,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
+                            .fillMaxWidth(),
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
             HorizontalDivider(
@@ -55,36 +63,54 @@ fun RobotTable(
                 color = NeonBlue.copy(alpha = 0.6f)
             )
 
-            Box(
-                modifier = modifier
-            ) {
-                LazyColumn {
-                    itemsIndexed(rows) { index, row ->
-                        Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                            row.forEach { cell ->
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(8.dp)
-                                ) {
-                                    Text(
-                                        text = cell,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
-                            }
-                        }
-                        if (index != rows.lastIndex) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                thickness = 2.dp,
-                                color = Color(0xFFCCCCCC).copy(alpha = 0.5f)
+            LazyColumn {
+                itemsIndexed(rows) { index, row ->
+                    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                        row.forEach { cell ->
+                            Text(
+                                text = cell,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
+                    if (index != rows.lastIndex) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            thickness = 1.dp,
+                            color = Color(0xFFCCCCCC).copy(alpha = 0.4f)
+                        )
+                    }
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RobotTablePreview() {
+    RobotTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SpaceGray)
+        ) {
+            RobotTable(
+                headers = listOf("Sensor", "Valor", "Estado"),
+                rows = listOf(
+                    listOf("Distancia", "20cm", "Activo"),
+                    listOf("Temperatura", "32°C", "Normal"),
+                    listOf("Luz", "Baja", "Alerta")
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
         }
     }
 }

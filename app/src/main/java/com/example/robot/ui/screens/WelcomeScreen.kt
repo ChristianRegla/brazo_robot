@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.robot.ui.components.AnimatedStartButton
 import com.example.robot.ui.theme.NightBlue
 import com.example.robot.ui.theme.SpaceGray
 import com.example.robot.ui.theme.DeepBlue
@@ -126,21 +127,10 @@ fun WelcomeScreen(
                     }
 
                     Spacer(modifier = Modifier.height(32.dp))
-                    Button(
+                    AnimatedStartButton(
                         onClick = onStartClick,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = NeonBlue,
-                            contentColor = Color.White
-                        ),
-                        modifier = Modifier
-                            .width(220.dp)
-                            .height(52.dp)
-                    ) {
-                        Text(
-                            text = "Comenzar",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
                 }
             }
         }

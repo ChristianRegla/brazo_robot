@@ -16,6 +16,8 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            tools:ignore="LockedOrientationActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.Robot">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
