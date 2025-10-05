@@ -1,12 +1,18 @@
 package com.example.robot.ui.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.runtime.Composable
@@ -26,16 +32,14 @@ import com.example.robot.ui.theme.NightBlue
 import com.example.robot.ui.theme.SpaceGray
 import com.example.robot.ui.theme.DeepBlue
 import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.ui.theme.RedAlert
 import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.ui.theme.RobotTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun MainScreen(
     onGoHome: () -> Unit,
-    onExit: () -> Unit,
-    onGoChart: () -> Unit
+    onExit: () -> Unit
 ) {
 
     var selectedScreen by remember { mutableIntStateOf(0) }
@@ -138,21 +142,27 @@ fun MainScreen(
                         .padding(top = 32.dp, start = 16.dp, end = 16.dp),
                     verticalArrangement = Arrangement.Top
                 ) {
-                    when (selectedScreen) {
-                        0 -> RobotTable(
-                            headers = headers,
-                            rows = rows,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                        )
-                        1 -> {
-                            RobotChart(
+                    AnimatedContent(
+                        targetState = selectedScreen,
+                        transitionSpec = {
+                            slideInHorizontally { it } + fadeIn() with
+                                    (slideOutHorizontally { -it } + fadeOut())
+                        }
+                    ) { targetScreen ->
+                        when (targetScreen) {
+                            0 -> RobotTable(
                                 headers = headers,
                                 rows = rows,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .weight(1f)
+                            )
+                            1 -> RobotChart(
+                                    headers = headers,
+                                    rows = rows,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
                             )
                         }
                     }
@@ -165,5 +175,5 @@ fun MainScreen(
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    MainScreen(onGoHome = {}, onExit = {}, onGoChart = {})
+    MainScreen(onGoHome = {}, onExit = {})
 }

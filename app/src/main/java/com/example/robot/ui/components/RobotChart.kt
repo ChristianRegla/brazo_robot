@@ -1,7 +1,5 @@
 package com.example.robot.ui.components
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Composable
 fun RobotChart(
     headers: List<String>,
