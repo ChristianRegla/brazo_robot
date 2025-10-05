@@ -278,5 +278,17 @@ fun MainScreen(
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    MainScreen(onGoHome = {}, onExit = {})
+    RobotTheme {
+        // Puedes mostrar directamente RobotTable con datos mock
+        val fakeRows = listOf(
+            listOf("Rojo", "100g", "Si", "Botella"),
+            listOf("Verde", "250g", "No", "Plástico"),
+            listOf("Azul", "800g", "Si", "Botella")
+        )
+        RobotTable(
+            headers = listOf("Color", "Peso (g)", "¿Es metal?", "Categoría"),
+            rows = fakeRows,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
