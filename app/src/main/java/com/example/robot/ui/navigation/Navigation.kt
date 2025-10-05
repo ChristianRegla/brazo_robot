@@ -24,16 +24,16 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         navController = navController,
         startDestination = Destinations.WELCOME_ROUTE,
         modifier = modifier,
-        enterTransition = { // Transición al entrar a una pantalla
+        enterTransition = {
             slideInHorizontally(initialOffsetX = { it }) + fadeIn(animationSpec = tween(500))
         },
-        exitTransition = { // Transición al salir de una pantalla
+        exitTransition = {
             slideOutHorizontally(targetOffsetX = { -it }) + fadeOut(animationSpec = tween(400))
         },
-        popEnterTransition = { // Transición al navegar "hacia atrás"
+        popEnterTransition = {
             slideInHorizontally(initialOffsetX = { -it }) + fadeIn(animationSpec = tween(500))
         },
-        popExitTransition = { // Transición al salir "hacia atrás"
+        popExitTransition = {
             slideOutHorizontally(targetOffsetX = { it }) + fadeOut(animationSpec = tween(400))
         }
     ) {

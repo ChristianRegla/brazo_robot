@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.ui.theme.SpaceGray
 
 @Composable
 fun RobotTable(
@@ -80,7 +79,7 @@ fun RobotTable(
                             HorizontalDivider(
                                 modifier = Modifier.padding(horizontal = 8.dp),
                                 thickness = 2.dp,
-                                color = Color(0xFFCCCCCC).copy(alpha = 0.15f)
+                                color = Color(0xFFCCCCCC).copy(alpha = 0.5f)
                             )
                         }
                     }
