@@ -2,11 +2,14 @@ package com.example.robot.ui.screens
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -24,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.robot.ui.components.RobotChart
@@ -95,25 +99,79 @@ fun MainScreen(
                         selected = selectedScreen == 0,
                         onClick = { selectedScreen = 0 },
                         icon = {
+                            val scale by animateFloatAsState(
+                                targetValue = if (selectedScreen == 0) 1.2f else 1f,
+                                animationSpec = spring(
+                                    stiffness = 400f,
+                                    dampingRatio = 0.4f
+                                ),
+                                label = "scale"
+                            )
                             Icon(
                                 Icons.Filled.TableChart,
                                 contentDescription = "Tabla",
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .graphicsLayer {
+                                        scaleX = scale
+                                        scaleY = scale
+                                    },
                                 tint = if (selectedScreen == 0) NeonBlue else TextPrimary,
                             )
                         },
-                        label = { Text("Tabla") }
+                        label = {
+                            val labelColor by animateColorAsState(
+                                targetValue = if (selectedScreen == 0) NeonBlue else TextPrimary,
+                                label = "labelColor"
+                            )
+                            Text(text = "Tabla", color = labelColor)
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = NeonBlue.copy(alpha = 0.25f),
+                            selectedIconColor = NeonBlue,
+                            selectedTextColor = NeonBlue,
+                            unselectedIconColor = TextPrimary,
+                            unselectedTextColor = TextPrimary
+                        )
                     )
                     NavigationBarItem(
                         selected = selectedScreen == 1,
                         onClick = { selectedScreen = 1 },
                         icon = {
+                            val scale by animateFloatAsState(
+                                targetValue = if (selectedScreen == 1) 1.2f else 1f,
+                                animationSpec = spring(
+                                    stiffness = 400f,
+                                    dampingRatio = 0.4f
+                                ),
+                                label = "scale"
+                            )
                             Icon(
                                 Icons.Filled.BarChart,
                                 contentDescription = "Gráfica",
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .graphicsLayer {
+                                        scaleX = scale
+                                        scaleY = scale
+                                    },
                                 tint = if (selectedScreen == 1) NeonBlue else TextPrimary
                             )
                         },
-                        label = { Text("Gráfica") }
+                        label = {
+                            val labelColor by animateColorAsState(
+                                targetValue = if (selectedScreen == 1) NeonBlue else TextPrimary,
+                                label = "labelColor"
+                            )
+                            Text(text = "Gráfica", color = labelColor)
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = NeonBlue.copy(alpha = 0.25f),
+                            selectedIconColor = NeonBlue,
+                            selectedTextColor = NeonBlue,
+                            unselectedIconColor = TextPrimary,
+                            unselectedTextColor = TextPrimary
+                        )
                     )
                 }
             },
@@ -145,8 +203,8 @@ fun MainScreen(
                     AnimatedContent(
                         targetState = selectedScreen,
                         transitionSpec = {
-                            slideInHorizontally { it } + fadeIn() with
-                                    (slideOutHorizontally { -it } + fadeOut())
+                            (slideInHorizontally { it } + fadeIn()).togetherWith(
+                                slideOutHorizontally { -it } + fadeOut())
                         }
                     ) { targetScreen ->
                         when (targetScreen) {
@@ -156,6 +214,7 @@ fun MainScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .weight(1f)
+                                    .padding(bottom = 16.dp)
                             )
                             1 -> RobotChart(
                                     headers = headers,
@@ -163,9 +222,11 @@ fun MainScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .weight(1f)
+                                        .padding(bottom = 16.dp)
                             )
                         }
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

@@ -3,14 +3,18 @@ package com.example.robot.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.robot.ui.theme.NeonBlue
+import com.example.robot.ui.theme.SpaceGray
 
 @Composable
 fun RobotTable(
@@ -46,14 +50,18 @@ fun RobotTable(
                     }
                 }
             }
-            Spacer(Modifier.height(4.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 4.dp),
+                thickness = 2.dp,
+                color = NeonBlue.copy(alpha = 0.6f)
+            )
 
             Box(
                 modifier = modifier
             ) {
                 LazyColumn {
-                    items(rows) { row ->
-                        Row(Modifier.fillMaxWidth()) {
+                    itemsIndexed(rows) { index, row ->
+                        Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                             row.forEach { cell ->
                                 Box(
                                     modifier = Modifier
@@ -67,6 +75,13 @@ fun RobotTable(
                                     )
                                 }
                             }
+                        }
+                        if (index != rows.lastIndex) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                thickness = 2.dp,
+                                color = Color(0xFFCCCCCC).copy(alpha = 0.15f)
+                            )
                         }
                     }
                 }
