@@ -1,61 +1,58 @@
 package com.example.robot.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.TableChart
+import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.robot.ui.components.RobotChart
-import com.example.robot.ui.components.RobotTable
-import com.example.robot.ui.theme.NightBlue
-import com.example.robot.ui.theme.SpaceGray
 import com.example.robot.ui.theme.DeepBlue
 import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.ui.theme.RedAlert
-import com.example.robot.ui.theme.TextPrimary
+import com.example.robot.ui.theme.NightBlue
 import com.example.robot.ui.theme.RobotTheme
+import com.example.robot.ui.theme.SpaceGray
+import com.example.robot.ui.theme.TextPrimary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(
+fun ChartScreen(
     onGoHome: () -> Unit,
-    onExit: () -> Unit,
-    onGoChart: () -> Unit
+    onGoMain: () -> Unit
 ) {
-
-    var selectedScreen by remember { mutableIntStateOf(0) }
-    val headers = listOf("Sensor", "Valor", "Estado")
-    var rows by remember {
-        mutableStateOf(
-            listOf(
-                listOf("Distancia", "20cm", "Activo"),
-                listOf("Temperatura", "32°C", "Normal"),
-                listOf("Luz", "Baja", "Alerta")
-            )
-        )
-    }
+    var selectedScreen by remember { mutableStateOf(1) }
     RobotTheme {
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            text = if (selectedScreen == 0) "Tabla del Robot" else "Gráfica del Robot",
+                            text = "Tablas del Robot",
                             color = TextPrimary,
                             style = MaterialTheme.typography.titleLarge
                         )
@@ -70,7 +67,7 @@ fun MainScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = onExit) {
+                        IconButton(onClick = onGoHome) {
                             Icon(
                                 imageVector = Icons.Filled.Replay,
                                 contentDescription = "Salir",
@@ -88,25 +85,25 @@ fun MainScreen(
                     containerColor = SpaceGray
                 ) {
                     NavigationBarItem(
-                        selected = selectedScreen == 0,
-                        onClick = { selectedScreen = 0 },
+                        selected = false,
+                        onClick = onGoMain,
                         icon = {
                             Icon(
                                 Icons.Filled.TableChart,
                                 contentDescription = "Tabla",
-                                tint = if (selectedScreen == 0) NeonBlue else TextPrimary,
+                                tint = NeonBlue,
                             )
                         },
                         label = { Text("Tabla") }
                     )
                     NavigationBarItem(
-                        selected = selectedScreen == 1,
-                        onClick = { selectedScreen = 1 },
+                        selected = true,
+                        onClick = {  },
                         icon = {
                             Icon(
                                 Icons.Filled.BarChart,
                                 contentDescription = "Gráfica",
-                                tint = if (selectedScreen == 1) NeonBlue else TextPrimary
+                                tint = if (selectedScreen == 0) NeonBlue else TextPrimary
                             )
                         },
                         label = { Text("Gráfica") }
@@ -131,39 +128,13 @@ fun MainScreen(
                     )
 
                     .padding(innerPadding)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 32.dp, start = 16.dp, end = 16.dp),
-                    verticalArrangement = Arrangement.Top
-                ) {
-                    when (selectedScreen) {
-                        0 -> RobotTable(
-                            headers = headers,
-                            rows = rows,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                        )
-                        1 -> {
-                            RobotChart(
-                                headers = headers,
-                                rows = rows,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f)
-                            )
-                        }
-                    }
-                }
-            }
+            )
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun MainScreenPreview() {
-    MainScreen(onGoHome = {}, onExit = {}, onGoChart = {})
+fun ChartScreenPreview() {
+    ChartScreen(onGoHome = {}, onGoMain = {})
 }
