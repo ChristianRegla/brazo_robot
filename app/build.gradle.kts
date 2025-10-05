@@ -56,6 +56,7 @@ dependencies {
     implementation("androidx.activity:activity-compose")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
     implementation("androidx.navigation:navigation-compose:2.9.5")
+    implementation("androidx.compose.foundation:foundation:1.9.2")
 
 
     // Accompanist
