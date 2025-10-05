@@ -97,7 +97,7 @@ fun MainScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 32.dp, start = 16.dp, end = 16.dp), // Separación con el appbar y bordes
+                        .padding(top = 32.dp, start = 16.dp, end = 16.dp),
                     verticalArrangement = Arrangement.Top
                 ) {
                     RobotTable(

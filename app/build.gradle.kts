@@ -71,6 +71,7 @@ dependencies {
     // Otros
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("co.yml:ycharts:2.1.0")
+    implementation(libs.androidx.compose.animation)
 
     // Tests
     testImplementation(libs.junit)
@@ -91,4 +92,7 @@ dependencies {
 
     // Icons
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
+
+    // Animations
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
 }
