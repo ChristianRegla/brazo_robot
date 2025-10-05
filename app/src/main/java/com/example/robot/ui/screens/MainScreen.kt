@@ -92,6 +92,7 @@ fun MainScreen(
                             end = Offset(0f, 1000f)
                         )
                     )
+
                     .padding(innerPadding)
             ) {
                 Column(
