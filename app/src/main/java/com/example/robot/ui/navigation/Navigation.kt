@@ -19,7 +19,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     ) {
         composable(Destinations.WELCOME_ROUTE) {
             WelcomeScreen(
-                onNavigateToMain = {
+                onStartClick = {
                     navController.navigate(Destinations.MAIN_ROUTE) {
                         popUpTo(Destinations.WELCOME_ROUTE) { inclusive = true }
                     }
@@ -27,7 +27,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             )
         }
         composable(Destinations.MAIN_ROUTE) {
-            MainScreen()
+            MainScreen(
+                onGoHome = { navController.navigate(Destinations.WELCOME_ROUTE) },
+                onExit = { navController.navigate(Destinations.WELCOME_ROUTE) }
+            )
         }
     }
 }
