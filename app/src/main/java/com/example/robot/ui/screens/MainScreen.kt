@@ -45,10 +45,7 @@ import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.R
 
 
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalAnimationApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun MainScreen(
     onGoHome: () -> Unit,
