@@ -1,76 +1,73 @@
 package com.example.robot.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import co.yml.charts.common.model.PlotType
+import co.yml.charts.common.model.Point
+import co.yml.charts.ui.linechart.LineChart
+import co.yml.charts.ui.linechart.model.Line
+import co.yml.charts.ui.linechart.model.LineChartData
+import co.yml.charts.ui.linechart.model.LinePlotData
+import co.yml.charts.ui.linechart.model.LineStyle
+import co.yml.charts.ui.linechart.model.LineType
+import com.example.robot.ui.theme.NeonBlue
+import com.example.robot.ui.theme.SpaceGray
+
 
 @Composable
 fun RobotChart(
-    headers: List<String>,
     rows: List<List<String>>,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp),
-        shadowElevation = 6.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(8.dp)
-                .background(MaterialTheme.colorScheme.surface)
-        ) {
-            // Header row
-            Row(Modifier.fillMaxWidth()) {
-                headers.forEach { header ->
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(8.dp)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.13f), RoundedCornerShape(6.dp))
-                    ) {
-                        Text(
-                            text = header,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-            }
-            Spacer(Modifier.height(4.dp))
-
-            Box(
-                modifier = modifier
-            ) {
-                LazyColumn {
-                    items(rows) { row ->
-                        Row(Modifier.fillMaxWidth()) {
-                            row.forEach { cell ->
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(8.dp)
-                                ) {
-                                    Text(
-                                        text = cell,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    val points = rows.mapIndexed { index, row ->
+        val peso = row[1].replace("g", "").toFloatOrNull() ?: 0f
+        Point(index.toFloat(), peso)
     }
+
+    val lineStyle = LineStyle(
+        lineType = LineType.SmoothCurve(isDotted = false),
+        color = NeonBlue,
+        width = 4f,
+        style = Stroke(width = 4f)
+    )
+
+    val line = Line(
+        dataPoints = points,
+        lineStyle = lineStyle
+    )
+
+    val linePlotData = LinePlotData(
+        plotType = PlotType.Line,
+        lines = listOf(line)
+    )
+
+    val lineChartData = LineChartData(
+        linePlotData = linePlotData,
+        backgroundColor = SpaceGray
+    )
+
+    LineChart(
+        lineChartData = lineChartData,
+        modifier = modifier.fillMaxWidth().height(220.dp)
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RobotChartPreview() {
+    val fakeRows = listOf(
+        listOf("Rojo", "50g", "Sí", "Botella"),
+        listOf("Verde", "100g", "No", "Plástico"),
+        listOf("Azul", "800g", "Sí", "Botella")
+    )
+    RobotChart(
+        rows = fakeRows,
+        modifier = Modifier.fillMaxWidth()
+    )
 }

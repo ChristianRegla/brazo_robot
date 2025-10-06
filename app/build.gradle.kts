@@ -59,7 +59,6 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:1.9.2")
     implementation("androidx.compose.material3:material3:1.2.0")
 
-
     // Accompanist
     implementation("com.google.accompanist:accompanist-navigation-animation:0.34.0")
 
@@ -103,5 +102,7 @@ dependencies {
     // Deslizar horizontal
     implementation("com.google.accompanist:accompanist-pager:0.36.0")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.36.0")
+
+    // Gráficas
 
 }

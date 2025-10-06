@@ -260,7 +260,6 @@ fun MainScreen(
                                 )
 
                                 1 -> RobotChart(
-                                    headers = headers,
                                     rows = rows,
                                     modifier = Modifier
                                         .fillMaxWidth()
