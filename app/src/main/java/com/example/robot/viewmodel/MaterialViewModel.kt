@@ -1,20 +1,55 @@
 package com.example.robot.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkRequest
+import androidx.lifecycle.AndroidViewModel
 import com.example.robot.model.MaterialItem
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class MaterialViewModel : ViewModel() {
+class MaterialViewModel(application: Application) : AndroidViewModel(application) {
+    // Propiedades para almacenar los datos
     private val _materiales = MutableStateFlow<List<MaterialItem>>(emptyList())
     val materiales: StateFlow<List<MaterialItem>> = _materiales
 
+    // Propiedades para controlar el estado de carga
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    // Propiedades para controlar la conexión
+    private val _isConnected = MutableStateFlow(true)
+    val isConnected: StateFlow<Boolean> = _isConnected
+
+    // Instancia de Firestore
     private val db = FirebaseFirestore.getInstance()
 
+    // Instancia del ConnectivityManager
+    private val connectivityManager =
+        application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    // Callback para la conexión
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) { _isConnected.value = true }
+        override fun onLost(network: Network) { _isConnected.value = false }
+    }
+
+    // Registro del callback
+    init {
+        val request = NetworkRequest.Builder().build()
+        connectivityManager.registerNetworkCallback(request, networkCallback)
+    }
+
+    // Desregistro del callback
+    override fun onCleared() {
+        super.onCleared()
+        connectivityManager.unregisterNetworkCallback(networkCallback)
+    }
+
+    // Función para cargar los materiales desde Firestore
     fun loadMateriales() {
         _isLoading.value = true
         db.collection("materiales")

@@ -5,6 +5,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -43,7 +44,11 @@ import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.R
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalAnimationApi::class
+)
 @Composable
 fun MainScreen(
     onGoHome: () -> Unit,
@@ -61,9 +66,11 @@ fun MainScreen(
     }
 
     val headers = listOf("Color", "Peso (g)", "¿Es metal?", "Categoría")
+
     val materialViewModel: MaterialViewModel = viewModel()
     val materiales by materialViewModel.materiales.collectAsState()
     val isLoading by materialViewModel.isLoading.collectAsState()
+    val isConnected by materialViewModel.isConnected.collectAsState()
 
     LaunchedEffect(Unit) {
         materialViewModel.loadMateriales()
@@ -232,6 +239,32 @@ fun MainScreen(
                             strokeWidth = 5.dp
                         )
                     }
+                } else if (!isConnected) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable { materialViewModel.loadMateriales() },
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.wifi_off),
+                            contentDescription = "Icono de sin conexión",
+                            tint = NeonBlue,
+                            modifier = Modifier.size(80.dp)
+                        )
+                        Text(
+                            text = "No hay conexión a internet.",
+                            color = NeonBlue,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "Toca para reintentar.",
+                            color = NeonBlue,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
                 } else if (rows.isEmpty()) {
                     Column(
                         modifier = Modifier
@@ -256,12 +289,12 @@ fun MainScreen(
                         state = pagerState,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(top = 32.dp, start = 12.dp, end = 12.dp)
+                            .padding(top = 12.dp, start = 12.dp, end = 12.dp)
                     ) { page ->
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(top = 32.dp, start = 12.dp, end = 12.dp),
+                                .padding(bottom = 16.dp),
                             contentAlignment = Alignment.TopCenter
                         ) {
                             when (page) {
