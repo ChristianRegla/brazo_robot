@@ -10,12 +10,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.size.Size
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.RobotTheme
@@ -36,9 +39,8 @@ fun RobotTable(
         Column(
             modifier = Modifier
                 .padding(8.dp)
-                .background(MaterialTheme.colorScheme.surface)
+                .background(MaterialTheme.colorScheme.surface),
         ) {
-            // Header row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -50,12 +52,13 @@ fun RobotTable(
                         text = header,
                         modifier = Modifier
                             .weight(1f)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .align(Alignment.CenterVertically),
                         color = Color.White,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
-
+                        fontSize = 15.sp
                     )
                 }
             }
@@ -77,7 +80,8 @@ fun RobotTable(
                                 text = cell,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .fillMaxWidth(),
+                                    .fillMaxWidth()
+                                    .align(Alignment.CenterVertically),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 style = MaterialTheme.typography.bodySmall,
                                 textAlign = TextAlign.Center

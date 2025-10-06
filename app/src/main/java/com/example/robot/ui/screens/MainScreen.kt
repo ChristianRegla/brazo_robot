@@ -10,7 +10,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.AreaChart
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.TableChart
@@ -167,7 +167,7 @@ fun MainScreen(
                                 label = "scale"
                             )
                             Icon(
-                                Icons.Filled.BarChart,
+                                Icons.Filled.AreaChart,
                                 contentDescription = "Gráfica",
                                 modifier = Modifier
                                     .size(28.dp)
@@ -175,7 +175,7 @@ fun MainScreen(
                                         scaleX = scale
                                         scaleY = scale
                                     },
-                                tint = if (selectedScreen == 1) NeonBlue else TextPrimary
+                                tint = if (selectedScreen == 1) NeonBlue else TextPrimary,
                             )
                         },
                         label = {
