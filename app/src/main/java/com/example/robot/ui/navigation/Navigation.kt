@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.robot.ui.screens.ChartScreen
 import com.example.robot.ui.screens.MainScreen
 import com.example.robot.ui.screens.WelcomeScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -50,12 +49,6 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             MainScreen(
                 onGoHome = { navController.navigate(Destinations.WELCOME_ROUTE) },
                 onExit = { navController.navigate(Destinations.WELCOME_ROUTE) },
-            )
-        }
-        composable(Destinations.CHART_ROUTE) {
-            ChartScreen(
-                onGoHome = { navController.navigate(Destinations.WELCOME_ROUTE) },
-                onGoMain = { navController.navigate(Destinations.MAIN_ROUTE) }
             )
         }
     }

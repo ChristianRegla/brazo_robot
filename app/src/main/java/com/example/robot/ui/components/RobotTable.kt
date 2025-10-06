@@ -11,7 +11,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -19,7 +18,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.size.Size
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.ui.theme.SpaceGray
@@ -44,7 +42,10 @@ fun RobotTable(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(NeonBlue.copy(alpha = 0.15f), RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                    .background(
+                        NeonBlue.copy(alpha = 0.15f),
+                        RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
+                    )
                     .padding(horizontal = 8.dp, vertical = 12.dp)
             ) {
                 headers.forEach { header ->

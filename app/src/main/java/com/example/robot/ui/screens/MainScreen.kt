@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,6 +41,7 @@ import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.viewmodel.MaterialViewModel
+import com.example.robot.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -63,18 +65,23 @@ fun MainScreen(
     val materiales by materialViewModel.materiales.collectAsState()
     val isLoading by materialViewModel.isLoading.collectAsState()
 
-
     LaunchedEffect(Unit) {
         materialViewModel.loadMateriales()
     }
 
-    val rows = materiales.map { item ->
-        listOf(
-            item.color,
-            "${item.pesoGramos}g",
-            if (item.esMetal) "Si" else "No",
-            item.categoria
-        )
+    val showEmpty = false
+
+    val rows = if (showEmpty) {
+        emptyList()
+    } else {
+        materiales.map { item ->
+            listOf(
+                item.color,
+                "${item.pesoGramos}g",
+                if (item.esMetal) "Si" else "No",
+                item.categoria
+            )
+        }
     }
 
     RobotTheme {
@@ -226,11 +233,18 @@ fun MainScreen(
                         )
                     }
                 } else if (rows.isEmpty()) {
-                    Box(
+                    Column(
                         modifier = Modifier
                             .fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
+                        Icon(
+                            painter = painterResource(R.drawable.file_sad),
+                            contentDescription = "Icono de archivo vacío",
+                            tint = NeonBlue,
+                            modifier = Modifier.size(80.dp)
+                        )
                         Text(
                             text = "No hay datos disponibles.",
                             color = NeonBlue,
@@ -278,7 +292,6 @@ fun MainScreen(
 @Composable
 fun MainScreenPreview() {
     RobotTheme {
-        // Puedes mostrar directamente RobotTable con datos mock
         val fakeRows = listOf(
             listOf("Rojo", "100g", "Si", "Botella"),
             listOf("Verde", "250g", "No", "Plástico"),
