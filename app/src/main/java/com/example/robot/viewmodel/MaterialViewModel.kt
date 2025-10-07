@@ -54,8 +54,8 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     fun loadMateriales() {
         // Ponemos que está cargando
         _isLoading.value = true
-        // Obtenemos los materiales de Firestore
         viewModelScope.launch {
+            // Obtenemos los materiales desde el repositorio
             materialRepository.getMateriales()
                 .catch { exception ->
                     _materialesRows.value = emptyList()
