@@ -48,6 +48,7 @@ import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.R
+import com.example.robot.ui.components.AnimatedNavigationBarItem
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -157,83 +158,19 @@ fun MainScreen(
                     NavigationBar(
                         containerColor = SpaceGray
                     ) {
-                        NavigationBarItem(
-                            selected = selectedScreen == 0,
+                        AnimatedNavigationBarItem(
+                            isSelected = pagerState.currentPage == 0,
                             onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
-                            icon = {
-                                val scale by animateFloatAsState(
-                                    targetValue = if (selectedScreen == 0) 1.2f else 1f,
-                                    animationSpec = spring(
-                                        stiffness = 400f,
-                                        dampingRatio = 0.4f
-                                    ),
-                                    label = "scale"
-                                )
-                                Icon(
-                                    Icons.Filled.TableChart,
-                                    contentDescription = "Tabla",
-                                    modifier = Modifier
-                                        .size(28.dp)
-                                        .graphicsLayer {
-                                            scaleX = scale
-                                            scaleY = scale
-                                        },
-                                    tint = if (selectedScreen == 0) NeonBlue else TextPrimary,
-                                )
-                            },
-                            label = {
-                                val labelColor by animateColorAsState(
-                                    targetValue = if (selectedScreen == 0) NeonBlue else TextPrimary,
-                                    label = "labelColor"
-                                )
-                                Text(text = "Tabla", color = labelColor)
-                            },
-                            colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = Color.Transparent,
-                                selectedIconColor = NeonBlue,
-                                selectedTextColor = NeonBlue,
-                                unselectedIconColor = TextPrimary,
-                                unselectedTextColor = TextPrimary
-                            )
+                            icon = Icons.Default.TableChart,
+                            label = "Tabla",
+                            contentDescription = "Ir a la sección de Tabla"
                         )
-                        NavigationBarItem(
-                            selected = selectedScreen == 1,
+                        AnimatedNavigationBarItem(
+                            isSelected = pagerState.currentPage == 1,
                             onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
-                            icon = {
-                                val scale by animateFloatAsState(
-                                    targetValue = if (selectedScreen == 1) 1.2f else 1f,
-                                    animationSpec = spring(
-                                        stiffness = 400f,
-                                        dampingRatio = 0.4f
-                                    ),
-                                    label = "scale"
-                                )
-                                Icon(
-                                    Icons.Filled.AreaChart,
-                                    contentDescription = "Gráfica",
-                                    modifier = Modifier
-                                        .size(28.dp)
-                                        .graphicsLayer {
-                                            scaleX = scale
-                                            scaleY = scale
-                                        },
-                                    tint = if (selectedScreen == 1) NeonBlue else TextPrimary,
-                                )
-                            },
-                            label = {
-                                val labelColor by animateColorAsState(
-                                    targetValue = if (selectedScreen == 1) NeonBlue else TextPrimary,
-                                    label = "labelColor"
-                                )
-                                Text(text = "Gráfica", color = labelColor)
-                            },
-                            colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = Color.Transparent,
-                                selectedIconColor = NeonBlue,
-                                selectedTextColor = NeonBlue,
-                                unselectedIconColor = TextPrimary,
-                                unselectedTextColor = TextPrimary
-                            )
+                            icon = Icons.Default.AreaChart,
+                            label = "Gráfica",
+                            contentDescription = "Ir a la sección de Tabla"
                         )
                     }
                     Box(

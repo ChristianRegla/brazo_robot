@@ -1,0 +1,70 @@
+package com.example.robot.ui.components
+
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
+import com.example.robot.ui.theme.NeonBlue
+import com.example.robot.ui.theme.TextPrimary
+
+@Composable
+fun RowScope.AnimatedNavigationBarItem(
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    selectedColor: Color = NeonBlue,
+    unselectedColor: Color = TextPrimary
+) {
+    val scale by animateFloatAsState(
+        targetValue = if (isSelected) 1.2f else 1f,
+        animationSpec = spring(
+            stiffness = 400f,
+            dampingRatio = 0.4f
+        ),
+        label = "scale"
+    )
+
+    val itemColor by animateColorAsState(
+        targetValue = if (isSelected) selectedColor else unselectedColor,
+        label = "itemColor"
+    )
+
+    NavigationBarItem(
+        selected = isSelected,
+        onClick = onClick,
+        modifier = modifier,
+        icon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                modifier = Modifier
+                    .size(28.dp)
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    },
+                tint = itemColor,
+            )
+        },
+        label = {
+            Text(text = label, color = itemColor)
+        },
+        colors = NavigationBarItemDefaults.colors(
+            indicatorColor = Color.Transparent
+        )
+    )
+}
