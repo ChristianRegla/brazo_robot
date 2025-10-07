@@ -51,14 +51,19 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
 
     // Función para cargar los materiales desde Firestore
     fun loadMateriales() {
+        // Ponemos que está cargando
         _isLoading.value = true
+        // Obtenemos los materiales de Firestore
         db.collection("materiales")
+            // addSnapshotListener para obtener los cambios en tiempo real
             .addSnapshotListener { snapshot, exception ->
+                // Si hay un error, mostramos los materiales vacíos y paramos
                 if (exception != null) {
                     _materiales.value = emptyList()
                     _isLoading.value = false
                     return@addSnapshotListener
                 }
+                // Si no hay error, obtenemos los materiales y los mostramos
                 if (snapshot != null) {
                     val lista = snapshot.documents.map { doc ->
                         MaterialItem(
@@ -68,8 +73,10 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
                             categoria = doc.getString("categoria") ?: ""
                         )
                     }
+                    // Actualizamos los materiales
                     _materiales.value = lista
                 }
+                // Paramos de cargar
                 _isLoading.value = false
             }
     }
