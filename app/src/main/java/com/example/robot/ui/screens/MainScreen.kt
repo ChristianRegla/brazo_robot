@@ -7,6 +7,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
@@ -29,8 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.robot.ui.components.RobotChart
@@ -43,6 +47,7 @@ import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.R
+import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -123,87 +128,123 @@ fun MainScreen(
                 )
             },
             bottomBar = {
-                NavigationBar(
-                    containerColor = SpaceGray
+                val itemCount = 2
+                val indicatorWidth = 80.dp
+                val indicatorHeight = 32.dp
+                val indicatorVerticalPadding = 12.dp
+
+                val density = LocalDensity.current
+                val windowInfo = LocalWindowInfo.current
+                val containerWidthPx = windowInfo.containerSize.width.toFloat()
+
+                val spacerPerItemPx = containerWidthPx / itemCount
+                val pageOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                val indicatorOffsetPx = pageOffset * spacerPerItemPx + (spacerPerItemPx - with(density) { indicatorWidth.toPx() }) / 2
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .background(SpaceGray)
                 ) {
-                    NavigationBarItem(
-                        selected = selectedScreen == 0,
-                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
-                        icon = {
-                            val scale by animateFloatAsState(
-                                targetValue = if (selectedScreen == 0) 1.2f else 1f,
-                                animationSpec = spring(
-                                    stiffness = 400f,
-                                    dampingRatio = 0.4f
-                                ),
-                                label = "scale"
+                    Box(
+                        modifier = Modifier
+                            .offset { IntOffset(indicatorOffsetPx.roundToInt(), with(density) { indicatorVerticalPadding.toPx() }.roundToInt()) }
+                            .size(width = indicatorWidth, height = indicatorHeight)
+                            .background(
+                                color = NeonBlue.copy(alpha = 0.25f),
+                                shape = MaterialTheme.shapes.medium
                             )
-                            Icon(
-                                Icons.Filled.TableChart,
-                                contentDescription = "Tabla",
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .graphicsLayer {
-                                        scaleX = scale
-                                        scaleY = scale
-                                    },
-                                tint = if (selectedScreen == 0) NeonBlue else TextPrimary,
-                            )
-                        },
-                        label = {
-                            val labelColor by animateColorAsState(
-                                targetValue = if (selectedScreen == 0) NeonBlue else TextPrimary,
-                                label = "labelColor"
-                            )
-                            Text(text = "Tabla", color = labelColor)
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = NeonBlue.copy(alpha = 0.25f),
-                            selectedIconColor = NeonBlue,
-                            selectedTextColor = NeonBlue,
-                            unselectedIconColor = TextPrimary,
-                            unselectedTextColor = TextPrimary
-                        )
                     )
-                    NavigationBarItem(
-                        selected = selectedScreen == 1,
-                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
-                        icon = {
-                            val scale by animateFloatAsState(
-                                targetValue = if (selectedScreen == 1) 1.2f else 1f,
-                                animationSpec = spring(
-                                    stiffness = 400f,
-                                    dampingRatio = 0.4f
-                                ),
-                                label = "scale"
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        NavigationBar(
+                            containerColor = SpaceGray
+                        ) {
+                            NavigationBarItem(
+                                selected = selectedScreen == 0,
+                                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
+                                icon = {
+                                    val scale by animateFloatAsState(
+                                        targetValue = if (selectedScreen == 0) 1.2f else 1f,
+                                        animationSpec = spring(
+                                            stiffness = 400f,
+                                            dampingRatio = 0.4f
+                                        ),
+                                        label = "scale"
+                                    )
+                                    Icon(
+                                        Icons.Filled.TableChart,
+                                        contentDescription = "Tabla",
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                            .graphicsLayer {
+                                                scaleX = scale
+                                                scaleY = scale
+                                            },
+                                        tint = if (selectedScreen == 0) NeonBlue else TextPrimary,
+                                    )
+                                },
+                                label = {
+                                    val labelColor by animateColorAsState(
+                                        targetValue = if (selectedScreen == 0) NeonBlue else TextPrimary,
+                                        label = "labelColor"
+                                    )
+                                    Text(text = "Tabla", color = labelColor)
+                                },
+                                colors = NavigationBarItemDefaults.colors(
+                                    indicatorColor = NeonBlue.copy(alpha = 0.25f),
+                                    selectedIconColor = NeonBlue,
+                                    selectedTextColor = NeonBlue,
+                                    unselectedIconColor = TextPrimary,
+                                    unselectedTextColor = TextPrimary
+                                )
                             )
-                            Icon(
-                                Icons.Filled.AreaChart,
-                                contentDescription = "Gráfica",
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .graphicsLayer {
-                                        scaleX = scale
-                                        scaleY = scale
-                                    },
-                                tint = if (selectedScreen == 1) NeonBlue else TextPrimary,
+                            NavigationBarItem(
+                                selected = selectedScreen == 1,
+                                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
+                                icon = {
+                                    val scale by animateFloatAsState(
+                                        targetValue = if (selectedScreen == 1) 1.2f else 1f,
+                                        animationSpec = spring(
+                                            stiffness = 400f,
+                                            dampingRatio = 0.4f
+                                        ),
+                                        label = "scale"
+                                    )
+                                    Icon(
+                                        Icons.Filled.AreaChart,
+                                        contentDescription = "Gráfica",
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                            .graphicsLayer {
+                                                scaleX = scale
+                                                scaleY = scale
+                                            },
+                                        tint = if (selectedScreen == 1) NeonBlue else TextPrimary,
+                                    )
+                                },
+                                label = {
+                                    val labelColor by animateColorAsState(
+                                        targetValue = if (selectedScreen == 1) NeonBlue else TextPrimary,
+                                        label = "labelColor"
+                                    )
+                                    Text(text = "Gráfica", color = labelColor)
+                                },
+                                colors = NavigationBarItemDefaults.colors(
+                                    indicatorColor = NeonBlue.copy(alpha = 0.25f),
+                                    selectedIconColor = NeonBlue,
+                                    selectedTextColor = NeonBlue,
+                                    unselectedIconColor = TextPrimary,
+                                    unselectedTextColor = TextPrimary
+                                )
                             )
-                        },
-                        label = {
-                            val labelColor by animateColorAsState(
-                                targetValue = if (selectedScreen == 1) NeonBlue else TextPrimary,
-                                label = "labelColor"
-                            )
-                            Text(text = "Gráfica", color = labelColor)
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = NeonBlue.copy(alpha = 0.25f),
-                            selectedIconColor = NeonBlue,
-                            selectedTextColor = NeonBlue,
-                            unselectedIconColor = TextPrimary,
-                            unselectedTextColor = TextPrimary
-                        )
-                    )
+                        }
+                    }
                 }
             },
             modifier = Modifier.fillMaxSize()
