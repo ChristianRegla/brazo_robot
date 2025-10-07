@@ -16,6 +16,9 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     private val _materiales = MutableStateFlow<List<MaterialItem>>(emptyList())
     val materiales: StateFlow<List<MaterialItem>> = _materiales
 
+    private val _materialesRows = MutableStateFlow<List<List<String>>>(emptyList())
+    val materialesRows: StateFlow<List<List<String>>> = _materialesRows
+
     // Propiedades para controlar el estado de carga
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -60,6 +63,7 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
                 // Si hay un error, mostramos los materiales vacíos y paramos
                 if (exception != null) {
                     _materiales.value = emptyList()
+                    _materialesRows.value = emptyList()
                     _isLoading.value = false
                     return@addSnapshotListener
                 }
@@ -75,6 +79,15 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
                     }
                     // Actualizamos los materiales
                     _materiales.value = lista
+
+                    _materialesRows.value = lista.map { item ->
+                        listOf(
+                            item.color,
+                            "${item.pesoGramos}g",
+                            if (item.esMetal) "Si" else "No",
+                            item.categoria
+                        )
+                    }
                 }
                 // Paramos de cargar
                 _isLoading.value = false

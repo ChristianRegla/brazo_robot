@@ -1,7 +1,6 @@
 package com.example.robot.ui.screens
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -12,25 +11,18 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AreaChart
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
@@ -40,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.robot.ui.components.RobotChart
 import com.example.robot.ui.components.RobotTable
+import com.example.robot.ui.navigation.TabScreen
 import com.example.robot.ui.theme.NightBlue
 import com.example.robot.ui.theme.SpaceGray
 import com.example.robot.ui.theme.DeepBlue
@@ -49,7 +42,10 @@ import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.R
 import com.example.robot.ui.components.AnimatedNavigationBarItem
+import com.example.robot.ui.navigation.tabs
 import kotlin.math.roundToInt
+
+private const val INITIALPAGE= 0
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -57,41 +53,22 @@ fun MainScreen(
     onGoHome: () -> Unit,
     onExit: () -> Unit
 ) {
-    var selectedScreen by remember { mutableIntStateOf(0) }
+
     val pagerState = rememberPagerState(
-        pageCount = { 2 },
-        initialPage = selectedScreen
+        pageCount = { tabs.size },
+        initialPage = INITIALPAGE
     )
     val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(pagerState.currentPage) {
-        selectedScreen = pagerState.currentPage
-    }
 
     val headers = listOf("Color", "Peso (g)", "¿Es metal?", "Categoría")
 
     val materialViewModel: MaterialViewModel = viewModel()
-    val materiales by materialViewModel.materiales.collectAsState()
     val isLoading by materialViewModel.isLoading.collectAsState()
     val isConnected by materialViewModel.isConnected.collectAsState()
+    val rows by materialViewModel.materialesRows.collectAsState()
 
     LaunchedEffect(Unit) {
         materialViewModel.loadMateriales()
-    }
-
-    val showEmpty = false
-
-    val rows = if (showEmpty) {
-        emptyList()
-    } else {
-        materiales.map { item ->
-            listOf(
-                item.color,
-                "${item.pesoGramos}g",
-                if (item.esMetal) "Si" else "No",
-                item.categoria
-            )
-        }
     }
 
     RobotTheme {
@@ -100,7 +77,7 @@ fun MainScreen(
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            text = if (selectedScreen == 0) "Tabla del Robot" else "Gráfica del Robot",
+                            text = tabs[pagerState.currentPage].title,
                             color = TextPrimary,
                             style = MaterialTheme.typography.titleLarge
                         )
@@ -129,7 +106,7 @@ fun MainScreen(
                 )
             },
             bottomBar = {
-                val itemCount = 2
+                val itemCount = tabs.size
                 val indicatorWidth = 80.dp
                 val indicatorHeight = 32.dp
                 val indicatorVerticalPadding = 12.dp
@@ -158,20 +135,15 @@ fun MainScreen(
                     NavigationBar(
                         containerColor = SpaceGray
                     ) {
-                        AnimatedNavigationBarItem(
-                            isSelected = pagerState.currentPage == 0,
-                            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
-                            icon = Icons.Default.TableChart,
-                            label = "Tabla",
-                            contentDescription = "Ir a la sección de Tabla"
-                        )
-                        AnimatedNavigationBarItem(
-                            isSelected = pagerState.currentPage == 1,
-                            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
-                            icon = Icons.Default.AreaChart,
-                            label = "Gráfica",
-                            contentDescription = "Ir a la sección de Tabla"
-                        )
+                        tabs.forEachIndexed { index, tab ->
+                            AnimatedNavigationBarItem(
+                                isSelected = pagerState.currentPage == index,
+                                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
+                                icon = tab.icon,
+                                label = tab.label,
+                                contentDescription = "Ir a ${tab.title}"
+                            )
+                        }
                     }
                     Box(
                         modifier = Modifier
@@ -265,28 +237,16 @@ fun MainScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(top = 12.dp, start = 12.dp, end = 12.dp)
-                    ) { page ->
+                    ) { pageIndex ->
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(bottom = 16.dp),
                             contentAlignment = Alignment.TopCenter
                         ) {
-                            when (page) {
-                                0 -> RobotTable(
-                                    headers = headers,
-                                    rows = rows,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = 16.dp)
-                                )
-
-                                1 -> RobotChart(
-                                    rows = rows,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = 16.dp)
-                                )
+                            when (tabs[pageIndex]) {
+                                is TabScreen.Table -> RobotTable(headers = headers, rows = rows)
+                                is TabScreen.Chart -> RobotChart(rows = rows)
                             }
                         }
                     }
