@@ -1,3 +1,21 @@
 <resources>
-    <string name="app_name">Robot</string>
+    <string name="app_name">Brazo Robot</string>
+    <string name="Color">Color</string>
+    <string name="Peso">Peso (g)</string>
+    <string name="EsMetal">¿Es Metal?</string>
+    <string name="Categoria">Categoría</string>
+    <string name="Inicio">Inicio</string>
+    <string name="Salir">Salir</string>
+    <string name="indicatorOffset">indicatorOffset</string>
+    <string name="iconoSinConexion">Icono de sin conexión</string>
+    <string name="sinConexion">No hay conexión a internet.</string>
+    <string name="reintentar">Toca para reintentar.</string>
+    <string name="noHayDatos">No hay datos disponibles.</string>"
+    <string name="iconoArchivoVacio">Icono de archivo vacío</string>
+    <string name="bienvenida">Bienvenido al sistema de control</string>
+    <string name="integrantes">Integrantes del proyecto</string>
+    <string name="alumno1">Christian Josue Regla Andrade - 22310380</string>
+    <string name="alumno2">Bruce Allen Denis Yañez - 22310377</string>
+    <string name="botonComenzar">Comenzar</string>
+    <string name="logoRobot">Logo Robot</string>
 </resources>

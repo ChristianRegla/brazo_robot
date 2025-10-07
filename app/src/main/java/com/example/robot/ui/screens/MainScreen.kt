@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -60,7 +61,12 @@ fun MainScreen(
     )
     val coroutineScope = rememberCoroutineScope()
 
-    val headers = listOf("Color", "Peso (g)", "¿Es metal?", "Categoría")
+    val headers = listOf(
+        stringResource(R.string.Color),
+        stringResource(R.string.Peso),
+        stringResource(R.string.EsMetal),
+        stringResource(R.string.Categoria)
+    )
 
     val materialViewModel: MaterialViewModel = viewModel()
     val isLoading by materialViewModel.isLoading.collectAsState()
@@ -86,7 +92,7 @@ fun MainScreen(
                         IconButton(onClick = onGoHome) {
                             Icon(
                                 imageVector = Icons.Filled.Home,
-                                contentDescription = "Inicio",
+                                contentDescription = stringResource(R.string.Inicio),
                                 tint = NeonBlue
                             )
                         }
@@ -95,7 +101,7 @@ fun MainScreen(
                         IconButton(onClick = onExit) {
                             Icon(
                                 imageVector = Icons.Filled.Replay,
-                                contentDescription = "Salir",
+                                contentDescription = stringResource(R.string.Salir),
                                 tint = NeonBlue
                             )
                         }
@@ -122,8 +128,8 @@ fun MainScreen(
 
                 val animatedIndicatorOffsetPx by animateFloatAsState(
                     targetValue = targetOffset,
-                    animationSpec = spring(stiffness = 400f, dampingRatio = 0.7f), // Puedes ajustar la suavidad
-                    label = "indicatorOffset"
+                    animationSpec = spring(stiffness = 400f, dampingRatio = 0.7f),
+                    label = stringResource(R.string.indicatorOffset)
                 )
 
                 Box(
@@ -196,17 +202,17 @@ fun MainScreen(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.wifi_off),
-                            contentDescription = "Icono de sin conexión",
+                            contentDescription = stringResource(R.string.iconoSinConexion),
                             tint = NeonBlue,
                             modifier = Modifier.size(80.dp)
                         )
                         Text(
-                            text = "No hay conexión a internet.",
+                            text = stringResource(R.string.sinConexion),
                             color = NeonBlue,
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "Toca para reintentar.",
+                            text = stringResource(R.string.reintentar),
                             color = NeonBlue,
                             style = MaterialTheme.typography.bodyMedium
                         )
@@ -221,12 +227,12 @@ fun MainScreen(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.file_sad),
-                            contentDescription = "Icono de archivo vacío",
+                            contentDescription = stringResource(R.string.iconoArchivoVacio),
                             tint = NeonBlue,
                             modifier = Modifier.size(80.dp)
                         )
                         Text(
-                            text = "No hay datos disponibles.",
+                            text = stringResource(R.string.noHayDatos),
                             color = NeonBlue,
                             style = MaterialTheme.typography.titleMedium
                         )

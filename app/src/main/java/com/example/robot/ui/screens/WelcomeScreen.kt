@@ -11,12 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.robot.R
 import com.example.robot.ui.components.AnimatedStartButton
 import com.example.robot.ui.theme.NightBlue
 import com.example.robot.ui.theme.SpaceGray
@@ -58,20 +59,20 @@ fun WelcomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Android,
-                        contentDescription = "Logo Robot",
+                        contentDescription = stringResource(R.string.logoRobot),
                         tint = NeonBlue,
                         modifier = Modifier.size(80.dp)
                     )
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = "Brazo Robot",
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.headlineLarge,
                         color = NeonBlue,
                         fontWeight = Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Bienvenido al sistema de control",
+                        text = stringResource(R.string.bienvenida),
                         style = MaterialTheme.typography.bodyLarge,
                         color = TextPrimary,
                         textAlign = TextAlign.Center
@@ -93,7 +94,7 @@ fun WelcomeScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "Integrantes del proyecto",
+                                text = stringResource(R.string.integrantes),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = NeonBlue,
                                 fontWeight = Bold,
@@ -108,8 +109,8 @@ fun WelcomeScreen(
                             )
 
                             val alumnos = listOf(
-                                "Christian Josue Regla Andrade - 22310380",
-                                "Bruce Allen Denis Yañez - 22310377"
+                                stringResource(R.string.alumno1),
+                                stringResource(R.string.alumno2)
                             )
                             alumnos.forEach { alumno ->
                                 Text(
