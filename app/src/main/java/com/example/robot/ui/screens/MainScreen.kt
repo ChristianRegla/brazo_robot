@@ -73,10 +73,6 @@ fun MainScreen(
     val isConnected by materialViewModel.isConnected.collectAsState()
     val rows by materialViewModel.materialesRows.collectAsState()
 
-    LaunchedEffect(Unit) {
-        materialViewModel.loadMateriales()
-    }
-
     RobotTheme {
         Scaffold(
             topBar = {

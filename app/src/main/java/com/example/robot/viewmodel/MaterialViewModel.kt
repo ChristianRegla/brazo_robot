@@ -6,29 +6,26 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
 import androidx.lifecycle.AndroidViewModel
-import com.example.robot.model.MaterialItem
-import com.google.firebase.firestore.FirebaseFirestore
+import androidx.lifecycle.viewModelScope
+import com.example.robot.data.MaterialRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 
 class MaterialViewModel(application: Application) : AndroidViewModel(application) {
-    // Propiedades para almacenar los datos
-    private val _materiales = MutableStateFlow<List<MaterialItem>>(emptyList())
-    val materiales: StateFlow<List<MaterialItem>> = _materiales
+    private val materialRepository = MaterialRepository()
 
     private val _materialesRows = MutableStateFlow<List<List<String>>>(emptyList())
     val materialesRows: StateFlow<List<List<String>>> = _materialesRows
 
     // Propiedades para controlar el estado de carga
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     // Propiedades para controlar la conexión
     private val _isConnected = MutableStateFlow(true)
     val isConnected: StateFlow<Boolean> = _isConnected
-
-    // Instancia de Firestore
-    private val db = FirebaseFirestore.getInstance()
 
     // Instancia del ConnectivityManager
     private val connectivityManager =
@@ -44,6 +41,7 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     init {
         val request = NetworkRequest.Builder().build()
         connectivityManager.registerNetworkCallback(request, networkCallback)
+        loadMateriales()
     }
 
     // Desregistro del callback
@@ -57,40 +55,23 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         // Ponemos que está cargando
         _isLoading.value = true
         // Obtenemos los materiales de Firestore
-        db.collection("materiales")
-            // addSnapshotListener para obtener los cambios en tiempo real
-            .addSnapshotListener { snapshot, exception ->
-                // Si hay un error, mostramos los materiales vacíos y paramos
-                if (exception != null) {
-                    _materiales.value = emptyList()
+        viewModelScope.launch {
+            materialRepository.getMateriales()
+                .catch { exception ->
                     _materialesRows.value = emptyList()
                     _isLoading.value = false
-                    return@addSnapshotListener
                 }
-                // Si no hay error, obtenemos los materiales y los mostramos
-                if (snapshot != null) {
-                    val lista = snapshot.documents.map { doc ->
-                        MaterialItem(
-                            color = doc.getString("color") ?: "",
-                            pesoGramos = doc.getLong("pesoGramos")?.toInt() ?: 0,
-                            esMetal = doc.getBoolean("esMetal") ?: false,
-                            categoria = doc.getString("categoria") ?: ""
-                        )
-                    }
-                    // Actualizamos los materiales
-                    _materiales.value = lista
-
-                    _materialesRows.value = lista.map { item ->
+                .collect { materialesList ->
+                    _materialesRows.value = materialesList.map { item->
                         listOf(
                             item.color,
                             "${item.pesoGramos}g",
-                            if (item.esMetal) "Si" else "No",
+                            if (item.esMetal) "Sí" else "No",
                             item.categoria
                         )
                     }
+                    _isLoading.value = false
                 }
-                // Paramos de cargar
-                _isLoading.value = false
-            }
+        }
     }
 }
