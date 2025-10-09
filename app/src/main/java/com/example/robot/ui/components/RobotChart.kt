@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import android.graphics.Typeface
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,11 +39,13 @@ import co.yml.charts.ui.barchart.models.BarChartData
 import co.yml.charts.ui.barchart.models.BarData
 import co.yml.charts.ui.barchart.models.BarStyle
 import co.yml.charts.ui.linechart.LineChart
+import co.yml.charts.ui.linechart.model.IntersectionPoint
 import co.yml.charts.ui.linechart.model.Line
 import co.yml.charts.ui.linechart.model.LineChartData
 import co.yml.charts.ui.linechart.model.LinePlotData
 import co.yml.charts.ui.linechart.model.LineStyle
 import co.yml.charts.ui.linechart.model.LineType
+import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.piechart.charts.PieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
@@ -128,9 +131,30 @@ fun LineChartPesos(rows: List<List<String>>) {
         color = NeonBlue,
         width = 4f
     )
+
+    val intersectionPoint = IntersectionPoint(
+        color = NeonBlue,
+        radius = 6.dp,
+        alpha = 1.0f
+    )
+
+    val selectionHighlightPopUp = SelectionHighlightPopUp(
+        backgroundColor = NeonBlue,
+        backgroundAlpha = 0.9f,
+        backgroundCornerRadius = CornerRadius(8f),
+        paddingBetweenPopUpAndPoint = 12.dp,
+        labelSize = 14.sp,
+        labelColor = Color.White,
+        popUpLabel = { x, y ->
+            "Índice: ${x.toInt()}\n Peso: ${"%.1f".format(y)}g"
+        }
+    )
+
     val line = Line(
         dataPoints = points,
-        lineStyle = lineStyle
+        lineStyle = lineStyle,
+        intersectionPoint = intersectionPoint,
+        selectionHighlightPopUp = selectionHighlightPopUp
     )
     val linePlotData = LinePlotData(
         plotType = PlotType.Line,
@@ -180,14 +204,27 @@ fun BarChartCategorias(rows: List<List<String>>) {
         .build()
 
     val maxCount = counts.values.maxOrNull() ?: 0
-    val yAxisSteps = if (maxCount <= 5) maxCount else 4
+    val yStep: Int
+    val yMax: Int
+
+    if (maxCount <=5) {
+        yStep = 1
+        yMax = maxCount + 1
+    } else {
+        yStep = 5
+        yMax = ((maxCount + 4) / 5) * 5
+    }
+    val ySteps: Int = if (yStep == 1) yMax else (yMax + yStep)
 
     val yAxisData = AxisData.Builder()
-        .steps(yAxisSteps)
+        .steps(ySteps)
         .labelAndAxisLinePadding(20.dp)
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
-        .labelData { value -> "%.0f".format(value.toFloat()) }
+        .labelData { value ->
+            val v = (value * yStep)
+            if (v == 0 && yMax > 5) "" else v.toString()
+        }
         .build()
 
 
