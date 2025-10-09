@@ -18,4 +18,8 @@
     <string name="alumno2">Bruce Allen Denis Yañez - 22310377</string>
     <string name="botonComenzar">Comenzar</string>
     <string name="logoRobot">Logo Robot</string>
+    <string name="tablaRobot">Tabla del Robot</string>
+    <string name="tabla">Tabla</string>
+    <string name="graficaRobot">Gráfica del Robot</string>
+    <string name="grafica">Gráfica</string>
 </resources>
