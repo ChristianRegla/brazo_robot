@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import android.graphics.Typeface
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,12 +47,9 @@ import co.yml.charts.ui.piechart.charts.PieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
 import com.example.robot.R
-import com.example.robot.ui.theme.BorderGray
 import com.example.robot.ui.theme.CyanAccent
-import com.example.robot.ui.theme.DeepBlue
 import com.example.robot.ui.theme.GreenSensor
 import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.ui.theme.NightBlue
 import com.example.robot.ui.theme.RedAlert
 import com.example.robot.ui.theme.SpaceGray
 
@@ -64,15 +61,26 @@ fun RobotChart(
 ) {
     val scrollState = rememberScrollState()
     Column(
-        Modifier.fillMaxWidth().verticalScroll(scrollState).then(modifier)
+        Modifier
+            .fillMaxWidth()
+            .verticalScroll(scrollState)
+            .then(modifier)
     ) {
         Text(
-            text = stringResource(R.string.pesoMateriales),
+            text = stringResource(R.string.proporcionMetales),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
         )
-        LineChartPesos(rows)
+        Card(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            PieChartMetales(rows)
+        }
+
         Spacer(Modifier.height(24.dp))
 
         Text(
@@ -81,16 +89,31 @@ fun RobotChart(
             color = Color.White,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
         )
-        BarChartCategorias(rows)
+        Card(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            BarChartCategorias(rows)
+        }
+
         Spacer(Modifier.height(24.dp))
 
         Text(
-            text = stringResource(R.string.proporcionMetales),
+            text = stringResource(R.string.pesoMateriales),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
         )
-        PieChartMetales(rows)
+        Card(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            LineChartPesos(rows)
+        }
     }
 }
 
@@ -115,7 +138,8 @@ fun LineChartPesos(rows: List<List<String>>) {
     )
     val lineChartData = LineChartData(
         linePlotData = linePlotData,
-        backgroundColor = SpaceGray
+        backgroundColor = Color.Transparent,
+
     )
     LineChart(
         lineChartData = lineChartData,
@@ -171,7 +195,7 @@ fun BarChartCategorias(rows: List<List<String>>) {
         chartData = bars,
         xAxisData = xAxisData,
         yAxisData = yAxisData,
-        backgroundColor = SpaceGray,
+        backgroundColor = Color.Transparent,
         barStyle = BarStyle(
             barWidth = 50.dp,
             cornerRadius = 4.dp
@@ -223,7 +247,8 @@ fun PieChartMetales(rows: List<List<String>>) {
         sliceLabelTextSize = 14.sp,
         labelType = PieChartConfig.LabelType.PERCENTAGE,
         labelColor = Color.White,
-        backgroundColor = SpaceGray
+        backgroundColor = Color.Transparent,
+        isAnimationEnable = true
     )
 
     Column(
@@ -231,9 +256,7 @@ fun PieChartMetales(rows: List<List<String>>) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         PieChart(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
+            modifier = Modifier.size(220.dp),
             pieChartData = pieChartData,
             pieChartConfig = pieChartConfig,
             onSliceClick = { slice ->
