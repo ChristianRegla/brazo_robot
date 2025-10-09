@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +33,7 @@ import co.yml.charts.ui.linechart.model.LineType
 import co.yml.charts.ui.piechart.charts.PieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
+import com.example.robot.R
 import com.example.robot.ui.theme.CyanAccent
 import com.example.robot.ui.theme.GreenSensor
 import com.example.robot.ui.theme.NeonBlue
@@ -49,7 +51,7 @@ fun RobotChart(
         Modifier.fillMaxWidth().verticalScroll(scrollState).then(modifier)
     ) {
         Text(
-            text = "Peso de materiales",
+            text = stringResource(R.string.pesoMateriales),
             style = MaterialTheme.typography.titleMedium,
             color = NeonBlue,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
@@ -58,7 +60,7 @@ fun RobotChart(
         Spacer(Modifier.height(24.dp))
 
         Text(
-            text = "Cantidad de materiales por categoría",
+            text = stringResource(R.string.cantidadMateriales),
             style = MaterialTheme.typography.titleMedium,
             color = NeonBlue,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
@@ -67,7 +69,7 @@ fun RobotChart(
         Spacer(Modifier.height(24.dp))
 
         Text(
-            text = "Proporción de metales vs no metales",
+            text = stringResource(R.string.proporcionMetales),
             style = MaterialTheme.typography.titleMedium,
             color = NeonBlue,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
@@ -109,9 +111,11 @@ fun LineChartPesos(rows: List<List<String>>) {
 
 @Composable
 fun BarChartCategorias(rows: List<List<String>>) {
-    val counts = rows.groupingBy { it.getOrNull(3) ?: "Desconocido" }.eachCount()
+    val desconocido = stringResource(R.string.desconocido)
+    val counts = rows.groupingBy { it.getOrNull(3) ?: desconocido }.eachCount()
     val barColors = listOf(NeonBlue, CyanAccent, GreenSensor, RedAlert)
-    val bars = counts.entries.mapIndexed { idx, entry ->
+    val sortedCounts = counts.entries.sortedBy { it.key }
+    val bars = sortedCounts.mapIndexed { idx, entry ->
         BarData(
             point = Point(idx.toFloat(), entry.value.toFloat()),
             label = entry.key,
@@ -121,25 +125,23 @@ fun BarChartCategorias(rows: List<List<String>>) {
 
     val xAxisData = AxisData.Builder()
         .axisStepSize(100.dp)
-        .steps(bars.size - 1)
         .bottomPadding(16.dp)
         .axisLabelAngle(0f)
         .labelData { index -> bars.getOrNull(index)?.label ?: "" }
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
+        .startDrawPadding(50.dp)
         .build()
 
-    val maxRange = (counts.values.maxOrNull() ?: 0).toFloat()
+    val maxCount = counts.values.maxOrNull() ?: 0
+    val yAxisSteps = if (maxCount <= 5) maxCount else 4
 
     val yAxisData = AxisData.Builder()
-        .steps(4)
+        .steps(yAxisSteps)
         .labelAndAxisLinePadding(20.dp)
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
-        .labelData { value ->
-            val finalValue = if (value.toFloat() >= maxRange) maxRange else value.toFloat()
-            "%.0f".format(finalValue)
-        }
+        .labelData { value -> "%.0f".format(value.toFloat()) }
         .build()
 
 
@@ -164,16 +166,16 @@ fun BarChartCategorias(rows: List<List<String>>) {
 
 @Composable
 fun PieChartMetales(rows: List<List<String>>) {
-    val metalCount = rows.count { it.getOrNull(2)?.contains("si", ignoreCase = true) == true }
+    val metalCount = rows.count { it.getOrNull(2)?.contains("sí", ignoreCase = true) == true }
     val nonMetalCount = rows.size - metalCount
     val pieSlices = listOf(
         PieChartData.Slice(
-            label = "Metales",
+            label = stringResource(R.string.metales),
             value = metalCount.toFloat(),
             color = GreenSensor
         ),
         PieChartData.Slice(
-            label = "No Metales",
+            label = stringResource(R.string.noMetales),
             value = nonMetalCount.toFloat(),
             color = RedAlert
         )

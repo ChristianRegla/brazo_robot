@@ -22,4 +22,12 @@
     <string name="tabla">Tabla</string>
     <string name="graficaRobot">Gráfica del Robot</string>
     <string name="grafica">Gráfica</string>
+
+    <string name="pesoMateriales">Peso de materiales</string>
+    <string name="cantidadMateriales">Cantidad de materiales por categoría</string>
+    <string name="proporcionMetales">Proporción de metales vs no metales"</string>
+    <string name="desconocido">Desconocido</string>
+    <string name="metales">Metales</string>
+    <string name="noMetales">No Metales</string>
+
 </resources>
