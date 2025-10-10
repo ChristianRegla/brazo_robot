@@ -19,11 +19,9 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     private val _materialesRows = MutableStateFlow<List<List<String>>>(emptyList())
     val materialesRows: StateFlow<List<List<String>>> = _materialesRows
 
-    // Propiedades para controlar el estado de carga
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    // Propiedades para controlar la conexión
     private val _isConnected = MutableStateFlow(true)
     val isConnected: StateFlow<Boolean> = _isConnected
 
@@ -35,12 +33,9 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         loadMateriales()
     }
 
-    // Función para cargar los materiales desde Firestore
     fun loadMateriales() {
-        // Ponemos que está cargando
         _isLoading.value = true
         viewModelScope.launch {
-            // Obtenemos los materiales desde el repositorio
             materialRepository.getMateriales()
                 .catch { exception ->
                     _materialesRows.value = emptyList()

@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
@@ -113,8 +114,9 @@ fun MainScreen(
                 val indicatorVerticalPadding = 12.dp
 
                 val density = LocalDensity.current
-                val windowInfo = LocalWindowInfo.current
-                val containerWidthPx = windowInfo.containerSize.width.toFloat()
+                val configuration = LocalConfiguration.current
+                val screenWidthDp = configuration.screenWidthDp.dp
+                val containerWidthPx = with(density) { screenWidthDp.toPx() }
 
                 val spacerPerItemPx = containerWidthPx / itemCount
                 val pageOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
