@@ -31,6 +31,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.component1
+import androidx.core.graphics.component2
+import androidx.core.graphics.component3
+import androidx.core.graphics.component4
 import co.yml.charts.axis.AxisData
 import co.yml.charts.common.model.PlotType
 import co.yml.charts.common.model.Point
@@ -39,6 +43,7 @@ import co.yml.charts.ui.barchart.models.BarChartData
 import co.yml.charts.ui.barchart.models.BarData
 import co.yml.charts.ui.barchart.models.BarStyle
 import co.yml.charts.ui.linechart.LineChart
+import co.yml.charts.ui.linechart.model.GridLines
 import co.yml.charts.ui.linechart.model.IntersectionPoint
 import co.yml.charts.ui.linechart.model.Line
 import co.yml.charts.ui.linechart.model.LineChartData
@@ -126,6 +131,23 @@ fun LineChartPesos(rows: List<List<String>>) {
         val peso = row.getOrNull(1)?.replace("g", "")?.toFloatOrNull() ?: 0f
         Point(index.toFloat(), peso)
     }
+
+    val xAxisData = AxisData.Builder()
+        .axisStepSize(60.dp)
+        .steps(if (points.size > 10) points.size / 2 else points.size - 1)
+        .labelData { i -> (i + 1).toString() }
+        .axisLineColor(NeonBlue)
+        .axisLabelColor(Color.White)
+        .build()
+
+    val yAxisData = AxisData.Builder()
+        .steps(4)
+        .labelAndAxisLinePadding(20.dp)
+        .axisLineColor(NeonBlue)
+        .axisLabelColor(Color.White)
+        .labelData { value -> "%.0f g".format(value.toFloat()) }
+        .build()
+
     val lineStyle = LineStyle(
         lineType = LineType.SmoothCurve(isDotted = false),
         color = NeonBlue,
@@ -162,6 +184,9 @@ fun LineChartPesos(rows: List<List<String>>) {
     )
     val lineChartData = LineChartData(
         linePlotData = linePlotData,
+        xAxisData = xAxisData,
+        yAxisData = yAxisData,
+        gridLines = GridLines(color = Color.Gray.copy(alpha = 0.5f)),
         backgroundColor = Color.Transparent,
 
     )
