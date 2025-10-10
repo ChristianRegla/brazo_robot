@@ -1,5 +1,6 @@
 package com.example.robot.ui.components
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -70,11 +71,20 @@ fun RobotTable(
             )
 
             LazyColumn {
-                itemsIndexed(rows) { index, row ->
+                itemsIndexed(
+                    items = rows,
+                    key = { index, _ -> index }
+                ) { index, row ->
                     Row(
                         Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp, vertical = 8.dp)
+                            .animateItem(
+                                fadeInSpec = tween(
+                                    durationMillis = 300,
+                                    delayMillis = 30 * index
+                                )
+                            )
                     ) {
                         row.forEach { cell ->
                             Text(

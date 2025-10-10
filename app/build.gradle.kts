@@ -44,62 +44,43 @@ android {
 }
 
 dependencies {
-    // Compose BOM
     implementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(platform(libs.androidx.compose.bom))
 
-    // Compose core
+    // Compose
     implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.runtime:runtime-livedata")
+    implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.activity:activity-compose")
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
     implementation("androidx.navigation:navigation-compose:2.9.5")
-    implementation("androidx.compose.foundation:foundation:1.9.2")
-    implementation("androidx.compose.material3:material3:1.2.0")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.animation:animation")
 
-    // Accompanist
+    // Accompanist (para animaciones de navegación y pagers)
     implementation("com.google.accompanist:accompanist-navigation-animation:0.34.0")
+    implementation("com.google.accompanist:accompanist-pager:0.34.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.34.0")
 
     // Kotlin & AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
 
-    // Otros
-    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    // Otras librerías
+    implementation("io.coil-kt.coil3:coil-compose:3.0.0-alpha06")
     implementation("co.yml:ycharts:2.1.0")
-    implementation(libs.androidx.compose.animation)
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-firestore-ktx")
 
     // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-
-    // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
-    implementation("com.google.firebase:firebase-analytics")
-
-    // Firestore
-    implementation("com.google.firebase:firebase-firestore-ktx:25.1.4")
-
-    // Fonts
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.9.2")
-
-    // Icons
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
-
-    // Animations
-    implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
-
-    // Deslizar horizontal
-    implementation("com.google.accompanist:accompanist-pager:0.36.0")
-    implementation("com.google.accompanist:accompanist-pager-indicators:0.36.0")
 }

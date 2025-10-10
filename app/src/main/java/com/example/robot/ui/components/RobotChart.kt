@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,12 +24,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import android.graphics.Typeface
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.component1
+import androidx.core.graphics.component2
+import androidx.core.graphics.component3
+import androidx.core.graphics.component4
 import co.yml.charts.axis.AxisData
+import co.yml.charts.common.model.AccessibilityConfig
 import co.yml.charts.common.model.PlotType
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.barchart.BarChart
@@ -38,21 +44,22 @@ import co.yml.charts.ui.barchart.models.BarChartData
 import co.yml.charts.ui.barchart.models.BarData
 import co.yml.charts.ui.barchart.models.BarStyle
 import co.yml.charts.ui.linechart.LineChart
+import co.yml.charts.ui.linechart.model.GridLines
+import co.yml.charts.ui.linechart.model.IntersectionPoint
 import co.yml.charts.ui.linechart.model.Line
 import co.yml.charts.ui.linechart.model.LineChartData
 import co.yml.charts.ui.linechart.model.LinePlotData
 import co.yml.charts.ui.linechart.model.LineStyle
 import co.yml.charts.ui.linechart.model.LineType
+import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
+import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.piechart.charts.PieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
 import com.example.robot.R
-import com.example.robot.ui.theme.BorderGray
 import com.example.robot.ui.theme.CyanAccent
-import com.example.robot.ui.theme.DeepBlue
 import com.example.robot.ui.theme.GreenSensor
 import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.ui.theme.NightBlue
 import com.example.robot.ui.theme.RedAlert
 import com.example.robot.ui.theme.SpaceGray
 
@@ -64,15 +71,26 @@ fun RobotChart(
 ) {
     val scrollState = rememberScrollState()
     Column(
-        Modifier.fillMaxWidth().verticalScroll(scrollState).then(modifier)
+        Modifier
+            .fillMaxWidth()
+            .verticalScroll(scrollState)
+            .then(modifier)
     ) {
         Text(
-            text = stringResource(R.string.pesoMateriales),
+            text = stringResource(R.string.proporcionMetales),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
         )
-        LineChartPesos(rows)
+        Card(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            PieChartMetales(rows)
+        }
+
         Spacer(Modifier.height(24.dp))
 
         Text(
@@ -81,16 +99,31 @@ fun RobotChart(
             color = Color.White,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
         )
-        BarChartCategorias(rows)
+        Card(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            BarChartCategorias(rows)
+        }
+
         Spacer(Modifier.height(24.dp))
 
         Text(
-            text = stringResource(R.string.proporcionMetales),
+            text = stringResource(R.string.pesoMateriales),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
         )
-        PieChartMetales(rows)
+        Card(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            LineChartPesos(rows)
+        }
     }
 }
 
@@ -100,14 +133,68 @@ fun LineChartPesos(rows: List<List<String>>) {
         val peso = row.getOrNull(1)?.replace("g", "")?.toFloatOrNull() ?: 0f
         Point(index.toFloat(), peso)
     }
+
+    val xAxisData = AxisData.Builder()
+        .axisStepSize(60.dp)
+        // 1. SOLUCIÓN EJE X: Los 'steps' deben coincidir siempre con los puntos.
+        .steps(points.size - 1)
+        .labelData { i ->
+            // Para evitar amontonamiento, solo mostramos una etiqueta cada 2 puntos si hay muchos datos.
+            if (points.size > 10 && i % 2 != 0) {
+                "" // Dejamos la etiqueta vacía
+            } else {
+                (i + 1).toString()
+            }
+        }
+        .axisLineColor(NeonBlue)
+        .axisLabelColor(Color.White)
+        .build()
+
+    val maxWeight = points.maxOfOrNull { it.y } ?: 1f
+
+    val yAxisData = AxisData.Builder()
+        .steps(4)
+        .labelAndAxisLinePadding(20.dp)
+        .axisLineColor(NeonBlue)
+        .axisLabelColor(Color.White)
+        .labelData { value ->
+            // Calculamos manualmente el valor de cada etiqueta basándonos en el peso máximo.
+            val scale = maxWeight / 4f // Dividimos el rango total entre el número de intervalos
+            val labelValue = scale * value
+            "%.0f g".format(labelValue)
+        }
+        .build()
+
     val lineStyle = LineStyle(
         lineType = LineType.SmoothCurve(isDotted = false),
         color = NeonBlue,
         width = 4f
     )
+
+    val intersectionPoint = IntersectionPoint(
+        color = NeonBlue,
+        radius = 6.dp,
+        alpha = 1.0f
+    )
+
+    val selectionHighlightPopUp = SelectionHighlightPopUp(
+        backgroundColor = NeonBlue,
+        backgroundAlpha = 0.9f,
+        backgroundCornerRadius = CornerRadius(8f),
+        paddingBetweenPopUpAndPoint = 12.dp,
+        labelSize = 14.sp,
+        labelColor = Color.White,
+        popUpLabel = { x, y ->
+            "Índice: ${x.toInt()}\n Peso: ${"%.1f".format(y)}g"
+        }
+    )
+
     val line = Line(
         dataPoints = points,
-        lineStyle = lineStyle
+        lineStyle = lineStyle,
+        intersectionPoint = intersectionPoint,
+        selectionHighlightPoint = SelectionHighlightPoint(),
+        selectionHighlightPopUp = selectionHighlightPopUp
     )
     val linePlotData = LinePlotData(
         plotType = PlotType.Line,
@@ -115,7 +202,11 @@ fun LineChartPesos(rows: List<List<String>>) {
     )
     val lineChartData = LineChartData(
         linePlotData = linePlotData,
-        backgroundColor = SpaceGray
+        xAxisData = xAxisData,
+        yAxisData = yAxisData,
+        gridLines = GridLines(color = Color.Gray.copy(alpha = 0.5f)),
+        backgroundColor = Color.Transparent,
+
     )
     LineChart(
         lineChartData = lineChartData,
@@ -130,7 +221,9 @@ fun BarChartCategorias(rows: List<List<String>>) {
     val desconocido = stringResource(R.string.desconocido)
     val counts = rows.groupingBy { it.getOrNull(3) ?: desconocido }.eachCount()
     val barColors = listOf(NeonBlue, CyanAccent, GreenSensor, RedAlert)
+
     val sortedCounts = counts.entries.sortedBy { it.key }
+
     val bars = sortedCounts.mapIndexed { idx, entry ->
         BarData(
             point = Point(idx.toFloat(), entry.value.toFloat()),
@@ -155,23 +248,27 @@ fun BarChartCategorias(rows: List<List<String>>) {
         .typeFace(customTypceFace ?: Typeface.DEFAULT)
         .build()
 
-    val maxCount = counts.values.maxOrNull() ?: 0
-    val yAxisSteps = if (maxCount <= 5) maxCount else 4
+    val maxCount = counts.values.maxOrNull() ?: 1
+    val yAxisIntervals = if (maxCount < 5) maxCount else 4
 
     val yAxisData = AxisData.Builder()
-        .steps(yAxisSteps)
+        .steps(yAxisIntervals)
         .labelAndAxisLinePadding(20.dp)
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
-        .labelData { value -> "%.0f".format(value.toFloat()) }
+        // 2. Dejamos que la librería calcule la escala
+        .labelData { value ->
+            val scale = maxCount.toFloat() / yAxisIntervals
+            val labelValue = scale * value
+            "%.0f".format(labelValue)
+        }
         .build()
-
 
     val barChartData = BarChartData(
         chartData = bars,
         xAxisData = xAxisData,
         yAxisData = yAxisData,
-        backgroundColor = SpaceGray,
+        backgroundColor = Color.Transparent,
         barStyle = BarStyle(
             barWidth = 50.dp,
             cornerRadius = 4.dp
@@ -223,7 +320,8 @@ fun PieChartMetales(rows: List<List<String>>) {
         sliceLabelTextSize = 14.sp,
         labelType = PieChartConfig.LabelType.PERCENTAGE,
         labelColor = Color.White,
-        backgroundColor = SpaceGray
+        backgroundColor = Color.Transparent,
+        isAnimationEnable = true
     )
 
     Column(
@@ -231,9 +329,7 @@ fun PieChartMetales(rows: List<List<String>>) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         PieChart(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
+            modifier = Modifier.size(220.dp),
             pieChartData = pieChartData,
             pieChartConfig = pieChartConfig,
             onSliceClick = { slice ->
