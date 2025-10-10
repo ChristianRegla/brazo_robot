@@ -36,6 +36,7 @@ import androidx.core.graphics.component2
 import androidx.core.graphics.component3
 import androidx.core.graphics.component4
 import co.yml.charts.axis.AxisData
+import co.yml.charts.common.model.AccessibilityConfig
 import co.yml.charts.common.model.PlotType
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.barchart.BarChart
@@ -50,6 +51,7 @@ import co.yml.charts.ui.linechart.model.LineChartData
 import co.yml.charts.ui.linechart.model.LinePlotData
 import co.yml.charts.ui.linechart.model.LineStyle
 import co.yml.charts.ui.linechart.model.LineType
+import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
 import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.piechart.charts.PieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
@@ -134,18 +136,33 @@ fun LineChartPesos(rows: List<List<String>>) {
 
     val xAxisData = AxisData.Builder()
         .axisStepSize(60.dp)
-        .steps(if (points.size > 10) points.size / 2 else points.size - 1)
-        .labelData { i -> (i + 1).toString() }
+        // 1. SOLUCIÓN EJE X: Los 'steps' deben coincidir siempre con los puntos.
+        .steps(points.size - 1)
+        .labelData { i ->
+            // Para evitar amontonamiento, solo mostramos una etiqueta cada 2 puntos si hay muchos datos.
+            if (points.size > 10 && i % 2 != 0) {
+                "" // Dejamos la etiqueta vacía
+            } else {
+                (i + 1).toString()
+            }
+        }
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
         .build()
+
+    val maxWeight = points.maxOfOrNull { it.y } ?: 1f
 
     val yAxisData = AxisData.Builder()
         .steps(4)
         .labelAndAxisLinePadding(20.dp)
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
-        .labelData { value -> "%.0f g".format(value.toFloat()) }
+        .labelData { value ->
+            // Calculamos manualmente el valor de cada etiqueta basándonos en el peso máximo.
+            val scale = maxWeight / 4f // Dividimos el rango total entre el número de intervalos
+            val labelValue = scale * value
+            "%.0f g".format(labelValue)
+        }
         .build()
 
     val lineStyle = LineStyle(
@@ -176,6 +193,7 @@ fun LineChartPesos(rows: List<List<String>>) {
         dataPoints = points,
         lineStyle = lineStyle,
         intersectionPoint = intersectionPoint,
+        selectionHighlightPoint = SelectionHighlightPoint(),
         selectionHighlightPopUp = selectionHighlightPopUp
     )
     val linePlotData = LinePlotData(
@@ -203,7 +221,9 @@ fun BarChartCategorias(rows: List<List<String>>) {
     val desconocido = stringResource(R.string.desconocido)
     val counts = rows.groupingBy { it.getOrNull(3) ?: desconocido }.eachCount()
     val barColors = listOf(NeonBlue, CyanAccent, GreenSensor, RedAlert)
+
     val sortedCounts = counts.entries.sortedBy { it.key }
+
     val bars = sortedCounts.mapIndexed { idx, entry ->
         BarData(
             point = Point(idx.toFloat(), entry.value.toFloat()),
@@ -228,30 +248,21 @@ fun BarChartCategorias(rows: List<List<String>>) {
         .typeFace(customTypceFace ?: Typeface.DEFAULT)
         .build()
 
-    val maxCount = counts.values.maxOrNull() ?: 0
-    val yStep: Int
-    val yMax: Int
-
-    if (maxCount <=5) {
-        yStep = 1
-        yMax = maxCount + 1
-    } else {
-        yStep = 5
-        yMax = ((maxCount + 4) / 5) * 5
-    }
-    val ySteps: Int = if (yStep == 1) yMax else (yMax + yStep)
+    val maxCount = counts.values.maxOrNull() ?: 1
+    val yAxisIntervals = if (maxCount < 5) maxCount else 4
 
     val yAxisData = AxisData.Builder()
-        .steps(ySteps)
+        .steps(yAxisIntervals)
         .labelAndAxisLinePadding(20.dp)
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
+        // 2. Dejamos que la librería calcule la escala
         .labelData { value ->
-            val v = (value * yStep)
-            if (v == 0 && yMax > 5) "" else v.toString()
+            val scale = maxCount.toFloat() / yAxisIntervals
+            val labelValue = scale * value
+            "%.0f".format(labelValue)
         }
         .build()
-
 
     val barChartData = BarChartData(
         chartData = bars,
