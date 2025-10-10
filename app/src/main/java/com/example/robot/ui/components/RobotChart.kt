@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import android.graphics.Typeface
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,15 +54,17 @@ import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
 import com.example.robot.R
 import com.example.robot.ui.theme.CyanAccent
+import com.example.robot.ui.theme.GreenSensor
 import com.example.robot.ui.theme.NeonBlue
+import com.example.robot.ui.theme.RedAlert
 import com.example.robot.ui.theme.SpaceGray
 
 @Composable
 fun RobotChart(
     rows: List<List<String>>,
+    scrollState: ScrollState,
     modifier: Modifier = Modifier
 ) {
-    val scrollState = rememberScrollState()
     Column(
         Modifier
             .fillMaxWidth()
@@ -81,6 +84,23 @@ fun RobotChart(
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             PieChartMetales(rows)
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        Text(
+            text = "Proporción de Colores",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.White,
+            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+        )
+        Card(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            PieChartColores(rows)
         }
 
         Spacer(Modifier.height(24.dp))
@@ -337,6 +357,80 @@ fun PieChartMetales(rows: List<List<String>>) {
 }
 
 @Composable
+fun PieChartColores(rows: List<List<String>>) {
+    val colorCounts = rows.groupingBy { it.getOrNull(0) ?: "Desconocido" }.eachCount()
+    val totalCount = rows.size.toFloat()
+
+    var selectedSlice by remember { mutableStateOf<PieChartData.Slice?>(null) }
+    var showDialog by remember { mutableStateOf(false) }
+
+    val colorMap = mapOf(
+        "Rojo" to RedAlert,
+        "Verde" to GreenSensor,
+        "Azul" to NeonBlue,
+        "No hay color" to Color.Gray
+    )
+
+    val pieSlices = if (totalCount == 0f) {
+        emptyList()
+    } else {
+        colorCounts.map { (colorName, count) ->
+            PieChartData.Slice(
+                label = colorName,
+                value = count.toFloat(),
+                color = colorMap[colorName] ?: Color.Magenta
+            )
+        }
+    }
+
+    val pieChartData = PieChartData(
+        slices = pieSlices,
+        plotType = PlotType.Pie
+    )
+    val pieChartConfig = PieChartConfig(
+        showSliceLabels = true,
+        sliceLabelTextColor = Color.White,
+        sliceLabelTextSize = 14.sp,
+        labelType = PieChartConfig.LabelType.PERCENTAGE,
+        labelColor = Color.White,
+        backgroundColor = Color.Transparent,
+        isAnimationEnable = true,
+        animationDuration = 800
+    )
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (pieSlices.isEmpty()) {
+            Text(
+                text = "No hay datos de colores para mostrar",
+                modifier = Modifier.padding(32.dp),
+                color = Color.White
+            )
+        } else {
+            PieChart(
+                modifier = Modifier.size(220.dp),
+                pieChartData = pieChartData,
+                pieChartConfig = pieChartConfig,
+                onSliceClick = { slice ->
+                    selectedSlice = slice
+                    showDialog = true
+                }
+            )
+        }
+
+        if (showDialog && selectedSlice != null) {
+            SliceDetailDialog(
+                slice = selectedSlice!!,
+                totalValue = totalCount,
+                onDismiss = { showDialog = false }
+            )
+        }
+    }
+}
+
+@Composable
 fun SliceDetailDialog(
     slice: PieChartData.Slice,
     totalValue: Float,
@@ -387,6 +481,7 @@ fun RobotChartPreview() {
     )
     RobotChart(
         rows = fakeRows,
+        scrollState = rememberScrollState(),
         modifier = Modifier.fillMaxWidth()
     )
 }

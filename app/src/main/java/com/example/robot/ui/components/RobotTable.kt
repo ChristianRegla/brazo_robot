@@ -4,7 +4,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +29,7 @@ import com.example.robot.ui.theme.SpaceGray
 fun RobotTable(
     headers: List<String>,
     rows: List<List<String>>,
+    lazyListState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -70,7 +73,7 @@ fun RobotTable(
                 color = NeonBlue.copy(alpha = 0.6f)
             )
 
-            LazyColumn {
+            LazyColumn(state = lazyListState) {
                 itemsIndexed(
                     items = rows,
                     key = { index, _ -> index }
@@ -128,6 +131,7 @@ fun RobotTablePreview() {
                     listOf("Verde", "100g", "Falso", "Plástico"),
                     listOf("Azul", "800g", "Verdadero", "Botella")
                 ),
+                lazyListState = rememberLazyListState(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)

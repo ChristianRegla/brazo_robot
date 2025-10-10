@@ -7,8 +7,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -71,6 +73,9 @@ fun MainScreen(
     val isLoading by materialViewModel.isLoading.collectAsState()
     val isConnected by materialViewModel.isConnected.collectAsState()
     val rows by materialViewModel.materialesRows.collectAsState()
+
+    val lazyListState = rememberLazyListState()
+    val scrollState = rememberScrollState()
 
     RobotTheme {
         Scaffold(
@@ -140,7 +145,20 @@ fun MainScreen(
                         tabs.forEachIndexed { index, tab ->
                             AnimatedNavigationBarItem(
                                 isSelected = pagerState.currentPage == index,
-                                onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
+                                onClick = {
+                                    coroutineScope.launch {
+                                        if (pagerState.currentPage == index) {
+                                            when (tabs[index]) {
+                                                is TabScreen.Table ->
+                                                    lazyListState.animateScrollToItem(0)
+                                                is TabScreen.Chart ->
+                                                    scrollState.animateScrollTo(0)
+                                            }
+                                        } else {
+                                            pagerState.animateScrollToPage(index)
+                                        }
+                                    }
+                                },
                                 icon = tab.icon,
                                 label = tab.label,
                                 contentDescription = "Ir a ${tab.title}"
@@ -247,8 +265,15 @@ fun MainScreen(
                             contentAlignment = Alignment.TopCenter
                         ) {
                             when (tabs[pageIndex]) {
-                                is TabScreen.Table -> RobotTable(headers = headers, rows = rows)
-                                is TabScreen.Chart -> RobotChart(rows = rows)
+                                is TabScreen.Table -> RobotTable(
+                                    headers = headers,
+                                    rows = rows,
+                                    lazyListState = lazyListState,
+                                )
+                                is TabScreen.Chart -> RobotChart(
+                                    rows = rows,
+                                    scrollState = scrollState
+                                )
                             }
                         }
                     }
@@ -275,6 +300,7 @@ fun MainScreenPreview() {
                 stringResource(R.string.Categoria)
             ),
             rows = fakeRows,
+            lazyListState = rememberLazyListState(),
             modifier = Modifier.fillMaxWidth()
         )
     }
