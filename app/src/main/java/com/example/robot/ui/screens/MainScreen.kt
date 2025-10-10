@@ -24,7 +24,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -269,7 +268,12 @@ fun MainScreenPreview() {
             listOf("Azul", "800g", "Si", "Botella")
         )
         RobotTable(
-            headers = listOf("Color", "Peso (g)", "¿Es metal?", "Categoría"),
+            headers = listOf(
+                stringResource(R.string.Color),
+                stringResource(R.string.Peso),
+                stringResource(R.string.EsMetal),
+                stringResource(R.string.Categoria)
+            ),
             rows = fakeRows,
             modifier = Modifier.fillMaxWidth()
         )
