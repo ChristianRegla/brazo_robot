@@ -55,10 +55,10 @@ fun AnimatedStartButton(
     )
 
     val shimmerTranslate by infiniteTransition.animateFloat(
-        initialValue = -300f,
+        initialValue = -20f,
         targetValue = 690f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1500, delayMillis = 800)
+            animation = tween(durationMillis = 1300, delayMillis = 500)
         ),
         label = "shimmerTranslate"
     )

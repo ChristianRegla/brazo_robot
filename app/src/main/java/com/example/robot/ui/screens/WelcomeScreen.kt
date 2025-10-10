@@ -66,8 +66,9 @@ fun WelcomeScreen(
                     Spacer(Modifier.height(16.dp))
                     Text(
                         text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.headlineLarge,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = NeonBlue,
+                        fontSize = 32.sp,
                         fontWeight = Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -98,6 +99,7 @@ fun WelcomeScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 color = NeonBlue,
                                 fontWeight = Bold,
+                                fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -115,8 +117,8 @@ fun WelcomeScreen(
                             alumnos.forEach { alumno ->
                                 Text(
                                     text = alumno,
-                                    fontSize = 13.sp,
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.labelSmall,
                                     color = TextPrimary,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier

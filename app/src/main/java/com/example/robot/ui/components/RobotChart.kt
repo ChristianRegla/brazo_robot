@@ -31,12 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.component1
-import androidx.core.graphics.component2
-import androidx.core.graphics.component3
-import androidx.core.graphics.component4
 import co.yml.charts.axis.AxisData
-import co.yml.charts.common.model.AccessibilityConfig
 import co.yml.charts.common.model.PlotType
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.barchart.BarChart
@@ -58,11 +53,8 @@ import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
 import com.example.robot.R
 import com.example.robot.ui.theme.CyanAccent
-import com.example.robot.ui.theme.GreenSensor
 import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.ui.theme.RedAlert
 import com.example.robot.ui.theme.SpaceGray
-
 
 @Composable
 fun RobotChart(
@@ -136,12 +128,10 @@ fun LineChartPesos(rows: List<List<String>>) {
 
     val xAxisData = AxisData.Builder()
         .axisStepSize(60.dp)
-        // 1. SOLUCIÓN EJE X: Los 'steps' deben coincidir siempre con los puntos.
         .steps(points.size - 1)
         .labelData { i ->
-            // Para evitar amontonamiento, solo mostramos una etiqueta cada 2 puntos si hay muchos datos.
             if (points.size > 10 && i % 2 != 0) {
-                "" // Dejamos la etiqueta vacía
+                ""
             } else {
                 (i + 1).toString()
             }
@@ -158,8 +148,7 @@ fun LineChartPesos(rows: List<List<String>>) {
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
         .labelData { value ->
-            // Calculamos manualmente el valor de cada etiqueta basándonos en el peso máximo.
-            val scale = maxWeight / 4f // Dividimos el rango total entre el número de intervalos
+            val scale = maxWeight / 4f
             val labelValue = scale * value
             "%.0f g".format(labelValue)
         }
@@ -220,7 +209,7 @@ fun LineChartPesos(rows: List<List<String>>) {
 fun BarChartCategorias(rows: List<List<String>>) {
     val desconocido = stringResource(R.string.desconocido)
     val counts = rows.groupingBy { it.getOrNull(3) ?: desconocido }.eachCount()
-    val barColors = listOf(NeonBlue, CyanAccent, GreenSensor, RedAlert)
+    val barColors = listOf(NeonBlue, CyanAccent)
 
     val sortedCounts = counts.entries.sortedBy { it.key }
 
@@ -256,7 +245,6 @@ fun BarChartCategorias(rows: List<List<String>>) {
         .labelAndAxisLinePadding(20.dp)
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
-        // 2. Dejamos que la librería calcule la escala
         .labelData { value ->
             val scale = maxCount.toFloat() / yAxisIntervals
             val labelValue = scale * value
