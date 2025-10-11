@@ -204,102 +204,104 @@ fun MainScreen(
             },
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
-            Box(
+            HorizontalPager(
+                state = pagerState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                NightBlue,
-                                SpaceGray,
-                                DeepBlue
-                            ),
-                            start = Offset(0f, 0f),
-                            end = Offset(0f, 1000f)
-                        )
-                    )
                     .padding(innerPadding)
-            ) {
-                if (isLoading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = NeonBlue,
-                            trackColor = SpaceGray,
-                            strokeWidth = 5.dp
-                        )
-                    }
-                } else if (!isConnected) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable { materialViewModel.loadMateriales() },
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.wifi_off),
-                            contentDescription = stringResource(R.string.iconoSinConexion),
-                            tint = NeonBlue,
-                            modifier = Modifier.size(80.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.sinConexion),
-                            color = NeonBlue,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = stringResource(R.string.reintentar),
-                            color = NeonBlue,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+            ) { pageIndex ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(NightBlue, SpaceGray, DeepBlue),
+                                start = Offset(0f, 0f),
+                                end = Offset(0f, 1000f)
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    when {
+                        isLoading -> {
+                            CircularProgressIndicator(
+                                color = NeonBlue,
+                                trackColor = SpaceGray,
+                                strokeWidth = 5.dp
+                            )
+                        }
 
-                } else if (materiales.isEmpty()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.file_sad),
-                            contentDescription = stringResource(R.string.iconoArchivoVacio),
-                            tint = NeonBlue,
-                            modifier = Modifier.size(80.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.noHayDatos),
-                            color = NeonBlue,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                } else {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(top = 12.dp, start = 12.dp, end = 12.dp)
-                    ) { pageIndex ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(bottom = 16.dp),
-                            contentAlignment = Alignment.TopCenter
-                        ) {
-                            when (tabs[pageIndex]) {
-                                is TabScreen.Table -> RobotTable(
-                                    headers = headers,
-                                    materiales = materiales,
-                                    lazyListState = lazyListState,
+                        !isConnected -> {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clickable { materialViewModel.loadMateriales() },
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.wifi_off),
+                                    contentDescription = stringResource(R.string.iconoSinConexion),
+                                    tint = NeonBlue,
+                                    modifier = Modifier.size(80.dp)
                                 )
-                                is TabScreen.Chart -> RobotChart(
-                                    materiales = materiales,
-                                    scrollState = scrollState
+                                Text(
+                                    text = stringResource(R.string.sinConexion),
+                                    color = NeonBlue,
+                                    style = MaterialTheme.typography.titleMedium
                                 )
+                                Text(
+                                    text = stringResource(R.string.reintentar),
+                                    color = NeonBlue,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+
+                        materiales.isEmpty() -> {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.file_sad),
+                                    contentDescription = stringResource(R.string.iconoArchivoVacio),
+                                    tint = NeonBlue,
+                                    modifier = Modifier.size(80.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.noHayDatos),
+                                    color = NeonBlue,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
+                        }
+
+                        else -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(
+                                        top = 12.dp,
+                                        start = 12.dp,
+                                        end = 12.dp,
+                                        bottom = 16.dp
+                                    ),
+                                contentAlignment = Alignment.TopCenter
+                            ) {
+                                when (tabs[pageIndex]) {
+                                    is TabScreen.Table -> RobotTable(
+                                        headers = headers,
+                                        materiales = materiales,
+                                        lazyListState = lazyListState,
+                                    )
+
+                                    is TabScreen.Chart -> RobotChart(
+                                        materiales = materiales,
+                                        scrollState = scrollState
+                                    )
+                                }
                             }
                         }
                     }
