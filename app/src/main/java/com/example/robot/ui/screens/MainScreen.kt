@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -72,7 +71,7 @@ fun MainScreen(
     val materialViewModel: MaterialViewModel = viewModel()
     val isLoading by materialViewModel.isLoading.collectAsState()
     val isConnected by materialViewModel.isConnected.collectAsState()
-    val rows by materialViewModel.materialesRows.collectAsState()
+    val materiales by materialViewModel.materiales.collectAsState()
 
     val lazyListState = rememberLazyListState()
     val scrollState = rememberScrollState()
@@ -236,7 +235,7 @@ fun MainScreen(
                         )
                     }
 
-                } else if (rows.isEmpty()) {
+                } else if (materiales.isEmpty()) {
                     Column(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -271,11 +270,11 @@ fun MainScreen(
                             when (tabs[pageIndex]) {
                                 is TabScreen.Table -> RobotTable(
                                     headers = headers,
-                                    rows = rows,
+                                    materiales = materiales,
                                     lazyListState = lazyListState,
                                 )
                                 is TabScreen.Chart -> RobotChart(
-                                    rows = rows,
+                                    materiales = materiales,
                                     scrollState = scrollState
                                 )
                             }
@@ -284,28 +283,5 @@ fun MainScreen(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    RobotTheme {
-        val fakeRows = listOf(
-            listOf("Rojo", "100g", "Si", "Botella"),
-            listOf("Verde", "250g", "No", "Plástico"),
-            listOf("Azul", "800g", "Si", "Botella")
-        )
-        RobotTable(
-            headers = listOf(
-                stringResource(R.string.Color),
-                stringResource(R.string.Peso),
-                stringResource(R.string.EsMetal),
-                stringResource(R.string.Categoria)
-            ),
-            rows = fakeRows,
-            lazyListState = rememberLazyListState(),
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }

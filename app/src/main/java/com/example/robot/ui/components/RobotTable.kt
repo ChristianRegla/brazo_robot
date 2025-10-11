@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.robot.model.MaterialItem
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.ui.theme.SpaceGray
@@ -28,7 +29,7 @@ import com.example.robot.ui.theme.SpaceGray
 @Composable
 fun RobotTable(
     headers: List<String>,
-    rows: List<List<String>>,
+    materiales: List<MaterialItem>,
     lazyListState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
@@ -75,9 +76,9 @@ fun RobotTable(
 
             LazyColumn(state = lazyListState) {
                 itemsIndexed(
-                    items = rows,
+                    items = materiales,
                     key = { index, _ -> index }
-                ) { index, row ->
+                ) { index, item ->
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -89,20 +90,48 @@ fun RobotTable(
                                 )
                             )
                     ) {
-                        row.forEach { cell ->
-                            Text(
-                                text = cell,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxWidth()
-                                    .align(Alignment.CenterVertically),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.bodySmall,
-                                textAlign = TextAlign.Center
-                            )
-                        }
+                        Text(
+                            text = item.color,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .align(Alignment.CenterVertically),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = "${item.pesoGramos}g",
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .align(Alignment.CenterVertically),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = if (item.esMetal) "Sí" else "No",
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .align(Alignment.CenterVertically),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = item.categoria,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .align(Alignment.CenterVertically),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center
+                        )
                     }
-                    if (index != rows.lastIndex) {
+                    if (index != materiales.lastIndex) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 8.dp),
                             thickness = 1.dp,
@@ -124,13 +153,14 @@ fun RobotTablePreview() {
                 .fillMaxWidth()
                 .background(SpaceGray)
         ) {
+            val fakeMateriales = listOf(
+                MaterialItem("Rojo", 50, true, "Botella"),
+                MaterialItem("Verde", 100, false, "Plástico"),
+                MaterialItem("Azul", 800, true, "Botella")
+            )
             RobotTable(
                 headers = listOf("Color", "Peso (g)", "¿Es metal?", "Categoría"),
-                rows = listOf(
-                    listOf("Rojo", "50g", "Verdadero", "Botella"),
-                    listOf("Verde", "100g", "Falso", "Plástico"),
-                    listOf("Azul", "800g", "Verdadero", "Botella")
-                ),
+                materiales = fakeMateriales,
                 lazyListState = rememberLazyListState(),
                 modifier = Modifier
                     .fillMaxWidth()

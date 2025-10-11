@@ -53,6 +53,7 @@ import co.yml.charts.ui.piechart.charts.PieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
 import com.example.robot.R
+import com.example.robot.model.MaterialItem
 import com.example.robot.ui.theme.CyanAccent
 import com.example.robot.ui.theme.GreenSensor
 import com.example.robot.ui.theme.NeonBlue
@@ -61,7 +62,7 @@ import com.example.robot.ui.theme.SpaceGray
 
 @Composable
 fun RobotChart(
-    rows: List<List<String>>,
+    materiales: List<MaterialItem>,
     scrollState: ScrollState,
     modifier: Modifier = Modifier
 ) {
@@ -83,7 +84,7 @@ fun RobotChart(
             colors = CardDefaults.cardColors(containerColor = SpaceGray),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
-            PieChartMetales(rows)
+            PieChartMetales(materiales)
         }
 
         Spacer(Modifier.height(24.dp))
@@ -100,7 +101,7 @@ fun RobotChart(
             colors = CardDefaults.cardColors(containerColor = SpaceGray),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
-            PieChartColores(rows)
+            PieChartColores(materiales)
         }
 
         Spacer(Modifier.height(24.dp))
@@ -117,7 +118,7 @@ fun RobotChart(
             colors = CardDefaults.cardColors(containerColor = SpaceGray),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
-            BarChartCategorias(rows)
+            BarChartCategorias(materiales)
         }
 
         Spacer(Modifier.height(24.dp))
@@ -134,16 +135,15 @@ fun RobotChart(
             colors = CardDefaults.cardColors(containerColor = SpaceGray),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
-            LineChartPesos(rows)
+            LineChartPesos(materiales)
         }
     }
 }
 
 @Composable
-fun LineChartPesos(rows: List<List<String>>) {
-    val points = rows.mapIndexed { index, row ->
-        val peso = row.getOrNull(1)?.replace("g", "")?.toFloatOrNull() ?: 0f
-        Point(index.toFloat(), peso)
+fun LineChartPesos(materiales: List<MaterialItem>) {
+    val points = materiales.mapIndexed { index, item ->
+        Point(index.toFloat(), item.pesoGramos.toFloat())
     }
 
     val xAxisData = AxisData.Builder()
@@ -226,9 +226,9 @@ fun LineChartPesos(rows: List<List<String>>) {
 }
 
 @Composable
-fun BarChartCategorias(rows: List<List<String>>) {
+fun BarChartCategorias(materiales: List<MaterialItem>) {
     val desconocido = stringResource(R.string.desconocido)
-    val counts = rows.groupingBy { it.getOrNull(3) ?: desconocido }.eachCount()
+    val counts = materiales.groupingBy { it.categoria.ifEmpty { desconocido } }.eachCount()
     val barColors = listOf(NeonBlue, CyanAccent)
 
     val sortedCounts = counts.entries.sortedBy { it.key }
@@ -292,10 +292,10 @@ fun BarChartCategorias(rows: List<List<String>>) {
 }
 
 @Composable
-fun PieChartMetales(rows: List<List<String>>) {
-    val metalCount = rows.count { it.getOrNull(2)?.contains("sí", ignoreCase = true) == true }
-    val nonMetalCount = rows.size - metalCount
-    val totalCount = (metalCount + nonMetalCount).toFloat()
+fun PieChartMetales(materiales: List<MaterialItem>) {
+    val metalCount = materiales.count { it.esMetal }
+    val nonMetalCount = materiales.size - metalCount
+    val totalCount = materiales.size.toFloat()
 
     var selectedSlice by remember { mutableStateOf<PieChartData.Slice?>(null) }
 
@@ -357,9 +357,9 @@ fun PieChartMetales(rows: List<List<String>>) {
 }
 
 @Composable
-fun PieChartColores(rows: List<List<String>>) {
-    val colorCounts = rows.groupingBy { it.getOrNull(0) ?: "Desconocido" }.eachCount()
-    val totalCount = rows.size.toFloat()
+fun PieChartColores(materiales: List<MaterialItem>) {
+    val colorCounts = materiales.groupingBy { it.color }.eachCount()
+    val totalCount = materiales.size.toFloat()
 
     var selectedSlice by remember { mutableStateOf<PieChartData.Slice?>(null) }
     var showDialog by remember { mutableStateOf(false) }
@@ -474,13 +474,13 @@ fun SliceDetailDialog(
 @Preview(showBackground = true)
 @Composable
 fun RobotChartPreview() {
-    val fakeRows = listOf(
-        listOf("Rojo", "50g", "Sí", "Botella"),
-        listOf("Verde", "100g", "No", "Plástico"),
-        listOf("Azul", "800g", "Sí", "Botella")
+    val fakeMateriales = listOf(
+        MaterialItem("Rojo", 50, true, "Botella"),
+        MaterialItem("Verde", 100, false, "Plástico"),
+        MaterialItem("Azul", 800, true, "Botella")
     )
     RobotChart(
-        rows = fakeRows,
+        materiales = fakeMateriales,
         scrollState = rememberScrollState(),
         modifier = Modifier.fillMaxWidth()
     )
