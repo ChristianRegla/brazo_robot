@@ -29,5 +29,6 @@
     <string name="desconocido">Desconocido</string>
     <string name="metales">Metales</string>
     <string name="noMetales">No Metales</string>
+    <string name="proporcionColores">Proporción de Colores</string>
 
 </resources>

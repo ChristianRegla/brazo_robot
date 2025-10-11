@@ -90,7 +90,7 @@ fun RobotChart(
         Spacer(Modifier.height(24.dp))
 
         Text(
-            text = "Proporción de Colores",
+            text = stringResource(R.string.proporcionColores),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
@@ -404,7 +404,7 @@ fun PieChartColores(materiales: List<MaterialItem>) {
     ) {
         if (pieSlices.isEmpty()) {
             Text(
-                text = "No hay datos de colores para mostrar",
+                text = stringResource(R.string.noHayDatos),
                 modifier = Modifier.padding(32.dp),
                 color = Color.White
             )
