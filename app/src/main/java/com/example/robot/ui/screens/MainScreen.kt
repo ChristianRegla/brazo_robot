@@ -13,13 +13,15 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Replay
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +46,7 @@ import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.R
 import com.example.robot.ui.components.AnimatedNavigationBarItem
+import com.example.robot.ui.components.ConfirmationDialog
 import com.example.robot.ui.navigation.tabs
 import kotlin.math.roundToInt
 
@@ -52,8 +55,7 @@ private const val INITIALPAGE= 0
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun MainScreen(
-    onGoHome: () -> Unit,
-    onExit: () -> Unit
+    onGoHome: () -> Unit
 ) {
 
     val pagerState = rememberPagerState(
@@ -80,6 +82,16 @@ fun MainScreen(
     val lazyListState = rememberLazyListState()
     val scrollState = rememberScrollState()
 
+    var showClearConfirmationDialog by remember { mutableStateOf(false) }
+
+    if (showClearConfirmationDialog) {
+        ConfirmationDialog(
+            onConfirm = { materialViewModel.clearAllMateriales() },
+            onDismiss = { showClearConfirmationDialog = false }
+        )
+    }
+
+
     RobotTheme {
         Scaffold(
             topBar = {
@@ -101,9 +113,11 @@ fun MainScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = onExit) {
+                        IconButton(onClick = {
+                            showClearConfirmationDialog = true
+                        }) {
                             Icon(
-                                imageVector = Icons.Filled.Replay,
+                                imageVector = Icons.Filled.Delete,
                                 contentDescription = stringResource(R.string.Salir),
                                 tint = NeonBlue
                             )
@@ -174,7 +188,12 @@ fun MainScreen(
                     }
                     Box(
                         modifier = Modifier
-                            .offset { IntOffset(animatedIndicatorOffsetPx.roundToInt(), indicatorVerticalPaddingPx.roundToInt()) }
+                            .offset {
+                                IntOffset(
+                                    animatedIndicatorOffsetPx.roundToInt(),
+                                    indicatorVerticalPaddingPx.roundToInt()
+                                )
+                            }
                             .size(width = indicatorWidth, height = indicatorHeight)
                             .background(
                                 color = NeonBlue.copy(alpha = 0.25f),

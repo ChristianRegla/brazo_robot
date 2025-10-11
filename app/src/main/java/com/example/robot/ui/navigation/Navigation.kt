@@ -48,7 +48,6 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(Destinations.MAIN_ROUTE) {
             MainScreen(
                 onGoHome = { navController.navigate(Destinations.WELCOME_ROUTE) },
-                onExit = { navController.navigate(Destinations.WELCOME_ROUTE) },
             )
         }
     }

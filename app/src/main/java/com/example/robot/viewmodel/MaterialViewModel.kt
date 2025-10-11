@@ -48,4 +48,10 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
                 }
         }
     }
+
+    fun clearAllMateriales() {
+        viewModelScope.launch {
+            materialRepository.clearMateriales()
+        }
+    }
 }

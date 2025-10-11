@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 
 class MaterialRepository {
 
@@ -27,5 +28,19 @@ class MaterialRepository {
                 trySend(materials)
             }
         awaitClose { listener.remove() }
+    }
+
+    suspend fun clearMateriales() {
+        try {
+            val collection = db.collection("materiales")
+            val snapshot = collection.get().await()
+            val batch = db.batch()
+            for (document in snapshot.documents) {
+                batch.delete(document.reference)
+            }
+            batch.commit().await()
+        } catch (e: Exception) {
+            throw e
+        }
     }
 }
