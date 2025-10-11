@@ -113,19 +113,23 @@ fun MainScreen(
             },
             bottomBar = {
                 val itemCount = tabs.size
+
                 val indicatorWidth = 80.dp
                 val indicatorHeight = 32.dp
                 val indicatorVerticalPadding = 12.dp
 
                 val density = LocalDensity.current
                 val configuration = LocalConfiguration.current
-                val screenWidthDp = configuration.screenWidthDp.dp
-                val containerWidthPx = with(density) { screenWidthDp.toPx() }
 
-                val spacerPerItemPx = containerWidthPx / itemCount
+                val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
+                val indicatorWidthPx = with(density) { indicatorWidth.toPx() }
+                val indicatorVerticalPaddingPx = with(density) { indicatorVerticalPadding.toPx() }
+
+                val spacePerItemPx = screenWidthPx / itemCount
                 val pageOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
 
-                val targetOffset = pageOffset * spacerPerItemPx + (spacerPerItemPx - with(density) { indicatorWidth.toPx() }) / 2
+                val indicatorCenterOffset = (spacePerItemPx - indicatorWidthPx) / 2
+                val targetOffset = pageOffset * spacePerItemPx + indicatorCenterOffset
 
                 val animatedIndicatorOffsetPx by animateFloatAsState(
                     targetValue = targetOffset,
@@ -167,7 +171,7 @@ fun MainScreen(
                     }
                     Box(
                         modifier = Modifier
-                            .offset { IntOffset(animatedIndicatorOffsetPx.roundToInt(), with(density) { indicatorVerticalPadding.toPx() }.roundToInt()) }
+                            .offset { IntOffset(animatedIndicatorOffsetPx.roundToInt(), indicatorVerticalPaddingPx.roundToInt()) }
                             .size(width = indicatorWidth, height = indicatorHeight)
                             .background(
                                 color = NeonBlue.copy(alpha = 0.25f),
