@@ -77,7 +77,7 @@ fun RobotTable(
             LazyColumn(state = lazyListState) {
                 itemsIndexed(
                     items = materiales,
-                    key = { index, _ -> index }
+                    key = { _, item -> item.id }
                 ) { index, item ->
                     Row(
                         Modifier
@@ -140,32 +140,6 @@ fun RobotTable(
                     }
                 }
             }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RobotTablePreview() {
-    RobotTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(SpaceGray)
-        ) {
-            val fakeMateriales = listOf(
-                MaterialItem("Rojo", 50, true, "Botella"),
-                MaterialItem("Verde", 100, false, "Plástico"),
-                MaterialItem("Azul", 800, true, "Botella")
-            )
-            RobotTable(
-                headers = listOf("Color", "Peso (g)", "¿Es metal?", "Categoría"),
-                materiales = fakeMateriales,
-                lazyListState = rememberLazyListState(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
         }
     }
 }

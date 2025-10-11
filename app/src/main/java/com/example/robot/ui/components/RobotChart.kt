@@ -470,18 +470,3 @@ fun SliceDetailDialog(
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun RobotChartPreview() {
-    val fakeMateriales = listOf(
-        MaterialItem("Rojo", 50, true, "Botella"),
-        MaterialItem("Verde", 100, false, "Plástico"),
-        MaterialItem("Azul", 800, true, "Botella")
-    )
-    RobotChart(
-        materiales = fakeMateriales,
-        scrollState = rememberScrollState(),
-        modifier = Modifier.fillMaxWidth()
-    )
-}

@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Replay
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
@@ -61,12 +62,15 @@ fun MainScreen(
     )
     val coroutineScope = rememberCoroutineScope()
 
-    val headers = listOf(
-        stringResource(R.string.Color),
-        stringResource(R.string.Peso),
-        stringResource(R.string.EsMetal),
-        stringResource(R.string.Categoria)
-    )
+    val headers = remember {
+        listOf(
+            "Color",
+            "Peso (g)",
+            "¿Es Metal?",
+            "Categoría"
+        )
+    }
+
 
     val materialViewModel: MaterialViewModel = viewModel()
     val isLoading by materialViewModel.isLoading.collectAsState()
