@@ -194,7 +194,7 @@ fun LineChartPesos(materiales: List<MaterialItem>) {
         labelSize = 14.sp,
         labelColor = Color.White,
         popUpLabel = { x, y ->
-            "Índice: ${x.toInt()}\n Peso: ${"%.1f".format(y)}g"
+            "Índice: ${x.toInt() + 1}\n Peso: ${"%.1f".format(y)}g"
         }
     )
 

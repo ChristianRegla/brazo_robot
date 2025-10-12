@@ -54,4 +54,10 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
             materialRepository.clearMateriales()
         }
     }
+
+    fun deleteMaterial(material: MaterialItem) {
+        viewModelScope.launch {
+            materialRepository.deleteMaterialById(material.id)
+        }
+    }
 }

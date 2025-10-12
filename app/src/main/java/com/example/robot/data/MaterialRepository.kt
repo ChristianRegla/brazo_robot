@@ -43,4 +43,12 @@ class MaterialRepository {
             throw e
         }
     }
+
+    suspend fun deleteMaterialById(materialId: String) {
+        try {
+            db.collection("materiales").document(materialId).delete().await()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 }

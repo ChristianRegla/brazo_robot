@@ -31,4 +31,9 @@
     <string name="noMetales">No Metales</string>
     <string name="proporcionColores">Proporción de Colores</string>
 
+    <string name="confirmarEliminacionIndividualTitulo">Confirmar Eliminación</string>
+    <string name="confirmarEliminacionTotalTitulo">Vaciar Registros</string>
+    <string name="confirmacionEliminarIndividual">¿Estás seguro de que quieres eliminar este registro de forma permanente?</string>
+    <string name="confirmacionEliminacionTotal">¿Estás seguro de que quieres eliminar TODOS los registros? Esta acción no se puede deshacer.</string>
+
 </resources>

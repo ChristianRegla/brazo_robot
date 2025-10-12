@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,9 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun ConfirmationDialog(
+    title: String,
+    text: String,
+    icon: ImageVector = Icons.Default.Warning,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -82,7 +86,7 @@ fun ConfirmationDialog(
                 verticalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Warning,
+                    imageVector = icon,
                     contentDescription = "Advertencia",
                     tint = RedAlert,
                     modifier = Modifier.size(48.dp)
@@ -91,7 +95,7 @@ fun ConfirmationDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "¿Estás seguro?",
+                    text = title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     color = TextPrimary
@@ -100,7 +104,7 @@ fun ConfirmationDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Esta acción eliminará permanentemente todos los datos de la colección. No se puede deshacer.",
+                    text = text,
                     textAlign = TextAlign.Center,
                     fontSize = 14.sp,
                     color = TextPrimary.copy(alpha = 0.8f)

@@ -57,7 +57,6 @@ private const val INITIALPAGE= 0
 fun MainScreen(
     onGoHome: () -> Unit
 ) {
-
     val pagerState = rememberPagerState(
         pageCount = { tabs.size },
         initialPage = INITIALPAGE
@@ -73,7 +72,6 @@ fun MainScreen(
         )
     }
 
-
     val materialViewModel: MaterialViewModel = viewModel()
     val isLoading by materialViewModel.isLoading.collectAsState()
     val isConnected by materialViewModel.isConnected.collectAsState()
@@ -86,6 +84,8 @@ fun MainScreen(
 
     if (showClearConfirmationDialog) {
         ConfirmationDialog(
+            title = stringResource(R.string.confirmarEliminacionTotalTitulo),
+            text = stringResource(R.string.confirmacionEliminacionTotal),
             onConfirm = { materialViewModel.clearAllMateriales() },
             onDismiss = { showClearConfirmationDialog = false }
         )
@@ -294,6 +294,7 @@ fun MainScreen(
                                         headers = headers,
                                         materiales = materiales,
                                         lazyListState = lazyListState,
+                                        viewModel = materialViewModel
                                     )
 
                                     is TabScreen.Chart -> RobotChart(
