@@ -69,12 +69,12 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
 
     fun sortTable(column: SortableColumn) {
         val currentSort = _sortState.value
-        val direction = if (currentSort?.first == column && currentSort.second == SortDirection.ASC) {
-            SortDirection.DESC
-        } else {
-            SortDirection.ASC
+        val newSortState = when {
+            currentSort?.first != column -> Pair(column, SortDirection.ASC)
+            currentSort.second == SortDirection.ASC -> Pair(column, SortDirection.DESC)
+            else -> null
         }
-        _sortState.value = Pair(column, direction)
+        _sortState.value = newSortState
     }
 
     private fun sortList(list: List<MaterialItem>, column: SortableColumn, direction: SortDirection): List<MaterialItem> {
@@ -133,9 +133,11 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     fun clearAllMateriales() {
         viewModelScope.launch {
             val allItems = _materiales.value
-            _lastDeletedItems.value = allItems
-            materialRepository.clearMateriales()
-            startUndoTimer()
+            if (allItems.isNotEmpty()) {
+                _lastDeletedItems.value = allItems
+                materialRepository.clearMateriales()
+                startUndoTimer()
+            }
         }
     }
 

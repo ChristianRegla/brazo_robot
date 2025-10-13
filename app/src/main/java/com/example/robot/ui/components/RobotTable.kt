@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,10 +31,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -78,7 +81,8 @@ fun RobotTable(
                         NeonBlue.copy(alpha = 0.15f),
                         RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
                     )
-                    .padding(vertical = 12.dp)
+                    .padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 headers.forEachIndexed { index, header ->
                     val column = SortableColumn.entries[index]
@@ -91,22 +95,21 @@ fun RobotTable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) { viewModel.sortTable(column) }
-                            .padding(horizontal = 4.dp),
+                            .padding(horizontal = 2.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Text(
+                        AutoSizeText(
                             text = header,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .align(Alignment.CenterVertically),
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            fontSize = 15.sp
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                fontSize = 15.sp
+                            ),
+                            modifier = Modifier.weight(1f, fill = false)
                         )
+
                         if (sortState?.first == column) {
                             Icon(
                                 imageVector = if (sortState.second == SortDirection.ASC) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
@@ -151,6 +154,8 @@ fun RobotTable(
                             .background(animatedBackgroundColor)
                             .then(rowModifier)
                             .combinedClickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
                                 onClick = {
                                     if (selectedItems.isNotEmpty()) {
                                         onItemClick(item)
@@ -222,4 +227,32 @@ fun RobotTable(
             }
         }
     }
+}
+
+@Composable
+fun AutoSizeText(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle
+) {
+    var scaledTextStyle by remember { mutableStateOf(style) }
+
+    LaunchedEffect(text, style) {
+        scaledTextStyle = style
+    }
+
+    Text(
+        text = text,
+        modifier = modifier,
+        style = scaledTextStyle,
+        softWrap = false,
+        maxLines = 1,
+        onTextLayout = { textLayoutResult ->
+            if (textLayoutResult.didOverflowWidth) {
+                if (scaledTextStyle.fontSize > 9.sp) {
+                    scaledTextStyle = scaledTextStyle.copy(fontSize = scaledTextStyle.fontSize * 0.95f)
+                }
+            }
+        }
+    )
 }
