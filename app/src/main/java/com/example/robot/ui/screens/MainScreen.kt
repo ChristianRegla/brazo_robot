@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -157,10 +158,8 @@ fun MainScreen(
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState) { data ->
                     UndoBar(
-                        visible = true,
                         itemCount = lastDeletedItems.size,
-                        onUndo = { data.performAction() },
-                        onDismiss = { data.dismiss() }
+                        onUndo = { data.performAction() }
                     )
                 }
             },
@@ -202,7 +201,11 @@ fun MainScreen(
                     CenterAlignedTopAppBar(
                         title = {
                             Text(
-                                text = stringResource(id = R.string.seleccionados, selectedItems.size),
+                                text = pluralStringResource(
+                                    id = R.plurals.seleccionados,
+                                    count = selectedItems.size,
+                                    selectedItems.size
+                                ),
                                 color = TextPrimary,
                                 style = MaterialTheme.typography.titleLarge
                             )
@@ -232,7 +235,6 @@ fun MainScreen(
                         )
                     )
                 }
-
             },
             bottomBar = {
                 val itemCount = tabs.size
