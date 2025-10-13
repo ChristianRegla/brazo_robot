@@ -43,4 +43,8 @@
     <string name="confirmarEliminacionSeleccionadosTitulo">Confirmar Eliminación</string>
     <string name="confirmacionEliminarSeleccionados">¿Estás seguro de que quieres eliminar los elementos seleccionados de forma permanente?</string>
 
+    <string name="elementos_eliminados">Se eliminaron %1$d elementos</string>
+    <string name="deshacer">Deshacer</string>
+    <string name="columna_ordenada_por">Columna ordenada por %1$s</string>
+
 </resources>

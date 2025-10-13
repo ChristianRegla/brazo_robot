@@ -1,5 +1,6 @@
 package com.example.robot.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,8 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
@@ -49,6 +53,7 @@ import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.R
 import com.example.robot.ui.components.AnimatedNavigationBarItem
 import com.example.robot.ui.components.ConfirmationDialog
+import com.example.robot.ui.components.UndoBar
 import com.example.robot.ui.navigation.tabs
 import kotlin.math.roundToInt
 
@@ -77,8 +82,10 @@ fun MainScreen(
     val materialViewModel: MaterialViewModel = viewModel()
     val isLoading by materialViewModel.isLoading.collectAsState()
     val isConnected by materialViewModel.isConnected.collectAsState()
-    val materiales by materialViewModel.materiales.collectAsState()
+    val materiales by materialViewModel.sortedMateriales.collectAsState()
     val selectedItems by materialViewModel.selectedItems.collectAsState()
+    val lastDeletedItems by materialViewModel.lastDeletedItems.collectAsState()
+    val sortState by materialViewModel.sortState.collectAsState()
 
     val lazyListState = rememberLazyListState()
     val scrollState = rememberScrollState()
@@ -86,11 +93,26 @@ fun MainScreen(
     var showClearConfirmationDialog by remember { mutableStateOf(false) }
     var showDeleteSelectedConfirmationDialog by remember { mutableStateOf(false) }
 
+    val haptic = LocalHapticFeedback.current
+
+    BackHandler(enabled = selectedItems.isNotEmpty()) {
+        materialViewModel.clearSelection()
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        if (selectedItems.isNotEmpty()) {
+            materialViewModel.clearSelection()
+        }
+    }
+
     if (showClearConfirmationDialog) {
         ConfirmationDialog(
             title = stringResource(R.string.confirmarEliminacionTotalTitulo),
             text = stringResource(R.string.confirmacionEliminacionTotal),
-            onConfirm = { materialViewModel.clearAllMateriales() },
+            onConfirm = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                materialViewModel.clearAllMateriales()
+            },
             onDismiss = { showClearConfirmationDialog = false }
         )
     }
@@ -99,7 +121,10 @@ fun MainScreen(
         ConfirmationDialog(
             title = stringResource(id = R.string.confirmarEliminacionSeleccionadosTitulo),
             text = stringResource(id = R.string.confirmacionEliminarSeleccionados),
-            onConfirm = { materialViewModel.deleteSelectedItems() },
+            onConfirm = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                materialViewModel.deleteSelectedItems()
+            },
             onDismiss = { showDeleteSelectedConfirmationDialog = false }
         )
     }
@@ -252,110 +277,121 @@ fun MainScreen(
             },
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) { pageIndex ->
-                Box(
+            Box(modifier = Modifier.fillMaxSize()) {
+                HorizontalPager(
+                    state = pagerState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(NightBlue, SpaceGray, DeepBlue),
-                                start = Offset(0f, 0f),
-                                end = Offset(0f, 1000f)
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    when {
-                        isLoading -> {
-                            CircularProgressIndicator(
-                                color = NeonBlue,
-                                trackColor = SpaceGray,
-                                strokeWidth = 5.dp
-                            )
-                        }
-
-                        !isConnected -> {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clickable { materialViewModel.loadMateriales() },
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.wifi_off),
-                                    contentDescription = stringResource(R.string.iconoSinConexion),
-                                    tint = NeonBlue,
-                                    modifier = Modifier.size(80.dp)
+                        .padding(innerPadding)
+                ) { pageIndex ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(NightBlue, SpaceGray, DeepBlue),
+                                    start = Offset(0f, 0f),
+                                    end = Offset(0f, 1000f)
                                 )
-                                Text(
-                                    text = stringResource(R.string.sinConexion),
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when {
+                            isLoading -> {
+                                CircularProgressIndicator(
                                     color = NeonBlue,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Text(
-                                    text = stringResource(R.string.reintentar),
-                                    color = NeonBlue,
-                                    style = MaterialTheme.typography.bodyMedium
+                                    trackColor = SpaceGray,
+                                    strokeWidth = 5.dp
                                 )
                             }
-                        }
 
-                        materiales.isEmpty() -> {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.file_sad),
-                                    contentDescription = stringResource(R.string.iconoArchivoVacio),
-                                    tint = NeonBlue,
-                                    modifier = Modifier.size(80.dp)
-                                )
-                                Text(
-                                    text = stringResource(R.string.noHayDatos),
-                                    color = NeonBlue,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
+                            !isConnected -> {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clickable { materialViewModel.loadMateriales() },
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.wifi_off),
+                                        contentDescription = stringResource(R.string.iconoSinConexion),
+                                        tint = NeonBlue,
+                                        modifier = Modifier.size(80.dp)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.sinConexion),
+                                        color = NeonBlue,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.reintentar),
+                                        color = NeonBlue,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
                             }
-                        }
 
-                        else -> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(
-                                        top = 12.dp,
-                                        start = 12.dp,
-                                        end = 12.dp,
-                                        bottom = 16.dp
-                                    ),
-                                contentAlignment = Alignment.TopCenter
-                            ) {
-                                when (tabs[pageIndex]) {
-                                    is TabScreen.Table -> RobotTable(
-                                        headers = headers,
-                                        materiales = materiales,
-                                        lazyListState = lazyListState,
-                                        viewModel = materialViewModel,
-                                        selectedItems = selectedItems,
-                                        onItemClick = { materialViewModel.toggleSelection(it) }
+                            materiales.isEmpty() && lastDeletedItems.isEmpty() -> {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.file_sad),
+                                        contentDescription = stringResource(R.string.iconoArchivoVacio),
+                                        tint = NeonBlue,
+                                        modifier = Modifier.size(80.dp)
                                     )
+                                    Text(
+                                        text = stringResource(R.string.noHayDatos),
+                                        color = NeonBlue,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
+                            }
 
-                                    is TabScreen.Chart -> RobotChart(
-                                        materiales = materiales,
-                                        scrollState = scrollState
-                                    )
+                            else -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(
+                                            top = 12.dp,
+                                            start = 12.dp,
+                                            end = 12.dp,
+                                            bottom = 16.dp
+                                        ),
+                                    contentAlignment = Alignment.TopCenter
+                                ) {
+                                    when (tabs[pageIndex]) {
+                                        is TabScreen.Table -> RobotTable(
+                                            headers = headers,
+                                            materiales = materiales,
+                                            lazyListState = lazyListState,
+                                            viewModel = materialViewModel,
+                                            selectedItems = selectedItems,
+                                            sortState = sortState,
+                                            onItemClick = { materialViewModel.toggleSelection(it) }
+                                        )
+
+                                        is TabScreen.Chart -> RobotChart(
+                                            materiales = materiales,
+                                            scrollState = scrollState
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
+                }
+                Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+                    UndoBar(
+                        visible = lastDeletedItems.isNotEmpty(),
+                        itemCount = lastDeletedItems.size,
+                        onUndo = { materialViewModel.undoDelete() },
+                        onDismiss = { materialViewModel.dismissUndo() }
+                    )
                 }
             }
         }

@@ -51,4 +51,30 @@ class MaterialRepository {
             throw e
         }
     }
+
+    suspend fun deleteMaterialsByIds(materialIds: List<String>) {
+        try {
+            val batch = db.batch()
+            materialIds.forEach { id ->
+                val docRef = db.collection("materiales").document(id)
+                batch.delete(docRef)
+            }
+            batch.commit().await()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    suspend fun addMaterials(materials: List<MaterialItem>) {
+        try {
+            val batch = db.batch()
+            materials.forEach { material ->
+                val docRef = db.collection("materiales").document(material.id)
+                batch.set(docRef, material)
+            }
+            batch.commit().await()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 }

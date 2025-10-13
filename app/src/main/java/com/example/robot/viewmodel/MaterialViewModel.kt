@@ -6,12 +6,24 @@ import androidx.lifecycle.viewModelScope
 import com.example.robot.data.MaterialRepository
 import com.example.robot.data.NetworkConnectivityObserver
 import com.example.robot.model.MaterialItem
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+enum class SortableColumn {
+    COLOR, PESO, ES_METAL, CATEGORIA
+}
+
+enum class SortDirection {
+    ASC, DESC
+}
 
 class MaterialViewModel(application: Application) : AndroidViewModel(application) {
     private val materialRepository = MaterialRepository()
@@ -29,6 +41,23 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     private val _selectedItems = MutableStateFlow<Set<MaterialItem>>(emptySet())
     val selectedItems: StateFlow<Set<MaterialItem>> = _selectedItems
 
+    private val _lastDeletedItems = MutableStateFlow<List<MaterialItem>>(emptyList())
+    val lastDeletedItems: StateFlow<List<MaterialItem>> = _lastDeletedItems
+    private var undoJob: Job? = null
+
+    private val _sortState = MutableStateFlow<Pair<SortableColumn, SortDirection>?>(null)
+    val sortState: StateFlow<Pair<SortableColumn, SortDirection>?> = _sortState
+
+    val sortedMateriales: StateFlow<List<MaterialItem>> = combine(
+        _materiales,
+        _sortState
+    ) { materials, sortState ->
+        if (sortState == null) {
+            materials
+        } else {
+            sortList(materials, sortState.first, sortState.second)
+        }
+    }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
         connectivityObserver.observe().onEach { isOnline ->
@@ -36,6 +65,30 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         }.launchIn(viewModelScope)
 
         loadMateriales()
+    }
+
+    fun sortTable(column: SortableColumn) {
+        val currentSort = _sortState.value
+        val direction = if (currentSort?.first == column && currentSort.second == SortDirection.ASC) {
+            SortDirection.DESC
+        } else {
+            SortDirection.ASC
+        }
+        _sortState.value = Pair(column, direction)
+    }
+
+    private fun sortList(list: List<MaterialItem>, column: SortableColumn, direction: SortDirection): List<MaterialItem> {
+        val comparator: Comparator<MaterialItem> = when (column) {
+            SortableColumn.COLOR -> compareBy { it.color }
+            SortableColumn.PESO -> compareBy { it.pesoGramos }
+            SortableColumn.ES_METAL -> compareBy { it.esMetal }
+            SortableColumn.CATEGORIA -> compareBy { it.categoria }
+        }
+        return if (direction == SortDirection.ASC) {
+            list.sortedWith(comparator)
+        } else {
+            list.sortedWith(comparator.reversed())
+        }
     }
 
     fun loadMateriales() {
@@ -79,8 +132,32 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
 
     fun clearAllMateriales() {
         viewModelScope.launch {
+            val allItems = _materiales.value
+            _lastDeletedItems.value = allItems
             materialRepository.clearMateriales()
+            startUndoTimer()
         }
+    }
+
+    private fun startUndoTimer() {
+        undoJob?.cancel()
+        undoJob = viewModelScope.launch {
+            delay(4500)
+            _lastDeletedItems.value = emptyList()
+        }
+    }
+
+    fun undoDelete() {
+        undoJob?.cancel()
+        viewModelScope.launch {
+            val itemsToRestore = _lastDeletedItems.value
+            materialRepository.addMaterials(itemsToRestore)
+            _lastDeletedItems.value = emptyList()
+        }
+    }
+
+    fun dismissUndo() {
+        _lastDeletedItems.value = emptyList()
     }
 
     fun deleteMaterial(material: MaterialItem) {
