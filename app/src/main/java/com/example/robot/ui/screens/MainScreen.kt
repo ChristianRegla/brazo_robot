@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
@@ -54,7 +53,6 @@ import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.R
 import com.example.robot.ui.components.AnimatedNavigationBarItem
 import com.example.robot.ui.components.ConfirmationDialog
-import com.example.robot.ui.components.UndoBar
 import com.example.robot.ui.navigation.tabs
 import kotlin.math.roundToInt
 
@@ -87,6 +85,7 @@ fun MainScreen(
     val selectedItems by materialViewModel.selectedItems.collectAsState()
     val lastDeletedItems by materialViewModel.lastDeletedItems.collectAsState()
     val sortState by materialViewModel.sortState.collectAsState()
+    val showUndoBar by materialViewModel.showUndoBar.collectAsState()
 
     val lazyListState = rememberLazyListState()
     val scrollState = rememberScrollState()
@@ -111,21 +110,6 @@ fun MainScreen(
     LaunchedEffect(pagerState.currentPage) {
         if (selectedItems.isNotEmpty()) {
             materialViewModel.clearSelection()
-        }
-    }
-
-    LaunchedEffect(lastDeletedItems) {
-        if (lastDeletedItems.isNotEmpty()) {
-            val result = snackbarHostState.showSnackbar(
-                message = "Deshacer",
-                actionLabel = "Deshacer",
-                duration = SnackbarDuration.Long
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                materialViewModel.undoDelete()
-            } else {
-                materialViewModel.dismissUndo()
-            }
         }
     }
 
@@ -155,14 +139,7 @@ fun MainScreen(
 
     RobotTheme {
         Scaffold(
-            snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState) { data ->
-                    UndoBar(
-                        itemCount = lastDeletedItems.size,
-                        onUndo = { data.performAction() }
-                    )
-                }
-            },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 if (selectedItems.isEmpty()) {
                     CenterAlignedTopAppBar(
@@ -312,6 +289,19 @@ fun MainScreen(
             },
             modifier = Modifier.fillMaxSize()
         ) { innerPadding ->
+            if (showUndoBar) {
+                LaunchedEffect(snackbarHostState) {
+                    val result = snackbarHostState.showSnackbar(
+                        message = "Elemento eliminado", // O un string resource
+                        actionLabel = "DESHACER",
+                        duration = SnackbarDuration.Long
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        materialViewModel.restoreItem()
+                    }
+                    materialViewModel.onUndoBarShown()
+                }
+            }
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier

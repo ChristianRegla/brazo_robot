@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -47,6 +48,11 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
 
     private val _sortState = MutableStateFlow<Pair<SortableColumn, SortDirection>?>(null)
     val sortState: StateFlow<Pair<SortableColumn, SortDirection>?> = _sortState
+
+    private val _showUndoBar = MutableStateFlow(false)
+    val showUndoBar: StateFlow<Boolean> = _showUndoBar.asStateFlow()
+
+    private val _deletedItem = MutableStateFlow<MaterialItem?>(null)
 
     val sortedMateriales: StateFlow<List<MaterialItem>> = combine(
         _materiales,
@@ -167,4 +173,18 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
             materialRepository.deleteMaterialById(material.id)
         }
     }
+
+    fun restoreItem() {
+        _deletedItem.value?.let { item ->
+            val currentList = _materiales.value.toMutableList()
+            currentList.add(item)
+            _materiales.value = currentList
+            _deletedItem.value = null
+        }
+    }
+
+    fun onUndoBarShown() {
+        _showUndoBar.value = false
+    }
+
 }
