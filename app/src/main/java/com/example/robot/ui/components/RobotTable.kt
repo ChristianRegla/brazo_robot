@@ -1,8 +1,10 @@
 package com.example.robot.ui.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,25 +43,12 @@ fun RobotTable(
     materiales: List<MaterialItem>,
     lazyListState: LazyListState,
     viewModel: MaterialViewModel,
+    selectedItems: Set<MaterialItem>,
+    onItemClick: (MaterialItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
-    var itemToDelete by remember { mutableStateOf<MaterialItem?>(null) }
-    var showDeleteConfirmation by remember { mutableStateOf(false) }
 
-    if (showDeleteConfirmation) {
-        itemToDelete?.let { item ->
-            ConfirmationDialog(
-                title = stringResource(R.string.confirmarEliminacionIndividualTitulo),
-                text = stringResource(R.string.confirmacionEliminarIndividual),
-                icon = Icons.Default.Delete,
-                onConfirm = { viewModel.deleteMaterial(item) },
-                onDismiss = { showDeleteConfirmation = false }
-            )
-        }
-    }
-
-    var selectedItem by remember { mutableStateOf<MaterialItem?>(null) }
 
     Surface(
         modifier = modifier,
@@ -108,25 +97,34 @@ fun RobotTable(
                     key = { _, item -> item.id }
                 ) { index, item ->
 
-                    val isSelected = selectedItem?.id == item.id
-                    val backgroundColor = if (isSelected) {
-                        NeonBlue.copy(alpha = 0.25f)
+                    val isSelected = selectedItems.contains(item)
+                    val animatedBackgroundColor by animateColorAsState(
+                        targetValue = if (isSelected) NeonBlue.copy(alpha = 0.4f) else Color.Transparent,
+                    )
+                    val rowModifier = if (isSelected) {
+                        Modifier.border(
+                            width = 2.dp,
+                            color = NeonBlue,
+                            shape = RoundedCornerShape(8.dp)
+                        )
                     } else {
-                        Color.Transparent
+                        Modifier
                     }
 
                     Row(
                         Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
-                            .background(backgroundColor)
+                            .background(animatedBackgroundColor)
+                            .then(rowModifier)
                             .combinedClickable(
                                 onClick = {
-                                    itemToDelete = null
+                                    if (selectedItems.isNotEmpty()) {
+                                        onItemClick(item)
+                                    }
                                 },
                                 onLongClick = {
-                                    itemToDelete = item
-                                    showDeleteConfirmation = true
+                                    onItemClick(item)
                                 }
                             )
                             .padding(horizontal = 8.dp, vertical = 8.dp)

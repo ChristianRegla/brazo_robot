@@ -13,6 +13,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
@@ -76,11 +78,13 @@ fun MainScreen(
     val isLoading by materialViewModel.isLoading.collectAsState()
     val isConnected by materialViewModel.isConnected.collectAsState()
     val materiales by materialViewModel.materiales.collectAsState()
+    val selectedItems by materialViewModel.selectedItems.collectAsState()
 
     val lazyListState = rememberLazyListState()
     val scrollState = rememberScrollState()
 
     var showClearConfirmationDialog by remember { mutableStateOf(false) }
+    var showDeleteSelectedConfirmationDialog by remember { mutableStateOf(false) }
 
     if (showClearConfirmationDialog) {
         ConfirmationDialog(
@@ -91,41 +95,86 @@ fun MainScreen(
         )
     }
 
+    if (showDeleteSelectedConfirmationDialog) {
+        ConfirmationDialog(
+            title = stringResource(id = R.string.confirmarEliminacionSeleccionadosTitulo),
+            text = stringResource(id = R.string.confirmacionEliminarSeleccionados),
+            onConfirm = { materialViewModel.deleteSelectedItems() },
+            onDismiss = { showDeleteSelectedConfirmationDialog = false }
+        )
+    }
+
     RobotTheme {
         Scaffold(
             topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = tabs[pagerState.currentPage].title,
-                            color = TextPrimary,
-                            style = MaterialTheme.typography.titleLarge
+                if (selectedItems.isEmpty()) {
+                    CenterAlignedTopAppBar(
+                        title = {
+                            Text(
+                                text = tabs[pagerState.currentPage].title,
+                                color = TextPrimary,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = onGoHome) {
+                                Icon(
+                                    imageVector = Icons.Filled.Home,
+                                    contentDescription = stringResource(R.string.Inicio),
+                                    tint = NeonBlue
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = {
+                                showClearConfirmationDialog = true
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = stringResource(R.string.Salir),
+                                    tint = NeonBlue
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = SpaceGray
                         )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onGoHome) {
-                            Icon(
-                                imageVector = Icons.Filled.Home,
-                                contentDescription = stringResource(R.string.Inicio),
-                                tint = NeonBlue
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = {
-                            showClearConfirmationDialog = true
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = stringResource(R.string.Salir),
-                                tint = NeonBlue
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = SpaceGray
                     )
-                )
+                } else {
+                    CenterAlignedTopAppBar(
+                        title = {
+                            Text(
+                                text = stringResource(id = R.string.seleccionados, selectedItems.size),
+                                color = TextPrimary,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = { materialViewModel.clearSelection() }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.limpiar_seleccion),
+                                    tint = NeonBlue
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = {
+                                showDeleteSelectedConfirmationDialog = true
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = stringResource(R.string.eliminar_seleccionados),
+                                    tint = NeonBlue
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = SpaceGray
+                        )
+                    )
+                }
+
             },
             bottomBar = {
                 val itemCount = tabs.size
@@ -294,7 +343,9 @@ fun MainScreen(
                                         headers = headers,
                                         materiales = materiales,
                                         lazyListState = lazyListState,
-                                        viewModel = materialViewModel
+                                        viewModel = materialViewModel,
+                                        selectedItems = selectedItems,
+                                        onItemClick = { materialViewModel.toggleSelection(it) }
                                     )
 
                                     is TabScreen.Chart -> RobotChart(

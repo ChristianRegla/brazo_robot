@@ -36,4 +36,11 @@
     <string name="confirmacionEliminarIndividual">¿Estás seguro de que quieres eliminar este registro de forma permanente?</string>
     <string name="confirmacionEliminacionTotal">¿Estás seguro de que quieres eliminar TODOS los registros? Esta acción no se puede deshacer.</string>
 
+    <string name="seleccionados">%1$d seleccionados</string>
+    <string name="limpiar_seleccion">Limpiar selección</string>
+    <string name="eliminar_seleccionados">Eliminar seleccionados</string>
+    <string name="vaciar_lista">Vaciar lista</string>
+    <string name="confirmarEliminacionSeleccionadosTitulo">Confirmar Eliminación</string>
+    <string name="confirmacionEliminarSeleccionados">¿Estás seguro de que quieres eliminar los elementos seleccionados de forma permanente?</string>
+
 </resources>

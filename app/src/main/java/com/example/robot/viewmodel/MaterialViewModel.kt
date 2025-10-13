@@ -26,6 +26,10 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     private val _isConnected = MutableStateFlow(true)
     val isConnected: StateFlow<Boolean> = _isConnected
 
+    private val _selectedItems = MutableStateFlow<Set<MaterialItem>>(emptySet())
+    val selectedItems: StateFlow<Set<MaterialItem>> = _selectedItems
+
+
     init {
         connectivityObserver.observe().onEach { isOnline ->
             _isConnected.value = isOnline
@@ -46,6 +50,30 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
                     _materiales.value = materialesList
                     _isLoading.value = false
                 }
+        }
+    }
+
+    fun toggleSelection(item: MaterialItem) {
+        val currentSelection = _selectedItems.value.toMutableSet()
+        if (item in currentSelection) {
+            currentSelection.remove(item)
+        } else {
+            currentSelection.add(item)
+        }
+        _selectedItems.value = currentSelection
+    }
+
+    fun clearSelection() {
+        _selectedItems.value = emptySet()
+    }
+
+    fun deleteSelectedItems() {
+        viewModelScope.launch {
+            val selectedIds = _selectedItems.value.map { it.id }
+            selectedIds.forEach { id ->
+                materialRepository.deleteMaterialById(id)
+            }
+            clearSelection()
         }
     }
 
