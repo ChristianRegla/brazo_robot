@@ -129,6 +129,12 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     fun deleteSelectedItems() {
         viewModelScope.launch {
             val selectedIds = _selectedItems.value.map { it.id }
+            val itemsToDelete = _materiales.value.filter { it.id in selectedIds }
+            if (itemsToDelete.isNotEmpty()) {
+                _lastDeletedItems.value = itemsToDelete
+                _showUndoBar.value = true
+                println("VM: showUndoBar.value = true, lastDeletedItems = ${itemsToDelete.size}")
+            }
             selectedIds.forEach { id ->
                 materialRepository.deleteMaterialById(id)
             }
@@ -141,6 +147,8 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
             val allItems = _materiales.value
             if (allItems.isNotEmpty()) {
                 _lastDeletedItems.value = allItems
+                _showUndoBar.value = true
+                println("VM: showUndoBar.value = true, lastDeletedItems = ${allItems.size}")
                 materialRepository.clearMateriales()
                 startUndoTimer()
             }
@@ -186,5 +194,4 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     fun onUndoBarShown() {
         _showUndoBar.value = false
     }
-
 }

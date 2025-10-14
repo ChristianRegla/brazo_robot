@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -58,7 +60,6 @@ fun RobotTable(
     onItemClick: (MaterialItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-
     val haptic = LocalHapticFeedback.current
 
     Surface(
@@ -234,6 +235,8 @@ fun AutoSizeText(
     style: TextStyle
 ) {
     var scaledTextStyle by remember { mutableStateOf(style) }
+    var layoutWidth by remember { mutableIntStateOf(0) }
+    val minFontSize = 9.sp
 
     LaunchedEffect(text, style) {
         scaledTextStyle = style
@@ -241,15 +244,18 @@ fun AutoSizeText(
 
     Text(
         text = text,
-        modifier = modifier,
+        modifier = modifier.onGloballyPositioned { coords ->
+            val newWidth = coords.size.width
+            if (layoutWidth != newWidth) layoutWidth = newWidth
+        },
         style = scaledTextStyle,
         softWrap = false,
         maxLines = 1,
         onTextLayout = { textLayoutResult ->
-            if (textLayoutResult.didOverflowWidth) {
-                if (scaledTextStyle.fontSize > 9.sp) {
-                    scaledTextStyle = scaledTextStyle.copy(fontSize = scaledTextStyle.fontSize * 0.95f)
-                }
+            if (textLayoutResult.didOverflowWidth && scaledTextStyle.fontSize > minFontSize) {
+                scaledTextStyle = scaledTextStyle.copy(
+                    fontSize = scaledTextStyle.fontSize * 0.95f
+                )
             }
         }
     )

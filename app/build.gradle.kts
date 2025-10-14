@@ -45,6 +45,7 @@ android {
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.animation)
     androidTestImplementation(platform(libs.androidx.compose.bom))
 
     // Compose
