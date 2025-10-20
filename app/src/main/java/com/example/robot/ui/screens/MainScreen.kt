@@ -103,7 +103,7 @@ fun MainScreen(
 
 
     BackHandler(enabled = selectedItems.isNotEmpty()) {
-        materialViewModel.clearSelectedItems()
+        materialViewModel.deselectAllItems()
     }
 
     LaunchedEffect(materiales) {
@@ -114,7 +114,7 @@ fun MainScreen(
 
     LaunchedEffect(pagerState.currentPage) {
         if (selectedItems.isNotEmpty()) {
-            materialViewModel.clearSelectedItems()
+            materialViewModel.deselectAllItems()
         }
     }
 
@@ -241,7 +241,7 @@ fun MainScreen(
                             )
                         },
                         navigationIcon = {
-                            IconButton(onClick = { materialViewModel.clearSelectedItems() }) {
+                            IconButton(onClick = { materialViewModel.deselectAllItems() }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = stringResource(R.string.limpiar_seleccion),
