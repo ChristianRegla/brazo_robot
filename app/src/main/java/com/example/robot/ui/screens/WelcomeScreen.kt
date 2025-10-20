@@ -1,5 +1,10 @@
 package com.example.robot.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -7,10 +12,16 @@ import androidx.compose.material.icons.filled.Android
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
@@ -25,11 +36,72 @@ import com.example.robot.ui.theme.DeepBlue
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.ui.theme.RobotTheme
+import kotlinx.coroutines.delay
 
 @Composable
 fun WelcomeScreen(
     onStartClick: () -> Unit
 ) {
+    val startAlpha = 0f
+    val endAlpha = 1f
+    val startTranslationY = 50f
+    val endTranslationY = 0f
+
+    var startAnimation by remember { mutableStateOf(false) }
+    var startButtonAnimation by remember { mutableStateOf(false) }
+
+    val animatedIconAlpha by animateFloatAsState(
+        targetValue = if (startAnimation) endAlpha else startAlpha,
+        animationSpec = tween(1000)
+    )
+    val animatedIconTranslationY by animateFloatAsState(
+        targetValue = if (startAnimation) endTranslationY else startTranslationY,
+        animationSpec = tween(1000)
+    )
+
+    val animatedTitleAlpha by animateFloatAsState(
+        targetValue = if (startAnimation) endAlpha else startAlpha,
+        animationSpec = tween(500, delayMillis = 200)
+    )
+    val animatedTitleTranslationY by animateFloatAsState(
+        targetValue = if (startAnimation) endTranslationY else startTranslationY,
+        animationSpec = tween(500, delayMillis = 200)
+    )
+
+    val animatedWelcomeTextAlpha by animateFloatAsState(
+        targetValue = if (startAnimation) endAlpha else startAlpha,
+        animationSpec = tween(500, delayMillis = 400)
+    )
+    val animatedWelcomeTextTranslationY by animateFloatAsState(
+        targetValue = if (startAnimation) endTranslationY else startTranslationY,
+        animationSpec = tween(500, delayMillis = 400)
+    )
+
+    val animatedCardAlpha by animateFloatAsState(
+        targetValue = if (startAnimation) endAlpha else startAlpha,
+        animationSpec = tween(500, delayMillis = 600)
+    )
+    val animatedCardTranslationY by animateFloatAsState(
+        targetValue = if (startAnimation) endTranslationY else startTranslationY,
+        animationSpec = tween(500, delayMillis = 600)
+    )
+
+    val animatedButtonAlpha by animateFloatAsState(
+        targetValue = if (startButtonAnimation) endAlpha else startAlpha,
+        animationSpec = tween(500)
+    )
+    val animatedButtonTranslationY by animateFloatAsState(
+        targetValue = if (startButtonAnimation) endTranslationY else startTranslationY,
+        animationSpec = tween(500)
+    )
+
+    LaunchedEffect(Unit) {
+        delay(300)
+        startAnimation = true
+        delay(1000)
+        startButtonAnimation = true
+    }
+
     RobotTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize()
@@ -54,30 +126,47 @@ fun WelcomeScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 32.dp),
-                    verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Spacer(Modifier.weight(1f))
+
                     Icon(
                         imageVector = Icons.Filled.Android,
                         contentDescription = stringResource(R.string.logoRobot),
                         tint = NeonBlue,
-                        modifier = Modifier.size(80.dp)
+                        modifier = Modifier
+                            .size(80.dp)
+                            .graphicsLayer {
+                                alpha = animatedIconAlpha
+                                translationY = animatedIconTranslationY
+                            }
                     )
+
                     Spacer(Modifier.height(16.dp))
+
                     Text(
                         text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.displaySmall,
                         color = NeonBlue,
-                        fontSize = 32.sp,
-                        fontWeight = Bold
+                        modifier = Modifier.graphicsLayer {
+                            alpha = animatedTitleAlpha
+                            translationY = animatedTitleTranslationY
+                        }
                     )
+
                     Spacer(modifier = Modifier.height(8.dp))
+
                     Text(
                         text = stringResource(R.string.bienvenida),
                         style = MaterialTheme.typography.bodyLarge,
                         color = TextPrimary,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.graphicsLayer {
+                            alpha = animatedWelcomeTextAlpha
+                            translationY = animatedWelcomeTextTranslationY // <-- EFECTO EXTRA
+                        }
                     )
+
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Card(
@@ -89,9 +178,15 @@ fun WelcomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 16.dp)
+                            .graphicsLayer {
+                                alpha = animatedCardAlpha
+                                translationY = animatedCardTranslationY // <-- EFECTO EXTRA
+                            }
                     ) {
                         Column(
-                            modifier = Modifier.padding(16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -99,7 +194,6 @@ fun WelcomeScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 color = NeonBlue,
                                 fontWeight = Bold,
-                                fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -118,22 +212,28 @@ fun WelcomeScreen(
                                 Text(
                                     text = alumno,
                                     fontSize = 12.sp,
-                                    style = MaterialTheme.typography.labelSmall,
+                                    style = MaterialTheme.typography.bodySmall,
                                     color = TextPrimary,
                                     textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 2.dp)
+                                    modifier = Modifier.padding(vertical = 2.dp)
                                 )
                             }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(32.dp))
+
                     AnimatedStartButton(
                         onClick = onStartClick,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .graphicsLayer {
+                                alpha = animatedButtonAlpha
+                                translationY = animatedButtonTranslationY
+                            }
                     )
+
+                    Spacer(Modifier.weight(1f))
                 }
             }
         }
