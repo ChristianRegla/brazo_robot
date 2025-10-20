@@ -15,15 +15,79 @@ val robotoMonoFontFamily = FontFamily(
 )
 
 val Typography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 57.sp
+    ),
+    displayMedium = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 45.sp
+    ),
+    displaySmall = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 36.sp
+    ),
+
+    headlineLarge = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 32.sp
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 28.sp
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp
+    ),
+
+    titleLarge = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 22.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp
+    ),
+    titleSmall = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp
+    ),
+
     bodyLarge = TextStyle(
         fontFamily = robotoMonoFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
     ),
-    titleLarge = TextStyle(
+    bodyMedium = TextStyle(
         fontFamily = robotoMonoFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 22.sp
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp
+    ),
+    bodySmall = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp
+    ),
+
+    labelLarge = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp
+    ),
+    labelMedium = TextStyle(
+        fontFamily = robotoMonoFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp
     ),
     labelSmall = TextStyle(
         fontFamily = robotoMonoFontFamily,
