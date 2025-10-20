@@ -31,7 +31,6 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     private val connectivityObserver = NetworkConnectivityObserver(application)
 
     private val _materiales = MutableStateFlow<List<MaterialItem>>(emptyList())
-    val materiales: StateFlow<List<MaterialItem>> = _materiales
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -44,15 +43,11 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
 
     private val _lastDeletedItems = MutableStateFlow<List<MaterialItem>>(emptyList())
     val lastDeletedItems: StateFlow<List<MaterialItem>> = _lastDeletedItems
-    private var undoJob: Job? = null
+    private var undoDismissJob: Job? = null
 
     private val _sortState = MutableStateFlow<Pair<SortableColumn, SortDirection>?>(null)
     val sortState: StateFlow<Pair<SortableColumn, SortDirection>?> = _sortState
 
-    private val _showUndoBar = MutableStateFlow(false)
-    val showUndoBar: StateFlow<Boolean> = _showUndoBar.asStateFlow()
-
-    private val _deletedItem = MutableStateFlow<MaterialItem?>(null)
 
     val sortedMateriales: StateFlow<List<MaterialItem>> = combine(
         _materiales,
@@ -61,7 +56,7 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         if (sortState == null) {
             materials
         } else {
-            sortList(materials, sortState.first, sortState.second)
+            applySort(materials, sortState.first, sortState.second)
         }
     }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -70,10 +65,10 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
             _isConnected.value = isOnline
         }.launchIn(viewModelScope)
 
-        loadMateriales()
+        fetchMateriales()
     }
 
-    fun sortTable(column: SortableColumn) {
+    fun updateSortColumn(column: SortableColumn) {
         val currentSort = _sortState.value
         val newSortState = when {
             currentSort?.first != column -> Pair(column, SortDirection.ASC)
@@ -83,7 +78,7 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         _sortState.value = newSortState
     }
 
-    private fun sortList(list: List<MaterialItem>, column: SortableColumn, direction: SortDirection): List<MaterialItem> {
+    private fun applySort(list: List<MaterialItem>, column: SortableColumn, direction: SortDirection): List<MaterialItem> {
         val comparator: Comparator<MaterialItem> = when (column) {
             SortableColumn.COLOR -> compareBy { it.color }
             SortableColumn.PESO -> compareBy { it.pesoGramos }
@@ -97,7 +92,7 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun loadMateriales() {
+    fun fetchMateriales() {
         _isLoading.value = true
         viewModelScope.launch {
             materialRepository.getMateriales()
@@ -112,7 +107,7 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun toggleSelection(item: MaterialItem) {
+    fun toggleItemSelection(item: MaterialItem) {
         val currentSelection = _selectedItems.value.toMutableSet()
         if (item in currentSelection) {
             currentSelection.remove(item)
@@ -122,7 +117,7 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         _selectedItems.value = currentSelection
     }
 
-    fun clearSelection() {
+    fun clearSelectedItems() {
         _selectedItems.value = emptySet()
     }
 
@@ -132,39 +127,48 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
             val itemsToDelete = _materiales.value.filter { it.id in selectedIds }
             if (itemsToDelete.isNotEmpty()) {
                 _lastDeletedItems.value = itemsToDelete
-                _showUndoBar.value = true
                 println("VM: showUndoBar.value = true, lastDeletedItems = ${itemsToDelete.size}")
             }
             selectedIds.forEach { id ->
                 materialRepository.deleteMaterialById(id)
             }
-            clearSelection()
-        }
-    }
+            clearSelectedItems()
 
-    fun clearAllMateriales() {
-        viewModelScope.launch {
-            val allItems = _materiales.value
-            if (allItems.isNotEmpty()) {
-                _lastDeletedItems.value = allItems
-                _showUndoBar.value = true
-                println("VM: showUndoBar.value = true, lastDeletedItems = ${allItems.size}")
-                materialRepository.clearMateriales()
-                startUndoTimer()
+            if (itemsToDelete.isNotEmpty()) {
+                startUndoDismissTimer()
             }
         }
     }
 
-    private fun startUndoTimer() {
-        undoJob?.cancel()
-        undoJob = viewModelScope.launch {
-            delay(4500)
-            _lastDeletedItems.value = emptyList()
+    fun deleteSingleMaterial(material: MaterialItem) {
+        viewModelScope.launch {
+            materialRepository.deleteMaterialById(material.id)
+            _lastDeletedItems.value = listOf(material)
+            startUndoDismissTimer()
         }
     }
 
-    fun undoDelete() {
-        undoJob?.cancel()
+    fun deleteAllMateriales() {
+        viewModelScope.launch {
+            val allItems = _materiales.value
+            if (allItems.isNotEmpty()) {
+                _lastDeletedItems.value = allItems
+                materialRepository.clearMateriales()
+                startUndoDismissTimer()
+            }
+        }
+    }
+
+    private fun startUndoDismissTimer() {
+        undoDismissJob?.cancel()
+        undoDismissJob = viewModelScope.launch {
+            delay(4500)
+            dismissUndoAction()
+        }
+    }
+
+    fun restoreLastDeletedItems() {
+        undoDismissJob?.cancel()
         viewModelScope.launch {
             val itemsToRestore = _lastDeletedItems.value
             materialRepository.addMaterials(itemsToRestore)
@@ -172,19 +176,7 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun deleteMaterial(material: MaterialItem) {
-        viewModelScope.launch {
-            materialRepository.deleteMaterialById(material.id)
-
-            _lastDeletedItems.value = listOf(material)
-
-            _showUndoBar.value = true
-
-            startUndoTimer()
-        }
-    }
-
-    fun onUndoBarShown() {
-        _showUndoBar.value = false
+    fun dismissUndoAction() {
+        _lastDeletedItems.value = emptyList()
     }
 }

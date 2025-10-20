@@ -89,7 +89,6 @@ fun MainScreen(
     val selectedItems by materialViewModel.selectedItems.collectAsState()
     val lastDeletedItems by materialViewModel.lastDeletedItems.collectAsState()
     val sortState by materialViewModel.sortState.collectAsState()
-    val showUndoBar by materialViewModel.showUndoBar.collectAsState()
     var itemDetalle by remember { mutableStateOf<MaterialItem?>(null) }
 
     val lazyListState = rememberLazyListState()
@@ -104,7 +103,7 @@ fun MainScreen(
 
 
     BackHandler(enabled = selectedItems.isNotEmpty()) {
-        materialViewModel.clearSelection()
+        materialViewModel.clearSelectedItems()
     }
 
     LaunchedEffect(materiales) {
@@ -115,7 +114,7 @@ fun MainScreen(
 
     LaunchedEffect(pagerState.currentPage) {
         if (selectedItems.isNotEmpty()) {
-            materialViewModel.clearSelection()
+            materialViewModel.clearSelectedItems()
         }
     }
 
@@ -125,7 +124,7 @@ fun MainScreen(
             text = stringResource(R.string.confirmacionEliminacionTotal),
             onConfirm = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                materialViewModel.clearAllMateriales()
+                materialViewModel.deleteAllMateriales()
             },
             onDismiss = { showClearConfirmationDialog = false }
         )
@@ -171,7 +170,7 @@ fun MainScreen(
 
                 Button(
                     onClick = {
-                        materialViewModel.deleteMaterial(itemDetalle!!)
+                        materialViewModel.deleteSingleMaterial(itemDetalle!!)
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
                                 itemDetalle = null
@@ -242,7 +241,7 @@ fun MainScreen(
                             )
                         },
                         navigationIcon = {
-                            IconButton(onClick = { materialViewModel.clearSelection() }) {
+                            IconButton(onClick = { materialViewModel.clearSelectedItems() }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = stringResource(R.string.limpiar_seleccion),
@@ -380,7 +379,7 @@ fun MainScreen(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .clickable { materialViewModel.loadMateriales() },
+                                        .clickable { materialViewModel.fetchMateriales() },
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
@@ -444,16 +443,16 @@ fun MainScreen(
                                             sortState = sortState,
                                             onItemClick = { item ->
                                                 if (selectedItems.isNotEmpty()) {
-                                                    materialViewModel.toggleSelection(item)
+                                                    materialViewModel.toggleItemSelection(item)
                                                 } else {
                                                     itemDetalle = item
                                                 }
                                             },
                                             onItemLongClick = { item ->
-                                                materialViewModel.toggleSelection(item)
+                                                materialViewModel.toggleItemSelection(item)
                                             },
                                             onSortClick = { column ->
-                                                materialViewModel.sortTable(column)
+                                                materialViewModel.updateSortColumn(column)
                                             }
                                         )
 
@@ -474,18 +473,17 @@ fun MainScreen(
                         .zIndex(1f)
                 ) {
                     CustomUndoBar(
-                        visible = showUndoBar,
+                        visible = lastDeletedItems.isNotEmpty(),
                         message = when (lastDeletedItems.size) {
                             0 -> ""
                             1 -> "Elemento eliminado"
                             else -> "Elementos eliminados"
                         },
                         onUndo = {
-                            materialViewModel.undoDelete()
-                            materialViewModel.onUndoBarShown()
+                            materialViewModel.restoreLastDeletedItems()
                         },
                         onTimeout = {
-                            materialViewModel.onUndoBarShown()
+                            materialViewModel.dismissUndoAction()
                         }
                     )
                 }
