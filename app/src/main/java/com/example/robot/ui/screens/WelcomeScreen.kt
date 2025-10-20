@@ -163,7 +163,7 @@ fun WelcomeScreen(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.graphicsLayer {
                             alpha = animatedWelcomeTextAlpha
-                            translationY = animatedWelcomeTextTranslationY // <-- EFECTO EXTRA
+                            translationY = animatedWelcomeTextTranslationY
                         }
                     )
 
@@ -180,7 +180,7 @@ fun WelcomeScreen(
                             .padding(vertical = 16.dp)
                             .graphicsLayer {
                                 alpha = animatedCardAlpha
-                                translationY = animatedCardTranslationY // <-- EFECTO EXTRA
+                                translationY = animatedCardTranslationY
                             }
                     ) {
                         Column(
