@@ -167,7 +167,7 @@ fun LineChartPesos(materiales: List<MaterialItem>) {
 
     val yAxisData = AxisData.Builder()
         .steps(4)
-        .labelAndAxisLinePadding(20.dp)
+        .labelAndAxisLinePadding(40.dp)
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
         .labelData { value ->
@@ -251,12 +251,12 @@ fun BarChartCategorias(materiales: List<MaterialItem>) {
 
     val xAxisData = AxisData.Builder()
         .axisStepSize(70.dp)
-        .bottomPadding(16.dp)
+        .bottomPadding(8.dp)
         .axisLabelAngle(0f)
         .labelData { index -> (index + 1).toString() }
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
-        .startDrawPadding(50.dp)
+        .startDrawPadding(30.dp)
         .typeFace(customTypceFace ?: Typeface.DEFAULT)
         .build()
 

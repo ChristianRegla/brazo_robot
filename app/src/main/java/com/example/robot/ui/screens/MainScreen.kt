@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -28,8 +29,10 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -225,7 +228,11 @@ fun MainScreen(
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = SpaceGray
-                        )
+                        ),
+                        modifier = Modifier.clip(RoundedCornerShape(
+                            bottomStart = 12.dp,
+                            bottomEnd = 12.dp
+                        ))
                     )
                 } else {
                     CenterAlignedTopAppBar(
@@ -262,7 +269,11 @@ fun MainScreen(
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = SpaceGray
-                        )
+                        ),
+                        modifier = Modifier.clip(RoundedCornerShape(
+                            bottomStart = 12.dp,
+                            bottomEnd = 12.dp
+                        ))
                     )
                 }
             },
@@ -274,74 +285,95 @@ fun MainScreen(
                 val indicatorVerticalPadding = 12.dp
 
                 val density = LocalDensity.current
-                
-                BoxWithConstraints {
-                    val screenWidthPx = with(density) { maxWidth.toPx() }
-                    val indicatorWidthPx = with(density) { indicatorWidth.toPx() }
-                    val indicatorVerticalPaddingPx = with(density) { indicatorVerticalPadding.toPx() }
 
-                    val spacePerItemPx = screenWidthPx / itemCount
-                    val pageOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
-
-                    val indicatorCenterOffset = (spacePerItemPx - indicatorWidthPx) / 2
-                    val targetOffset = pageOffset * spacePerItemPx + indicatorCenterOffset
-
-                    val animatedIndicatorOffsetPx by animateFloatAsState(
-                        targetValue = targetOffset,
-                        animationSpec = spring(stiffness = 400f, dampingRatio = 0.7f),
-                        label = stringResource(R.string.indicatorOffset)
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .background(SpaceGray)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(24.dp),
+                        color = SpaceGray,
+                        shadowElevation = 6.dp
                     ) {
-                        NavigationBar(
-                            containerColor = SpaceGray
-                        ) {
-                            tabs.forEachIndexed { index, tab ->
-                                AnimatedNavigationBarItem(
-                                    isSelected = pagerState.currentPage == index,
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            if (pagerState.currentPage == index) {
-                                                when (tabs[index]) {
-                                                    is TabScreen.Table ->
-                                                        lazyListState.animateScrollToItem(0)
-                                                    is TabScreen.Chart ->
-                                                        scrollState.animateScrollTo(0)
+                        BoxWithConstraints {
+                            val screenWidthPx = with(density) { maxWidth.toPx() }
+                            val indicatorWidthPx = with(density) { indicatorWidth.toPx() }
+                            val indicatorVerticalPaddingPx = with(density) { indicatorVerticalPadding.toPx() }
+
+                            val spacePerItemPx = screenWidthPx / itemCount
+                            val pageOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
+
+                            val indicatorCenterOffset = (spacePerItemPx - indicatorWidthPx) / 2
+                            val targetOffset = pageOffset * spacePerItemPx + indicatorCenterOffset
+
+                            val animatedIndicatorOffsetPx by animateFloatAsState(
+                                targetValue = targetOffset,
+                                animationSpec = spring(stiffness = 400f, dampingRatio = 0.7f),
+                                label = stringResource(R.string.indicatorOffset)
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(SpaceGray)
+                            ) {
+                                NavigationBar(
+                                    containerColor = Color.Transparent
+                                ) {
+                                    tabs.forEachIndexed { index, tab ->
+                                        AnimatedNavigationBarItem(
+                                            isSelected = pagerState.currentPage == index,
+                                            onClick = {
+                                                coroutineScope.launch {
+                                                    if (pagerState.currentPage == index) {
+                                                        when (tabs[index]) {
+                                                            is TabScreen.Table ->
+                                                                lazyListState.animateScrollToItem(0)
+                                                            is TabScreen.Chart ->
+                                                                scrollState.animateScrollTo(0)
+                                                        }
+                                                    } else {
+                                                        pagerState.animateScrollToPage(index)
+                                                    }
                                                 }
-                                            } else {
-                                                pagerState.animateScrollToPage(index)
-                                            }
+                                            },
+                                            icon = tab.icon,
+                                            label = tab.label,
+                                            contentDescription = "Ir a ${'$'}{tab.title}"
+                                        )
+                                    }
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .offset {
+                                            IntOffset(
+                                                animatedIndicatorOffsetPx.roundToInt(),
+                                                indicatorVerticalPaddingPx.roundToInt()
+                                            )
                                         }
-                                    },
-                                    icon = tab.icon,
-                                    label = tab.label,
-                                    contentDescription = "Ir a ${'$'}{tab.title}"
+                                        .size(width = indicatorWidth, height = indicatorHeight)
+                                        .background(
+                                            color = NeonBlue.copy(alpha = 0.25f),
+                                            shape = MaterialTheme.shapes.medium
+                                        )
                                 )
                             }
                         }
-                        Box(
-                            modifier = Modifier
-                                .offset {
-                                    IntOffset(
-                                        animatedIndicatorOffsetPx.roundToInt(),
-                                        indicatorVerticalPaddingPx.roundToInt()
-                                    )
-                                }
-                                .size(width = indicatorWidth, height = indicatorHeight)
-                                .background(
-                                    color = NeonBlue.copy(alpha = 0.25f),
-                                    shape = MaterialTheme.shapes.medium
-                                )
-                        )
                     }
                 }
             },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(NightBlue, SpaceGray, DeepBlue),
+                        start = Offset(0f, 0f),
+                        end = Offset(Offset.Infinite.x, Offset.Infinite.y)
+                    )
+                )
         ) { innerPadding ->
             Box(
                 modifier = Modifier
@@ -355,15 +387,7 @@ fun MainScreen(
 
                 ) { pageIndex ->
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                brush = Brush.linearGradient(
-                                    colors = listOf(NightBlue, SpaceGray, DeepBlue),
-                                    start = Offset(0f, 0f),
-                                    end = Offset(0f, 1000f)
-                                )
-                            ),
+                        modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         when {

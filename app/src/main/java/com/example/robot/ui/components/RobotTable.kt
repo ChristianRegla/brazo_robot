@@ -104,7 +104,7 @@ fun RobotTable(
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
-                                fontSize = 15.sp
+                                fontSize = 12.sp
                             ),
                             modifier = Modifier.weight(1f, fill = false)
                         )
@@ -138,7 +138,7 @@ fun RobotTable(
                     val targetBackgroundColor = when {
                         isSelected -> NeonBlue.copy(alpha = 0.4f)
                         index % 2 == 0 -> Color.Transparent
-                        else -> Color.Black.copy(alpha = 0.08f)
+                        else -> Color.Black.copy(alpha = 0.09f)
                     }
 
                     val animatedBackgroundColor by animateColorAsState(
