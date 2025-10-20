@@ -133,14 +133,23 @@ fun RobotTable(
                 ) { index, item ->
 
                     val isSelected = selectedItems.contains(item)
+                    val shape = RoundedCornerShape(8.dp)
+
+                    val targetBackgroundColor = when {
+                        isSelected -> NeonBlue.copy(alpha = 0.4f)
+                        index % 2 == 0 -> Color.Transparent
+                        else -> Color.Black.copy(alpha = 0.05f)
+                    }
+
                     val animatedBackgroundColor by animateColorAsState(
-                        targetValue = if (isSelected) NeonBlue.copy(alpha = 0.4f) else Color.Transparent,
+                        targetValue = targetBackgroundColor,
+                        label = "RowBackgroundAnimation"
                     )
                     val rowModifier = if (isSelected) {
                         Modifier.border(
                             width = 2.dp,
                             color = NeonBlue,
-                            shape = RoundedCornerShape(8.dp)
+                            shape = shape
                         )
                     } else {
                         Modifier
@@ -149,9 +158,12 @@ fun RobotTable(
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(animatedBackgroundColor)
+                            .background(
+                                color = animatedBackgroundColor,
+                                shape = shape
+                            )
                             .then(rowModifier)
+                            .clip(shape)
                             .combinedClickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,

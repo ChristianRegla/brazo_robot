@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -81,6 +80,7 @@ fun MainScreen(
     }
 
     val materialViewModel: MaterialViewModel = viewModel()
+
     val isLoading by materialViewModel.isLoading.collectAsState()
     val isConnected by materialViewModel.isConnected.collectAsState()
     val materiales by materialViewModel.sortedMateriales.collectAsState()
@@ -221,70 +221,71 @@ fun MainScreen(
                 val indicatorVerticalPadding = 12.dp
 
                 val density = LocalDensity.current
-                val configuration = LocalConfiguration.current
+                
+                BoxWithConstraints {
+                    val screenWidthPx = with(density) { maxWidth.toPx() }
+                    val indicatorWidthPx = with(density) { indicatorWidth.toPx() }
+                    val indicatorVerticalPaddingPx = with(density) { indicatorVerticalPadding.toPx() }
 
-                val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
-                val indicatorWidthPx = with(density) { indicatorWidth.toPx() }
-                val indicatorVerticalPaddingPx = with(density) { indicatorVerticalPadding.toPx() }
+                    val spacePerItemPx = screenWidthPx / itemCount
+                    val pageOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
 
-                val spacePerItemPx = screenWidthPx / itemCount
-                val pageOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                    val indicatorCenterOffset = (spacePerItemPx - indicatorWidthPx) / 2
+                    val targetOffset = pageOffset * spacePerItemPx + indicatorCenterOffset
 
-                val indicatorCenterOffset = (spacePerItemPx - indicatorWidthPx) / 2
-                val targetOffset = pageOffset * spacePerItemPx + indicatorCenterOffset
+                    val animatedIndicatorOffsetPx by animateFloatAsState(
+                        targetValue = targetOffset,
+                        animationSpec = spring(stiffness = 400f, dampingRatio = 0.7f),
+                        label = stringResource(R.string.indicatorOffset)
+                    )
 
-                val animatedIndicatorOffsetPx by animateFloatAsState(
-                    targetValue = targetOffset,
-                    animationSpec = spring(stiffness = 400f, dampingRatio = 0.7f),
-                    label = stringResource(R.string.indicatorOffset)
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .background(SpaceGray)
-                ) {
-                    NavigationBar(
-                        containerColor = SpaceGray
-                    ) {
-                        tabs.forEachIndexed { index, tab ->
-                            AnimatedNavigationBarItem(
-                                isSelected = pagerState.currentPage == index,
-                                onClick = {
-                                    coroutineScope.launch {
-                                        if (pagerState.currentPage == index) {
-                                            when (tabs[index]) {
-                                                is TabScreen.Table ->
-                                                    lazyListState.animateScrollToItem(0)
-                                                is TabScreen.Chart ->
-                                                    scrollState.animateScrollTo(0)
-                                            }
-                                        } else {
-                                            pagerState.animateScrollToPage(index)
-                                        }
-                                    }
-                                },
-                                icon = tab.icon,
-                                label = tab.label,
-                                contentDescription = "Ir a ${tab.title}"
-                            )
-                        }
-                    }
                     Box(
                         modifier = Modifier
-                            .offset {
-                                IntOffset(
-                                    animatedIndicatorOffsetPx.roundToInt(),
-                                    indicatorVerticalPaddingPx.roundToInt()
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .background(SpaceGray)
+                    ) {
+                        NavigationBar(
+                            containerColor = SpaceGray
+                        ) {
+                            tabs.forEachIndexed { index, tab ->
+                                AnimatedNavigationBarItem(
+                                    isSelected = pagerState.currentPage == index,
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            if (pagerState.currentPage == index) {
+                                                when (tabs[index]) {
+                                                    is TabScreen.Table ->
+                                                        lazyListState.animateScrollToItem(0)
+                                                    is TabScreen.Chart ->
+                                                        scrollState.animateScrollTo(0)
+                                                }
+                                            } else {
+                                                pagerState.animateScrollToPage(index)
+                                            }
+                                        }
+                                    },
+                                    icon = tab.icon,
+                                    label = tab.label,
+                                    contentDescription = "Ir a ${'$'}{tab.title}"
                                 )
                             }
-                            .size(width = indicatorWidth, height = indicatorHeight)
-                            .background(
-                                color = NeonBlue.copy(alpha = 0.25f),
-                                shape = MaterialTheme.shapes.medium
-                            )
-                    )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .offset {
+                                    IntOffset(
+                                        animatedIndicatorOffsetPx.roundToInt(),
+                                        indicatorVerticalPaddingPx.roundToInt()
+                                    )
+                                }
+                                .size(width = indicatorWidth, height = indicatorHeight)
+                                .background(
+                                    color = NeonBlue.copy(alpha = 0.25f),
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                        )
+                    }
                 }
             },
             modifier = Modifier.fillMaxSize()
