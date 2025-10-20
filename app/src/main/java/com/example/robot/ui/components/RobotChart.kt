@@ -24,7 +24,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import android.graphics.Typeface
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -245,10 +252,10 @@ fun BarChartCategorias(materiales: List<MaterialItem>) {
     }
 
     val xAxisData = AxisData.Builder()
-        .axisStepSize(100.dp)
+        .axisStepSize(70.dp)
         .bottomPadding(16.dp)
         .axisLabelAngle(0f)
-        .labelData { index -> bars.getOrNull(index)?.label ?: "" }
+        .labelData { index -> (index + 1).toString() }
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
         .startDrawPadding(50.dp)
@@ -276,17 +283,52 @@ fun BarChartCategorias(materiales: List<MaterialItem>) {
         yAxisData = yAxisData,
         backgroundColor = Color.Transparent,
         barStyle = BarStyle(
-            barWidth = 50.dp,
+            barWidth = 40.dp,
             cornerRadius = 4.dp
         ),
         horizontalExtraSpace = 20.dp
     )
-    BarChart(
-        barChartData = barChartData,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp)
-    )
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        BarChart(
+            barChartData = barChartData,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            bars.forEachIndexed { index, barData ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "${index + 1}.",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.width(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(barData.color, RoundedCornerShape(2.dp))
+                    )
+                    Spacer(Modifier.width(8.dp))
+
+                    Text(
+                        text = barData.label,
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
