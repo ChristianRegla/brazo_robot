@@ -43,17 +43,21 @@ fun ConfirmationDialog(
     var isConfirmEnabled by remember { mutableStateOf(false) }
     val fillProgress = remember { Animatable(0f) }
 
-    var countdownText by remember { mutableStateOf(" (3)") }
+    var countdownText by remember { mutableStateOf(" (5)") }
 
     LaunchedEffect(Unit) {
         fillProgress.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 3000)
+            animationSpec = tween(durationMillis = 5000)
         )
         isConfirmEnabled = true
     }
 
     LaunchedEffect(Unit) {
+        delay(1000L)
+        countdownText = " (4)"
+        delay(1000L)
+        countdownText = " (3)"
         delay(1000L)
         countdownText = " (2)"
         delay(1000L)

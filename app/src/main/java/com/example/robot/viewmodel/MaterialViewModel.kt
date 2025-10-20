@@ -47,7 +47,6 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     private val _sortState = MutableStateFlow<Pair<SortableColumn, SortDirection>?>(null)
     val sortState: StateFlow<Pair<SortableColumn, SortDirection>?> = _sortState
 
-
     val sortedMateriales: StateFlow<List<MaterialItem>> = combine(
         _materiales,
         _sortState
