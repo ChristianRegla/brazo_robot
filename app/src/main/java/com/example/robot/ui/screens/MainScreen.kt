@@ -51,10 +51,12 @@ import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.R
+import com.example.robot.model.MaterialItem
 import com.example.robot.ui.components.AnimatedNavigationBarItem
 import com.example.robot.ui.components.ConfirmationDialog
 import com.example.robot.ui.components.CustomUndoBar
 import com.example.robot.ui.navigation.tabs
+import com.example.robot.ui.theme.RedAlert
 import kotlin.math.roundToInt
 
 private const val INITIALPAGE= 0
@@ -88,9 +90,12 @@ fun MainScreen(
     val lastDeletedItems by materialViewModel.lastDeletedItems.collectAsState()
     val sortState by materialViewModel.sortState.collectAsState()
     val showUndoBar by materialViewModel.showUndoBar.collectAsState()
+    var itemDetalle by remember { mutableStateOf<MaterialItem?>(null) }
 
     val lazyListState = rememberLazyListState()
     val scrollState = rememberScrollState()
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
 
     var showClearConfirmationDialog by remember { mutableStateOf(false) }
     var showDeleteSelectedConfirmationDialog by remember { mutableStateOf(false) }
@@ -136,6 +141,55 @@ fun MainScreen(
             },
             onDismiss = { showDeleteSelectedConfirmationDialog = false }
         )
+    }
+
+    if (itemDetalle != null) {
+        ModalBottomSheet(
+            onDismissRequest = { itemDetalle = null },
+            sheetState = sheetState,
+            containerColor = SpaceGray
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Detalles del Material",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Spacer(Modifier.height(16.dp))
+
+                Text("ID: ${itemDetalle!!.id}")
+                Text("Color: ${itemDetalle!!.color}")
+                Text("Peso: ${itemDetalle!!.pesoGramos} g")
+                Text("Es Metal: ${if (itemDetalle!!.esMetal) "Sí" else "No"}")
+                Text("Categoría: ${itemDetalle!!.categoria}")
+
+                Spacer(Modifier.height(24.dp))
+
+                Button(
+                    onClick = {
+                        materialViewModel.deleteMaterial(itemDetalle!!)
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                itemDetalle = null
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = RedAlert,
+                        contentColor = TextPrimary
+                    )
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+                    Spacer(Modifier.width(8.dp))
+                    Text("Eliminar este item")
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+        }
     }
 
     RobotTheme {
@@ -386,10 +440,21 @@ fun MainScreen(
                                             headers = headers,
                                             materiales = materiales,
                                             lazyListState = lazyListState,
-                                            viewModel = materialViewModel,
                                             selectedItems = selectedItems,
                                             sortState = sortState,
-                                            onItemClick = { materialViewModel.toggleSelection(it) }
+                                            onItemClick = { item ->
+                                                if (selectedItems.isNotEmpty()) {
+                                                    materialViewModel.toggleSelection(item)
+                                                } else {
+                                                    itemDetalle = item
+                                                }
+                                            },
+                                            onItemLongClick = { item ->
+                                                materialViewModel.toggleSelection(item)
+                                            },
+                                            onSortClick = { column ->
+                                                materialViewModel.sortTable(column)
+                                            }
                                         )
 
                                         is TabScreen.Chart -> RobotChart(

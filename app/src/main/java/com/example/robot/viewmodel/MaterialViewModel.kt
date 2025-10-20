@@ -172,22 +172,15 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun dismissUndo() {
-        _lastDeletedItems.value = emptyList()
-    }
-
     fun deleteMaterial(material: MaterialItem) {
         viewModelScope.launch {
             materialRepository.deleteMaterialById(material.id)
-        }
-    }
 
-    fun restoreItem() {
-        _deletedItem.value?.let { item ->
-            val currentList = _materiales.value.toMutableList()
-            currentList.add(item)
-            _materiales.value = currentList
-            _deletedItem.value = null
+            _lastDeletedItems.value = listOf(material)
+
+            _showUndoBar.value = true
+
+            startUndoTimer()
         }
     }
 

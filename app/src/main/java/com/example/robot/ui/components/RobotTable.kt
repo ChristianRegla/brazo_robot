@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.sp
 import com.example.robot.R
 import com.example.robot.model.MaterialItem
 import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.viewmodel.SortDirection
 import com.example.robot.viewmodel.SortableColumn
 
@@ -54,11 +53,12 @@ fun RobotTable(
     headers: List<String>,
     materiales: List<MaterialItem>,
     lazyListState: LazyListState,
-    viewModel: MaterialViewModel,
     selectedItems: Set<MaterialItem>,
     sortState: Pair<SortableColumn, SortDirection>?,
     onItemClick: (MaterialItem) -> Unit,
     modifier: Modifier = Modifier,
+    onItemLongClick: (MaterialItem) -> Unit,
+    onSortClick: (SortableColumn) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -93,7 +93,7 @@ fun RobotTable(
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
-                            ) { viewModel.sortTable(column) }
+                            ) { onSortClick(column) }
                             .padding(horizontal = 2.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
@@ -138,7 +138,7 @@ fun RobotTable(
                     val targetBackgroundColor = when {
                         isSelected -> NeonBlue.copy(alpha = 0.4f)
                         index % 2 == 0 -> Color.Transparent
-                        else -> Color.Black.copy(alpha = 0.05f)
+                        else -> Color.Black.copy(alpha = 0.08f)
                     }
 
                     val animatedBackgroundColor by animateColorAsState(
@@ -168,13 +168,11 @@ fun RobotTable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
                                 onClick = {
-                                    if (selectedItems.isNotEmpty()) {
-                                        onItemClick(item)
-                                    }
+                                    onItemClick(item)
                                 },
                                 onLongClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onItemClick(item)
+                                    onItemLongClick(item)
                                 }
                             )
                             .padding(horizontal = 8.dp, vertical = 8.dp)
