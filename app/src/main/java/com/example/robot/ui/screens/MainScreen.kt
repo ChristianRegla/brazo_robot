@@ -43,6 +43,11 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.robot.ui.components.RobotChart
 import com.example.robot.ui.components.RobotTable
 import com.example.robot.ui.navigation.TabScreen
@@ -103,6 +108,29 @@ fun MainScreen(
     var showDeleteSelectedConfirmationDialog by remember { mutableStateOf(false) }
 
     val haptic = LocalHapticFeedback.current
+
+    val loadingComposition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.loading)
+    )
+    val noInternetComposition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.no_internet)
+    )
+    val emptyListComposition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.empty)
+    )
+
+    val loadingProgress by animateLottieCompositionAsState(
+        composition = loadingComposition,
+        iterations = LottieConstants.IterateForever
+    )
+    val noInternetProgress by animateLottieCompositionAsState(
+        composition = noInternetComposition,
+        iterations = LottieConstants.IterateForever
+    )
+    val emptyListProgress by animateLottieCompositionAsState(
+        composition = emptyListComposition,
+        iterations = LottieConstants.IterateForever
+    )
 
 
     BackHandler(enabled = selectedItems.isNotEmpty()) {
@@ -392,10 +420,10 @@ fun MainScreen(
                     ) {
                         when {
                             isLoading -> {
-                                CircularProgressIndicator(
-                                    color = NeonBlue,
-                                    trackColor = SpaceGray,
-                                    strokeWidth = 5.dp
+                                LottieAnimation(
+                                    composition = loadingComposition,
+                                    progress = { loadingProgress },
+                                    modifier = Modifier.size(150.dp)
                                 )
                             }
 
@@ -407,11 +435,10 @@ fun MainScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.wifi_off),
-                                        contentDescription = stringResource(R.string.iconoSinConexion),
-                                        tint = NeonBlue,
-                                        modifier = Modifier.size(80.dp)
+                                    LottieAnimation(
+                                        composition = noInternetComposition,
+                                        progress = { noInternetProgress },
+                                        modifier = Modifier.size(180.dp)
                                     )
                                     Text(
                                         text = stringResource(R.string.sinConexion),
@@ -432,11 +459,10 @@ fun MainScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.file_sad),
-                                        contentDescription = stringResource(R.string.iconoArchivoVacio),
-                                        tint = NeonBlue,
-                                        modifier = Modifier.size(80.dp)
+                                    LottieAnimation(
+                                        composition = emptyListComposition,
+                                        progress = { emptyListProgress },
+                                        modifier = Modifier.size(180.dp)
                                     )
                                     Text(
                                         text = stringResource(R.string.noHayDatos),

@@ -84,4 +84,7 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("com.airbnb.android:lottie-compose:6.6.10")
 }

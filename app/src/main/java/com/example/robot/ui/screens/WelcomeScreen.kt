@@ -4,8 +4,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Android
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
@@ -25,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.airbnb.lottie.compose.*
 import com.example.robot.R
 import com.example.robot.ui.components.AnimatedStartButton
 import com.example.robot.ui.theme.NightBlue
@@ -46,6 +45,16 @@ fun WelcomeScreen(
 
     var startAnimation by remember { mutableStateOf(false) }
     var startButtonAnimation by remember { mutableStateOf(false) }
+
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.industrial_arm)
+    )
+
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = LottieConstants.IterateForever,
+        speed = 1f
+    )
 
     val animatedIconAlpha by animateFloatAsState(
         targetValue = if (startAnimation) endAlpha else startAlpha,
@@ -127,19 +136,16 @@ fun WelcomeScreen(
                 ) {
                     Spacer(Modifier.weight(1f))
 
-                    Icon(
-                        imageVector = Icons.Filled.Android,
-                        contentDescription = stringResource(R.string.logoRobot),
-                        tint = NeonBlue,
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(200.dp)
                             .graphicsLayer {
                                 alpha = animatedIconAlpha
                                 translationY = animatedIconTranslationY
                             }
                     )
-
-                    Spacer(Modifier.height(16.dp))
 
                     Text(
                         text = stringResource(R.string.app_name),
