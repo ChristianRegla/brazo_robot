@@ -1,8 +1,12 @@
 package com.example.robot.ui.screens
 
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
@@ -11,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +38,7 @@ import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.ui.theme.RobotTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun WelcomeScreen(
@@ -49,11 +55,52 @@ fun WelcomeScreen(
     val composition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.industrial_arm)
     )
-
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = LottieConstants.IterateForever,
         speed = 1f
+    )
+
+    val scope = rememberCoroutineScope()
+
+    var lottieClicked by remember { mutableStateOf(false) }
+    val lottieScale by animateFloatAsState(
+        targetValue = if (lottieClicked) 1.15f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "lottieScale"
+    )
+
+    var titleClicked by remember { mutableStateOf(false) }
+    val titleScale by animateFloatAsState(
+        targetValue = if (titleClicked) 1.2f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "titleScale"
+    )
+
+    var welcomeTextClicked by remember { mutableStateOf(false) }
+    val welcomeTextScale by animateFloatAsState(
+        targetValue = if (welcomeTextClicked) 1.1f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "welcomeTextScale"
+    )
+
+    var cardClicked by remember { mutableStateOf(false) }
+    val cardScale by animateFloatAsState(
+        targetValue = if (cardClicked) 1.05f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "cardScale"
     )
 
     val animatedIconAlpha by animateFloatAsState(
@@ -108,6 +155,14 @@ fun WelcomeScreen(
         startButtonAnimation = true
     }
 
+    fun triggerBounce(setState: (Boolean) -> Unit) {
+        scope.launch {
+            setState(true)
+            delay(300)
+            setState(false)
+        }
+    }
+
     RobotTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize()
@@ -144,6 +199,14 @@ fun WelcomeScreen(
                             .graphicsLayer {
                                 alpha = animatedIconAlpha
                                 translationY = animatedIconTranslationY
+                                scaleX = lottieScale
+                                scaleY = lottieScale
+                            }
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                triggerBounce { lottieClicked = it }
                             }
                     )
 
@@ -154,7 +217,15 @@ fun WelcomeScreen(
                         modifier = Modifier.graphicsLayer {
                             alpha = animatedTitleAlpha
                             translationY = animatedTitleTranslationY
+                            scaleX = titleScale
+                            scaleY = titleScale
                         }
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                            ) {
+                                triggerBounce { titleClicked = it }
+                            }
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -167,7 +238,15 @@ fun WelcomeScreen(
                         modifier = Modifier.graphicsLayer {
                             alpha = animatedWelcomeTextAlpha
                             translationY = animatedWelcomeTextTranslationY
+                            scaleX = welcomeTextScale
+                            scaleY = welcomeTextScale
                         }
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                triggerBounce { welcomeTextClicked = it }
+                            }
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
@@ -184,6 +263,14 @@ fun WelcomeScreen(
                             .graphicsLayer {
                                 alpha = animatedCardAlpha
                                 translationY = animatedCardTranslationY
+                                scaleX = cardScale
+                                scaleY = cardScale
+                            }
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                triggerBounce { cardClicked = it }
                             }
                     ) {
                         Column(
