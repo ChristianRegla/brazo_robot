@@ -1,13 +1,19 @@
 package com.example.robot.ui.screens
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
@@ -19,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
@@ -59,6 +66,16 @@ fun WelcomeScreen(
         composition = composition,
         iterations = LottieConstants.IterateForever,
         speed = 1f
+    )
+
+    val infiniteTransition = rememberInfiniteTransition(label = "backgroundTransition")
+    val animatedOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 15000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
     )
 
     val scope = rememberCoroutineScope()
@@ -178,7 +195,7 @@ fun WelcomeScreen(
                                 DeepBlue
                             ),
                             start = Offset(0f, 0f),
-                            end = Offset(0f, 1000f)
+                            end = Offset(x = animatedOffset / 2, y = 1000f + animatedOffset / 3)
                         )
                     )
                     .padding(innerPadding)
@@ -214,7 +231,8 @@ fun WelcomeScreen(
                         text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.displaySmall,
                         color = NeonBlue,
-                        modifier = Modifier.graphicsLayer {
+                        modifier = Modifier
+                            .graphicsLayer {
                             alpha = animatedTitleAlpha
                             translationY = animatedTitleTranslationY
                             scaleX = titleScale
