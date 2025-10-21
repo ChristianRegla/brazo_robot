@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
@@ -106,6 +106,7 @@ fun MainScreen(
 
     var showClearConfirmationDialog by remember { mutableStateOf(false) }
     var showDeleteSelectedConfirmationDialog by remember { mutableStateOf(false) }
+    var showOptionsMenu by remember { mutableStateOf(false) }
 
     val haptic = LocalHapticFeedback.current
 
@@ -244,14 +245,34 @@ fun MainScreen(
                             }
                         },
                         actions = {
-                            IconButton(onClick = {
-                                showClearConfirmationDialog = true
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = stringResource(R.string.Salir),
-                                    tint = NeonBlue
-                                )
+                            Box {
+                                IconButton(onClick = { showOptionsMenu = true }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.MoreVert,
+                                        contentDescription = stringResource(R.string.mas),
+                                        tint = NeonBlue
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = showOptionsMenu,
+                                    onDismissRequest = { showOptionsMenu = false },
+                                    modifier = Modifier.background(SpaceGray)
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.vaciar_lista), color = TextPrimary) },
+                                        onClick = {
+                                            showClearConfirmationDialog = true
+                                            showOptionsMenu = false
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                Icons.Filled.Delete,
+                                                contentDescription = stringResource(R.string.vaciar_lista),
+                                                tint = RedAlert
+                                            )
+                                        }
+                                    )
+                                }
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
