@@ -55,4 +55,24 @@
     <string name="columna_ordenada_por">Columna ordenada por %1$s</string>
     <string name="mas">Más opciones</string>
 
+    <string name="acerca_de_titulo">Acerca de</string>
+    <string name="volver_atras">Volver atrás</string>
+    <string name="version_app">Versión: %s</string>
+    <string name="desarrollado_por">Desarrollado por:</string>
+    <string name="descripcion_app">Esta aplicación permite gestionar materiales de un brazo robot, visualizando datos en tablas y gráficos, y brindando herramientas para el control del inventario.</string>
+
+    <string name="configuracion_titulo">Configuración</string>
+    <string name="unidades_medida_peso">Unidades de medida de peso</string>
+    <string name="gr_unidad">Gramos</string>
+    <string name="kg_unidad">Kilogramos</string>
+    <string name="lb_unidad">Libras</string>
+
+    <string name="opciones_menu">Opciones</string>
+
+    <string name="gr_abreviacion">g</string>
+    <string name="kg_abreviacion">kg</string>
+    <string name="lb_abreviacion">lb</string>
+    <string name="peso_valor_gr">%d g</string>
+    <string name="peso_valor_kg">%.2f kg</string>
+    <string name="peso_valor_lb">%.2f lb</string>
 </resources>

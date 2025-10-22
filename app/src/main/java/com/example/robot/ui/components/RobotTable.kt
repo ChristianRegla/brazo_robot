@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.robot.R
 import com.example.robot.model.MaterialItem
+import com.example.robot.model.UnitType
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.viewmodel.SortDirection
 import com.example.robot.viewmodel.SortableColumn
@@ -58,7 +59,8 @@ fun RobotTable(
     onItemClick: (MaterialItem) -> Unit,
     modifier: Modifier = Modifier,
     onItemLongClick: (MaterialItem) -> Unit,
-    onSortClick: (SortableColumn) -> Unit
+    onSortClick: (SortableColumn) -> Unit,
+    currentUnit: UnitType
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -194,7 +196,11 @@ fun RobotTable(
                             textAlign = TextAlign.Center
                         )
                         Text(
-                            text = "${item.pesoGramos}g",
+                            text = when (currentUnit) {
+                                UnitType.GRAMS -> stringResource(R.string.peso_valor_gr, item.pesoGramos)
+                                UnitType.KILOGRAMS -> stringResource(R.string.peso_valor_kg, item.pesoGramos * currentUnit.conversionFactor)
+                                UnitType.POUNDS -> stringResource(R.string.peso_valor_lb, item.pesoGramos * currentUnit.conversionFactor)
+                            },
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxWidth()

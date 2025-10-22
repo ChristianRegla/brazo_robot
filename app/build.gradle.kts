@@ -87,4 +87,7 @@ dependencies {
 
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.airbnb.android:lottie-compose:6.6.10")
+
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.4")
 }

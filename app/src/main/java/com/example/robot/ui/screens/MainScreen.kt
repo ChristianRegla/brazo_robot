@@ -18,7 +18,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -65,6 +68,7 @@ import com.example.robot.ui.components.ConfirmationDialog
 import com.example.robot.ui.components.CustomUndoBar
 import com.example.robot.ui.navigation.tabs
 import com.example.robot.ui.theme.RedAlert
+import com.example.robot.viewmodel.SettingsViewModel
 import kotlin.math.roundToInt
 
 private const val INITIALPAGE= 0
@@ -72,7 +76,10 @@ private const val INITIALPAGE= 0
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun MainScreen(
-    onGoHome: () -> Unit
+    onGoHome: () -> Unit,
+    onGoToAbout: () -> Unit,
+    onGoToSettings: () -> Unit,
+    settingsViewModel: SettingsViewModel
 ) {
     val pagerState = rememberPagerState(
         pageCount = { tabs.size },
@@ -97,6 +104,8 @@ fun MainScreen(
     val selectedItems by materialViewModel.selectedItems.collectAsState()
     val lastDeletedItems by materialViewModel.lastDeletedItems.collectAsState()
     val sortState by materialViewModel.sortState.collectAsState()
+    val selectedUnit by settingsViewModel.unitType.collectAsStateWithLifecycle()
+
     var itemDetalle by remember { mutableStateOf<MaterialItem?>(null) }
 
     val lazyListState = rememberLazyListState()
@@ -258,6 +267,34 @@ fun MainScreen(
                                     onDismissRequest = { showOptionsMenu = false },
                                     modifier = Modifier.background(SpaceGray)
                                 ) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.configuracion_titulo), color = TextPrimary) },
+                                        onClick = {
+                                            onGoToSettings() // Navega a SettingsScreen
+                                            showOptionsMenu = false
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                Icons.Default.Settings,
+                                                contentDescription = stringResource(R.string.configuracion_titulo),
+                                                tint = NeonBlue
+                                            )
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.acerca_de_titulo), color = TextPrimary) },
+                                        onClick = {
+                                            onGoToAbout() // Navega a AboutScreen
+                                            showOptionsMenu = false
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                Icons.Default.Info,
+                                                contentDescription = stringResource(R.string.acerca_de_titulo),
+                                                tint = NeonBlue
+                                            )
+                                        }
+                                    )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.vaciar_lista), color = TextPrimary) },
                                         onClick = {
@@ -524,12 +561,14 @@ fun MainScreen(
                                             },
                                             onSortClick = { column ->
                                                 materialViewModel.updateSortColumn(column)
-                                            }
+                                            },
+                                            currentUnit = selectedUnit
                                         )
 
                                         is TabScreen.Chart -> RobotChart(
                                             materiales = materiales,
-                                            scrollState = scrollState
+                                            scrollState = scrollState,
+                                            currentUnit = selectedUnit
                                         )
                                     }
                                 }

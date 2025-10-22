@@ -57,17 +57,20 @@ import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
 import com.example.robot.R
 import com.example.robot.model.MaterialItem
+import com.example.robot.model.UnitType
 import com.example.robot.ui.theme.CyanAccent
 import com.example.robot.ui.theme.GreenSensor
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.RedAlert
 import com.example.robot.ui.theme.SpaceGray
+import kotlin.math.roundToInt
 
 @Composable
 fun RobotChart(
     materiales: List<MaterialItem>,
     scrollState: ScrollState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    currentUnit: UnitType
 ) {
     Column(
         Modifier
@@ -138,13 +141,17 @@ fun RobotChart(
             colors = CardDefaults.cardColors(containerColor = SpaceGray),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
-            LineChartPesos(materiales)
+            LineChartPesos(materiales, currentUnit)
         }
     }
 }
 
 @Composable
-fun LineChartPesos(materiales: List<MaterialItem>) {
+fun LineChartPesos(materiales: List<MaterialItem>, currentUnit: UnitType) {
+    val grAbreviacion = stringResource(R.string.gr_abreviacion)
+    val kgAbreviacion = stringResource(R.string.kg_abreviacion)
+    val lbAbreviacion = stringResource(R.string.lb_abreviacion)
+
     val points = materiales.mapIndexed { index, item ->
         Point(index.toFloat(), item.pesoGramos.toFloat())
     }
@@ -164,16 +171,21 @@ fun LineChartPesos(materiales: List<MaterialItem>) {
         .build()
 
     val maxWeight = points.maxOfOrNull { it.y } ?: 1f
+    val yAxisIntervals = 4
 
     val yAxisData = AxisData.Builder()
-        .steps(4)
+        .steps(yAxisIntervals)
         .labelAndAxisLinePadding(40.dp)
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
         .labelData { value ->
             val scale = maxWeight / 4f
             val labelValue = scale * value
-            "%.0f g".format(labelValue)
+            when (currentUnit) {
+                UnitType.GRAMS -> "${labelValue.roundToInt()} $grAbreviacion"
+                UnitType.KILOGRAMS -> "%.2f $kgAbreviacion".format(labelValue)
+                UnitType.POUNDS -> "%.2f $lbAbreviacion".format(labelValue)
+            }
         }
         .build()
 
@@ -197,7 +209,12 @@ fun LineChartPesos(materiales: List<MaterialItem>) {
         labelSize = 14.sp,
         labelColor = Color.White,
         popUpLabel = { x, y ->
-            "Índice: ${x.toInt() + 1}\n Peso: ${"%.1f".format(y)}g"
+            val formattedWeight = when (currentUnit) {
+                UnitType.GRAMS -> "${y.roundToInt()} $grAbreviacion"
+                UnitType.KILOGRAMS -> "%.2f $kgAbreviacion".format(y)
+                UnitType.POUNDS -> "%.2f $lbAbreviacion".format(y)
+            }
+            "Índice: ${x.toInt() + 1}\n Peso: $formattedWeight"
         }
     )
 
