@@ -90,7 +90,7 @@ fun MainScreen(
     val headers = remember {
         listOf(
             "Color",
-            "Peso (g)",
+            "Peso",
             "¿Es Metal?",
             "Categoría"
         )

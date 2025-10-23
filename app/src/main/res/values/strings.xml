@@ -72,7 +72,7 @@
     <string name="gr_abreviacion">g</string>
     <string name="kg_abreviacion">kg</string>
     <string name="lb_abreviacion">lb</string>
-    <string name="peso_valor_gr">%d g</string>
-    <string name="peso_valor_kg">%.2f kg</string>
-    <string name="peso_valor_lb">%.2f lb</string>
+    <string name="peso_valor_gr">%dg</string>
+    <string name="peso_valor_kg">%.2fkg</string>
+    <string name="peso_valor_lb">%.2flb</string>
 </resources>
