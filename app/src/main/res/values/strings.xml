@@ -76,4 +76,9 @@
     <string name="peso_valor_kg">%.2fkg</string>
     <string name="peso_valor_lb">%.2flb</string>
     <string name="cargando">Cargando…</string>
+
+    <string name="apariencia_tema">Apariencia</string>
+    <string name="tema_sistema">Seguir configuración del sistema</string>
+    <string name="tema_claro">Claro</string>
+    <string name="tema_oscuro">Oscuro</string>
 </resources>

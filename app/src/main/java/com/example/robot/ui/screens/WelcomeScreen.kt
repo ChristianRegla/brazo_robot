@@ -13,7 +13,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
@@ -25,7 +24,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
@@ -38,11 +36,6 @@ import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.*
 import com.example.robot.R
 import com.example.robot.ui.components.AnimatedStartButton
-import com.example.robot.ui.theme.NightBlue
-import com.example.robot.ui.theme.SpaceGray
-import com.example.robot.ui.theme.DeepBlue
-import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.ui.theme.RobotTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -51,6 +44,10 @@ import kotlinx.coroutines.launch
 fun WelcomeScreen(
     onStartClick: () -> Unit
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+
     val startAlpha = 0f
     val endAlpha = 1f
     val startTranslationY = 50f
@@ -165,6 +162,16 @@ fun WelcomeScreen(
         animationSpec = tween(500)
     )
 
+    val backgroundBrush = Brush.linearGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.background,
+            MaterialTheme.colorScheme.surfaceVariant,
+            MaterialTheme.colorScheme.surface
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(x = animatedOffset / 2, y = 1000f + animatedOffset / 3)
+    )
+
     LaunchedEffect(Unit) {
         delay(300)
         startAnimation = true
@@ -187,17 +194,7 @@ fun WelcomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                NightBlue,
-                                SpaceGray,
-                                DeepBlue
-                            ),
-                            start = Offset(0f, 0f),
-                            end = Offset(x = animatedOffset / 2, y = 1000f + animatedOffset / 3)
-                        )
-                    )
+                    .background(brush = backgroundBrush)
                     .padding(innerPadding)
             ) {
                 Column(
@@ -230,7 +227,7 @@ fun WelcomeScreen(
                     Text(
                         text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.displaySmall,
-                        color = NeonBlue,
+                        color = primaryColor,
                         modifier = Modifier
                             .graphicsLayer {
                             alpha = animatedTitleAlpha
@@ -251,7 +248,7 @@ fun WelcomeScreen(
                     Text(
                         text = stringResource(R.string.bienvenida),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = TextPrimary,
+                        color = onSurfaceColor,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.graphicsLayer {
                             alpha = animatedWelcomeTextAlpha
@@ -271,8 +268,8 @@ fun WelcomeScreen(
 
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = SpaceGray,
-                            contentColor = TextPrimary
+                            containerColor = surfaceColor,
+                            contentColor = onSurfaceColor
                         ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                         modifier = Modifier
@@ -300,7 +297,7 @@ fun WelcomeScreen(
                             Text(
                                 text = stringResource(R.string.integrantes),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = NeonBlue,
+                                color = primaryColor,
                                 fontWeight = Bold,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
@@ -309,7 +306,7 @@ fun WelcomeScreen(
                             HorizontalDivider(
                                 modifier = Modifier.padding(vertical = 8.dp),
                                 thickness = 1.dp,
-                                color = NeonBlue.copy(alpha = 0.7f)
+                                color = primaryColor.copy(alpha = 0.7f)
                             )
 
                             val alumnos = listOf(
@@ -321,7 +318,7 @@ fun WelcomeScreen(
                                     text = alumno,
                                     fontSize = 12.sp,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = TextPrimary,
+                                    color = onSurfaceColor,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.padding(vertical = 2.dp)
                                 )

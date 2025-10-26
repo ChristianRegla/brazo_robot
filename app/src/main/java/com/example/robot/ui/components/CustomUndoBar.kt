@@ -8,6 +8,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissValue
 import androidx.compose.material.ExperimentalMaterialApi
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,9 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.ui.theme.SpaceGray
-import com.example.robot.ui.theme.TextPrimary
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -37,6 +36,10 @@ fun CustomUndoBar(
     onTimeout: () -> Unit,
     durationMillis: Long = 4000
 ) {
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+    val primaryColor = MaterialTheme.colorScheme.primary
+
     val dismissState = rememberDismissState()
 
     LaunchedEffect(visible) {
@@ -73,7 +76,7 @@ fun CustomUndoBar(
                         .fillMaxWidth()
                         .padding(16.dp)
                         .shadow(8.dp)
-                        .background(SpaceGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+                        .background(surfaceColor, shape = RoundedCornerShape(14.dp))
                         .padding(horizontal = 24.dp, vertical = 16.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
@@ -84,20 +87,20 @@ fun CustomUndoBar(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Undo,
                             contentDescription = "Deshacer",
-                            tint = NeonBlue,
+                            tint = primaryColor,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(Modifier.width(12.dp))
                         Text(
                             text = message,
-                            color = TextPrimary,
+                            color = onSurfaceColor,
                             fontSize = 16.sp,
                             modifier = Modifier.weight(1f)
                         )
                         Spacer(Modifier.width(12.dp))
                         Text(
                             text = "DESHACER",
-                            color = NeonBlue,
+                            color = primaryColor,
                             fontSize = 15.sp,
                             modifier = Modifier
                                 .clickable(enabled = visible) {

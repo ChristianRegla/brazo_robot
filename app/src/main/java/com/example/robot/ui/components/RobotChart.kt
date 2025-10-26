@@ -58,11 +58,9 @@ import co.yml.charts.ui.piechart.models.PieChartData
 import com.example.robot.R
 import com.example.robot.model.MaterialItem
 import com.example.robot.model.UnitType
-import com.example.robot.ui.theme.CyanAccent
 import com.example.robot.ui.theme.GreenSensor
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.RedAlert
-import com.example.robot.ui.theme.SpaceGray
 import kotlin.math.roundToInt
 
 @Composable
@@ -72,6 +70,9 @@ fun RobotChart(
     modifier: Modifier = Modifier,
     currentUnit: UnitType
 ) {
+    val onBackgroundColor = MaterialTheme.colorScheme.onBackground
+    val surfaceColor = MaterialTheme.colorScheme.surface
+
     Column(
         Modifier
             .fillMaxWidth()
@@ -81,13 +82,13 @@ fun RobotChart(
         Text(
             text = stringResource(R.string.proporcionMetales),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.White,
+            color = onBackgroundColor,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
         )
         Card(
             modifier = Modifier.padding(horizontal = 8.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            colors = CardDefaults.cardColors(containerColor = surfaceColor),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             PieChartMetales(materiales)
@@ -98,13 +99,13 @@ fun RobotChart(
         Text(
             text = stringResource(R.string.proporcionColores),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.White,
+            color = onBackgroundColor,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
         )
         Card(
             modifier = Modifier.padding(horizontal = 8.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            colors = CardDefaults.cardColors(containerColor = surfaceColor),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             PieChartColores(materiales)
@@ -115,13 +116,13 @@ fun RobotChart(
         Text(
             text = stringResource(R.string.cantidadMateriales),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.White,
+            color = onBackgroundColor,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
         )
         Card(
             modifier = Modifier.padding(horizontal = 8.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            colors = CardDefaults.cardColors(containerColor = surfaceColor),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             BarChartCategorias(materiales)
@@ -132,13 +133,13 @@ fun RobotChart(
         Text(
             text = stringResource(R.string.pesoMateriales),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.White,
+            color = onBackgroundColor,
             modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
         )
         Card(
             modifier = Modifier.padding(horizontal = 8.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            colors = CardDefaults.cardColors(containerColor = surfaceColor),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             LineChartPesos(materiales, currentUnit)
@@ -148,6 +149,10 @@ fun RobotChart(
 
 @Composable
 fun LineChartPesos(materiales: List<MaterialItem>, currentUnit: UnitType) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+    val gridColor = MaterialTheme.colorScheme.outlineVariant
+
     val grAbreviacion = stringResource(R.string.gr_abreviacion)
     val kgAbreviacion = stringResource(R.string.kg_abreviacion)
     val lbAbreviacion = stringResource(R.string.lb_abreviacion)
@@ -166,8 +171,8 @@ fun LineChartPesos(materiales: List<MaterialItem>, currentUnit: UnitType) {
                 (i + 1).toString()
             }
         }
-        .axisLineColor(NeonBlue)
-        .axisLabelColor(Color.White)
+        .axisLineColor(primaryColor)
+        .axisLabelColor(onSurfaceColor)
         .build()
 
     val maxWeight = points.maxOfOrNull { it.y } ?: 1f
@@ -176,8 +181,8 @@ fun LineChartPesos(materiales: List<MaterialItem>, currentUnit: UnitType) {
     val yAxisData = AxisData.Builder()
         .steps(yAxisIntervals)
         .labelAndAxisLinePadding(40.dp)
-        .axisLineColor(NeonBlue)
-        .axisLabelColor(Color.White)
+        .axisLineColor(primaryColor)
+        .axisLabelColor(onSurfaceColor)
         .labelData { value ->
             val scale = maxWeight / yAxisIntervals
             val labelValue = scale * value
@@ -191,18 +196,18 @@ fun LineChartPesos(materiales: List<MaterialItem>, currentUnit: UnitType) {
 
     val lineStyle = LineStyle(
         lineType = LineType.SmoothCurve(isDotted = false),
-        color = NeonBlue,
+        color = primaryColor,
         width = 4f
     )
 
     val intersectionPoint = IntersectionPoint(
-        color = NeonBlue,
+        color = primaryColor,
         radius = 6.dp,
         alpha = 1.0f
     )
 
     val selectionHighlightPopUp = SelectionHighlightPopUp(
-        backgroundColor = NeonBlue,
+        backgroundColor = primaryColor,
         backgroundAlpha = 0.9f,
         backgroundCornerRadius = CornerRadius(8f),
         paddingBetweenPopUpAndPoint = 12.dp,
@@ -233,7 +238,7 @@ fun LineChartPesos(materiales: List<MaterialItem>, currentUnit: UnitType) {
         linePlotData = linePlotData,
         xAxisData = xAxisData,
         yAxisData = yAxisData,
-        gridLines = GridLines(color = Color.Gray.copy(alpha = 0.5f)),
+        gridLines = GridLines(color = gridColor.copy(alpha = 0.5f)),
         backgroundColor = Color.Transparent,
 
     )
@@ -247,9 +252,13 @@ fun LineChartPesos(materiales: List<MaterialItem>, currentUnit: UnitType) {
 
 @Composable
 fun BarChartCategorias(materiales: List<MaterialItem>) {
+    val barColor1 = MaterialTheme.colorScheme.primary
+    val barColor2 = MaterialTheme.colorScheme.secondary
+    val barColors = listOf(barColor1, barColor2)
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+
     val desconocido = stringResource(R.string.desconocido)
     val counts = materiales.groupingBy { it.categoria.ifEmpty { desconocido } }.eachCount()
-    val barColors = listOf(NeonBlue, CyanAccent)
 
     val sortedCounts = counts.entries.sortedBy { it.key }
 
@@ -271,8 +280,8 @@ fun BarChartCategorias(materiales: List<MaterialItem>) {
         .bottomPadding(8.dp)
         .axisLabelAngle(0f)
         .labelData { index -> (index + 1).toString() }
-        .axisLineColor(NeonBlue)
-        .axisLabelColor(Color.White)
+        .axisLineColor(barColor1)
+        .axisLabelColor(onSurfaceColor)
         .startDrawPadding(30.dp)
         .typeFace(customTypceFace ?: Typeface.DEFAULT)
         .build()
@@ -283,8 +292,8 @@ fun BarChartCategorias(materiales: List<MaterialItem>) {
     val yAxisData = AxisData.Builder()
         .steps(yAxisIntervals)
         .labelAndAxisLinePadding(20.dp)
-        .axisLineColor(NeonBlue)
-        .axisLabelColor(Color.White)
+        .axisLineColor(barColor1)
+        .axisLabelColor(onSurfaceColor)
         .labelData { value ->
             val scale = maxCount.toFloat() / yAxisIntervals
             val labelValue = scale * value
@@ -322,7 +331,7 @@ fun BarChartCategorias(materiales: List<MaterialItem>) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "${index + 1}.",
-                        color = Color.White,
+                        color = onSurfaceColor,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -337,7 +346,7 @@ fun BarChartCategorias(materiales: List<MaterialItem>) {
 
                     Text(
                         text = barData.label,
-                        color = Color.White,
+                        color = onSurfaceColor,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -348,6 +357,10 @@ fun BarChartCategorias(materiales: List<MaterialItem>) {
 
 @Composable
 fun PieChartMetales(materiales: List<MaterialItem>) {
+    val metalColor = MaterialTheme.colorScheme.secondary
+    val nonMetalColor = MaterialTheme.colorScheme.primary
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+
     val metalCount = materiales.count { it.esMetal }
     val nonMetalCount = materiales.size - metalCount
     val totalCount = materiales.size.toFloat()
@@ -363,12 +376,12 @@ fun PieChartMetales(materiales: List<MaterialItem>) {
             PieChartData.Slice(
                 label = stringResource(R.string.metales),
                 value = metalCount.toFloat(),
-                color = CyanAccent
+                color = metalColor
             ),
             PieChartData.Slice(
                 label = stringResource(R.string.noMetales),
                 value = nonMetalCount.toFloat(),
-                color = NeonBlue
+                color = nonMetalColor
             )
         )
     }
@@ -379,10 +392,10 @@ fun PieChartMetales(materiales: List<MaterialItem>) {
     )
     val pieChartConfig = PieChartConfig(
         showSliceLabels = true,
-        sliceLabelTextColor = Color.White,
+        sliceLabelTextColor = MaterialTheme.colorScheme.onPrimary,
         sliceLabelTextSize = 14.sp,
         labelType = PieChartConfig.LabelType.PERCENTAGE,
-        labelColor = Color.White,
+        labelColor = onSurfaceColor,
         backgroundColor = Color.Transparent,
         isAnimationEnable = true
     )
@@ -413,6 +426,12 @@ fun PieChartMetales(materiales: List<MaterialItem>) {
 
 @Composable
 fun PieChartColores(materiales: List<MaterialItem>) {
+    val pieColorRed = RedAlert
+    val pieColorGreen = GreenSensor
+    val pieColorBlue = NeonBlue
+    val pieColorGray = Color.Gray
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+
     val colorCounts = materiales.groupingBy { it.color }.eachCount()
     val totalCount = materiales.size.toFloat()
 
@@ -420,20 +439,21 @@ fun PieChartColores(materiales: List<MaterialItem>) {
     var showDialog by remember { mutableStateOf(false) }
 
     val colorMap = mapOf(
-        "Rojo" to RedAlert,
-        "Verde" to GreenSensor,
-        "Azul" to NeonBlue,
-        "No hay color" to Color.Gray
+        "Rojo" to pieColorRed,
+        "Verde" to pieColorGreen,
+        "Azul" to pieColorBlue,
+        "No hay color" to pieColorGray
     )
+    val defaultPieColor = MaterialTheme.colorScheme.tertiary
 
     val pieSlices = if (totalCount == 0f) {
         emptyList()
     } else {
         colorCounts.map { (colorName, count) ->
             PieChartData.Slice(
-                label = colorName,
+                label = colorName.ifBlank { stringResource(R.string.desconocido) },
                 value = count.toFloat(),
-                color = colorMap[colorName] ?: Color.Magenta
+                color = colorMap[colorName.ifBlank { "No hay color" }] ?: defaultPieColor
             )
         }
     }
@@ -447,7 +467,7 @@ fun PieChartColores(materiales: List<MaterialItem>) {
         sliceLabelTextColor = Color.White,
         sliceLabelTextSize = 14.sp,
         labelType = PieChartConfig.LabelType.PERCENTAGE,
-        labelColor = Color.White,
+        labelColor = onSurfaceColor,
         backgroundColor = Color.Transparent,
         isAnimationEnable = true,
         animationDuration = 800
@@ -461,7 +481,7 @@ fun PieChartColores(materiales: List<MaterialItem>) {
             Text(
                 text = stringResource(R.string.noHayDatos),
                 modifier = Modifier.padding(32.dp),
-                color = Color.White
+                color = onSurfaceColor
             )
         } else {
             PieChart(
@@ -496,7 +516,7 @@ fun SliceDetailDialog(
     Dialog(onDismissRequest = onDismiss) {
         Card(
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
@@ -513,13 +533,13 @@ fun SliceDetailDialog(
                 Text(
                     text = "Cantidad: ${slice.value.toInt()}",
                     fontSize = 16.sp,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Porcentaje: ${"%.1f".format(percentage)}%",
                     fontSize = 16.sp,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +39,9 @@ fun AnimatedStartButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onPrimaryColor = MaterialTheme.colorScheme.onPrimary
+
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(targetValue = if (isPressed) 0.95f else 1f, label = "buttonScale")
@@ -82,11 +86,11 @@ fun AnimatedStartButton(
                 elevation = 12.dp,
                 shape = RoundedCornerShape(25.dp),
                 clip = false,
-                ambientColor = NeonBlue.copy(alpha = glowAlpha),
-                spotColor = NeonBlue.copy(alpha = glowAlpha)
+                ambientColor = primaryColor.copy(alpha = glowAlpha),
+                spotColor = primaryColor.copy(alpha = glowAlpha)
             )
             .clip(RoundedCornerShape(25.dp))
-            .background(NeonBlue)
+            .background(primaryColor)
             .background(shimmerBrush)
             .clickable(
                 onClick = onClick,
@@ -97,7 +101,7 @@ fun AnimatedStartButton(
     ) {
         Text(
             text = stringResource(R.string.botonComenzar),
-            color = Color.White,
+            color = onPrimaryColor,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )

@@ -63,6 +63,12 @@ fun RobotTable(
     onSortClick: (SortableColumn) -> Unit,
     currentUnit: UnitType
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+    val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
+    val outlineVariantColor = MaterialTheme.colorScheme.outlineVariant
+
     val haptic = LocalHapticFeedback.current
     val materiales by materialViewModel.filteredAndSortedMateriales.collectAsStateWithLifecycle()
     val headers = remember {
@@ -76,20 +82,20 @@ fun RobotTable(
 
     Surface(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.surface,
+        color = surfaceColor,
         shape = RoundedCornerShape(12.dp),
         shadowElevation = 6.dp
     ) {
         Box(modifier = Modifier.padding(8.dp)) {
             Column(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surface),
+                    .background(surfaceColor),
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            NeonBlue.copy(alpha = 0.15f),
+                            primaryColor.copy(alpha = 0.15f),
                             RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
                         )
                         .padding(top = 40.dp, bottom = 12.dp, start = 4.dp, end = 4.dp),
@@ -112,7 +118,7 @@ fun RobotTable(
                             AutoSizeText(
                                 text = header,
                                 style = MaterialTheme.typography.titleMedium.copy(
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center,
                                     fontSize = 12.sp
@@ -124,7 +130,7 @@ fun RobotTable(
                                 Icon(
                                     imageVector = if (sortState.second == SortDirection.ASC) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
                                     contentDescription = stringResource(id = R.string.columna_ordenada_por, header),
-                                    tint = NeonBlue,
+                                    tint = primaryColor,
                                     modifier = Modifier.size(16.dp).padding(start = 4.dp)
                                 )
                             }
@@ -135,7 +141,7 @@ fun RobotTable(
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 4.dp),
                     thickness = 2.dp,
-                    color = NeonBlue.copy(alpha = 0.6f)
+                    color = primaryColor.copy(alpha = 0.6f)
                 )
 
                 LazyColumn(state = lazyListState) {
@@ -147,9 +153,9 @@ fun RobotTable(
                         val shape = RoundedCornerShape(8.dp)
 
                         val targetBackgroundColor = when {
-                            isSelected -> NeonBlue.copy(alpha = 0.4f)
+                            isSelected -> primaryColor.copy(alpha = 0.4f)
                             index % 2 == 0 -> Color.Transparent
-                            else -> Color.Black.copy(alpha = 0.09f)
+                            else -> onSurfaceColor.copy(alpha = 0.05f)
                         }
 
                         val animatedBackgroundColor by animateColorAsState(
@@ -159,7 +165,7 @@ fun RobotTable(
                         val rowModifier = if (isSelected) {
                             Modifier.border(
                                 width = 2.dp,
-                                color = NeonBlue,
+                                color = primaryColor,
                                 shape = shape
                             )
                         } else {
@@ -200,7 +206,7 @@ fun RobotTable(
                                     .weight(1f)
                                     .fillMaxWidth()
                                     .align(Alignment.CenterVertically),
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = onSurfaceColor,
                                 style = MaterialTheme.typography.bodySmall,
                                 textAlign = TextAlign.Center
                             )
@@ -214,7 +220,7 @@ fun RobotTable(
                                     .weight(1f)
                                     .fillMaxWidth()
                                     .align(Alignment.CenterVertically),
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = onSurfaceColor,
                                 style = MaterialTheme.typography.bodySmall,
                                 textAlign = TextAlign.Center
                             )
@@ -224,7 +230,7 @@ fun RobotTable(
                                     .weight(1f)
                                     .fillMaxWidth()
                                     .align(Alignment.CenterVertically),
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = onSurfaceColor,
                                 style = MaterialTheme.typography.bodySmall,
                                 textAlign = TextAlign.Center
                             )
@@ -234,7 +240,7 @@ fun RobotTable(
                                     .weight(1f)
                                     .fillMaxWidth()
                                     .align(Alignment.CenterVertically),
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = onSurfaceColor,
                                 style = MaterialTheme.typography.bodySmall,
                                 textAlign = TextAlign.Center
                             )
@@ -244,7 +250,7 @@ fun RobotTable(
                             HorizontalDivider(
                                 modifier = Modifier.padding(horizontal = 8.dp),
                                 thickness = 1.dp,
-                                color = Color(0xFFCCCCCC).copy(alpha = 0.4f)
+                                color = outlineVariantColor
                             )
                         }
                     }

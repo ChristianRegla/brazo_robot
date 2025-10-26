@@ -1,5 +1,11 @@
 package com.example.robot.ui.screens
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,20 +26,40 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.*
 import com.example.robot.R
-import com.example.robot.ui.theme.DeepBlue
-import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.ui.theme.NightBlue
 import com.example.robot.ui.theme.RobotTheme
-import com.example.robot.ui.theme.SpaceGray
-import com.example.robot.ui.theme.TextPrimary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(
     onBackClick: () -> Unit
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariantColor = MaterialTheme.colorScheme.onSurfaceVariant
+
+    val infiniteTransition = rememberInfiniteTransition(label = "backgroundTransition")
+    val animatedOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 15000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    val backgroundBrush = Brush.linearGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.background,
+            MaterialTheme.colorScheme.surfaceVariant,
+            MaterialTheme.colorScheme.surface
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(x = animatedOffset / 2, y = 1000f + animatedOffset / 3)
+    )
+
     val composition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(R.raw.industrial_arm) // Reutiliza tu Lottie o busca uno nuevo
+        LottieCompositionSpec.RawRes(R.raw.industrial_arm)
     )
     val progress by animateLottieCompositionAsState(
         composition = composition,
@@ -48,7 +74,6 @@ fun AboutScreen(
                     title = {
                         Text(
                             text = stringResource(R.string.acerca_de_titulo),
-                            color = TextPrimary,
                             style = MaterialTheme.typography.titleLarge
                         )
                     },
@@ -57,12 +82,12 @@ fun AboutScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(R.string.volver_atras),
-                                tint = NeonBlue
+                                tint = primaryColor
                             )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = SpaceGray
+                        containerColor = surfaceColor
                     ),
                     modifier = Modifier.graphicsLayer {
                         shadowElevation = 8.dp.toPx()
@@ -73,13 +98,7 @@ fun AboutScreen(
             },
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(NightBlue, SpaceGray, DeepBlue),
-                        start = Offset(0f, 0f),
-                        end = Offset(0f, Float.POSITIVE_INFINITY)
-                    )
-                )
+                .background(brush = backgroundBrush)
         ) { innerPadding ->
             Column(
                 modifier = Modifier
@@ -103,20 +122,20 @@ fun AboutScreen(
                 Text(
                     text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.headlineMedium,
-                    color = NeonBlue,
+                    color = primaryColor,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = stringResource(R.string.version_app, "1.0.0"), // Ejemplo de versión
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextPrimary.copy(alpha = 0.8f),
+                    color = onSurfaceVariantColor,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = SpaceGray,
-                        contentColor = TextPrimary
+                        containerColor = surfaceColor,
+                        contentColor = onSurfaceColor
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -130,20 +149,20 @@ fun AboutScreen(
                         Text(
                             text = stringResource(R.string.desarrollado_por),
                             style = MaterialTheme.typography.titleSmall,
-                            color = NeonBlue,
+                            color = primaryColor,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                         Text(
-                            text = stringResource(R.string.alumno1), // Reutiliza el nombre del alumno
+                            text = stringResource(R.string.alumno1),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = TextPrimary,
+                            color = onSurfaceColor,
                             textAlign = TextAlign.Center
                         )
                         Text(
-                            text = stringResource(R.string.alumno2), // Reutiliza el nombre del alumno
+                            text = stringResource(R.string.alumno2),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = TextPrimary,
+                            color = onSurfaceColor,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
@@ -151,13 +170,13 @@ fun AboutScreen(
                         HorizontalDivider(
                             modifier = Modifier.padding(vertical = 8.dp),
                             thickness = 1.dp,
-                            color = NeonBlue.copy(alpha = 0.7f)
+                            color = primaryColor.copy(alpha = 0.7f)
                         )
 
                         Text(
                             text = stringResource(R.string.descripcion_app),
                             style = MaterialTheme.typography.bodySmall,
-                            color = TextPrimary.copy(alpha = 0.7f),
+                            color = onSurfaceVariantColor,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 8.dp)
                         )

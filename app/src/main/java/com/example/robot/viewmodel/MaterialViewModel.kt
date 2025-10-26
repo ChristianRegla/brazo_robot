@@ -63,7 +63,6 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     val categoryFilter: StateFlow<Set<String>> = _categoryFilter
 
     val availableColors: StateFlow<List<String>> = _materiales.map { materiales ->
-        // Incluye "No hay color" si hay items sin color
         val colors = materiales.map { it.color.ifBlank { "No hay color" } }.distinct().sorted()
         colors
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

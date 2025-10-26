@@ -2,8 +2,14 @@ package com.example.robot.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -54,10 +60,6 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.robot.ui.components.RobotChart
 import com.example.robot.ui.components.RobotTable
 import com.example.robot.ui.navigation.TabScreen
-import com.example.robot.ui.theme.NightBlue
-import com.example.robot.ui.theme.SpaceGray
-import com.example.robot.ui.theme.DeepBlue
-import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.viewmodel.MaterialViewModel
@@ -81,6 +83,11 @@ fun MainScreen(
     onGoToSettings: () -> Unit,
     settingsViewModel: SettingsViewModel
 ) {
+
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val errorColor = MaterialTheme.colorScheme.error
+
     val pagerState = rememberPagerState(
         pageCount = { tabs.size },
         initialPage = INITIALPAGE
@@ -179,7 +186,7 @@ fun MainScreen(
         ModalBottomSheet(
             onDismissRequest = { itemDetalle = null },
             sheetState = sheetState,
-            containerColor = SpaceGray
+            containerColor = surfaceColor
         ) {
             Column(
                 modifier = Modifier
@@ -224,6 +231,26 @@ fun MainScreen(
         }
     }
 
+    val infiniteTransition = rememberInfiniteTransition(label = "backgroundTransition")
+    val animatedOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 15000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    val backgroundBrush = Brush.linearGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.background,
+            MaterialTheme.colorScheme.surfaceVariant,
+            MaterialTheme.colorScheme.surface
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(x = animatedOffset / 2, y = 1000f + animatedOffset / 3)
+    )
+
     RobotTheme {
         Scaffold(
             topBar = {
@@ -232,7 +259,6 @@ fun MainScreen(
                         title = {
                             Text(
                                 text = tabs[pagerState.currentPage].title,
-                                color = TextPrimary,
                                 style = MaterialTheme.typography.titleLarge
                             )
                         },
@@ -241,7 +267,7 @@ fun MainScreen(
                                 Icon(
                                     imageVector = Icons.Filled.Home,
                                     contentDescription = stringResource(R.string.Inicio),
-                                    tint = NeonBlue
+                                    tint = primaryColor
                                 )
                             }
                         },
@@ -251,30 +277,30 @@ fun MainScreen(
                                     Icon(
                                         imageVector = Icons.Filled.MoreVert,
                                         contentDescription = stringResource(R.string.mas),
-                                        tint = NeonBlue
+                                        tint = primaryColor
                                     )
                                 }
                                 DropdownMenu(
                                     expanded = showOptionsMenu,
                                     onDismissRequest = { showOptionsMenu = false },
-                                    modifier = Modifier.background(SpaceGray)
+                                    modifier = Modifier.background(surfaceColor)
                                 ) {
                                     DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.configuracion_titulo), color = TextPrimary) },
+                                        text = { Text(stringResource(R.string.configuracion_titulo)) },
                                         onClick = {
-                                            onGoToSettings() // Navega a SettingsScreen
+                                            onGoToSettings()
                                             showOptionsMenu = false
                                         },
                                         leadingIcon = {
                                             Icon(
                                                 Icons.Default.Settings,
                                                 contentDescription = stringResource(R.string.configuracion_titulo),
-                                                tint = NeonBlue
+                                                tint = primaryColor
                                             )
                                         }
                                     )
                                     DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.acerca_de_titulo), color = TextPrimary) },
+                                        text = { Text(stringResource(R.string.acerca_de_titulo)) },
                                         onClick = {
                                             onGoToAbout() // Navega a AboutScreen
                                             showOptionsMenu = false
@@ -283,12 +309,12 @@ fun MainScreen(
                                             Icon(
                                                 Icons.Default.Info,
                                                 contentDescription = stringResource(R.string.acerca_de_titulo),
-                                                tint = NeonBlue
+                                                tint = primaryColor
                                             )
                                         }
                                     )
                                     DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.vaciar_lista), color = TextPrimary) },
+                                        text = { Text(stringResource(R.string.vaciar_lista)) },
                                         onClick = {
                                             showClearConfirmationDialog = true
                                             showOptionsMenu = false
@@ -297,7 +323,7 @@ fun MainScreen(
                                             Icon(
                                                 Icons.Filled.Delete,
                                                 contentDescription = stringResource(R.string.vaciar_lista),
-                                                tint = RedAlert
+                                                tint = errorColor
                                             )
                                         }
                                     )
@@ -305,7 +331,7 @@ fun MainScreen(
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = SpaceGray
+                            containerColor = surfaceColor
                         ),
                         modifier = Modifier.clip(RoundedCornerShape(
                             bottomStart = 12.dp,
@@ -321,7 +347,6 @@ fun MainScreen(
                                     count = selectedItems.size,
                                     selectedItems.size
                                 ),
-                                color = TextPrimary,
                                 style = MaterialTheme.typography.titleLarge
                             )
                         },
@@ -330,7 +355,7 @@ fun MainScreen(
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = stringResource(R.string.limpiar_seleccion),
-                                    tint = NeonBlue
+                                    tint = primaryColor
                                 )
                             }
                         },
@@ -341,12 +366,12 @@ fun MainScreen(
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
                                     contentDescription = stringResource(R.string.eliminar_seleccionados),
-                                    tint = NeonBlue
+                                    tint = primaryColor
                                 )
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = SpaceGray
+                            containerColor = surfaceColor
                         ),
                         modifier = Modifier.clip(RoundedCornerShape(
                             bottomStart = 12.dp,
@@ -371,7 +396,7 @@ fun MainScreen(
                 ) {
                     Surface(
                         shape = RoundedCornerShape(24.dp),
-                        color = SpaceGray,
+                        color = surfaceColor,
                         shadowElevation = 6.dp
                     ) {
                         BoxWithConstraints {
@@ -396,7 +421,7 @@ fun MainScreen(
                                     .fillMaxWidth()
                                     .wrapContentHeight()
                                     .clip(RoundedCornerShape(24.dp))
-                                    .background(SpaceGray)
+                                    .background(surfaceColor)
                             ) {
                                 NavigationBar(
                                     containerColor = Color.Transparent
@@ -434,7 +459,7 @@ fun MainScreen(
                                         }
                                         .size(width = indicatorWidth, height = indicatorHeight)
                                         .background(
-                                            color = NeonBlue.copy(alpha = 0.25f),
+                                            color = primaryColor.copy(alpha = 0.25f),
                                             shape = MaterialTheme.shapes.medium
                                         )
                                 )
@@ -445,13 +470,7 @@ fun MainScreen(
             },
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(NightBlue, SpaceGray, DeepBlue),
-                        start = Offset(0f, 0f),
-                        end = Offset(Offset.Infinite.x, Offset.Infinite.y)
-                    )
-                )
+                .background(brush = backgroundBrush)
         ) { innerPadding ->
             Box(
                 modifier = Modifier
@@ -465,7 +484,9 @@ fun MainScreen(
 
                 ) { pageIndex ->
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(brush = backgroundBrush),
                         contentAlignment = Alignment.Center
                     ) {
                         when {
@@ -482,7 +503,7 @@ fun MainScreen(
                                     )
                                     Text(
                                         text = stringResource(R.string.cargando),
-                                        color = NeonBlue,
+                                        color = primaryColor,
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                 }
@@ -503,12 +524,12 @@ fun MainScreen(
                                     )
                                     Text(
                                         text = stringResource(R.string.sinConexion),
-                                        color = NeonBlue,
+                                        color = primaryColor,
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                     Text(
                                         text = stringResource(R.string.reintentar),
-                                        color = NeonBlue,
+                                        color = primaryColor,
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
@@ -527,7 +548,7 @@ fun MainScreen(
                                     )
                                     Text(
                                         text = stringResource(R.string.noHayDatos),
-                                        color = NeonBlue,
+                                        color = primaryColor,
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
@@ -36,8 +37,8 @@ fun RowScope.AnimatedNavigationBarItem(
     label: String,
     contentDescription: String,
     modifier: Modifier = Modifier,
-    selectedColor: Color = NeonBlue,
-    unselectedColor: Color = TextPrimary
+    selectedColor: Color = MaterialTheme.colorScheme.primary,
+    unselectedColor: Color = MaterialTheme.colorScheme.onSurfaceVariant
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.2f else 1f,

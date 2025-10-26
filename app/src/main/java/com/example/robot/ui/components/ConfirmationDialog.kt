@@ -40,6 +40,13 @@ fun ConfirmationDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onPrimaryColor = MaterialTheme.colorScheme.onPrimary
+    val errorColor = MaterialTheme.colorScheme.error
+    val onErrorColor = MaterialTheme.colorScheme.onError
+
     var isConfirmEnabled by remember { mutableStateOf(false) }
     val fillProgress = remember { Animatable(0f) }
 
@@ -66,8 +73,8 @@ fun ConfirmationDialog(
         countdownText = ""
     }
 
-    val disabledColor = RedAlert.copy(alpha = 0.5f)
-    val enabledColor = RedAlert
+    val disabledColor = errorColor.copy(alpha = 0.5f)
+    val enabledColor = errorColor
 
     val buttonBrush = Brush.linearGradient(
         colorStops = arrayOf(
@@ -81,7 +88,7 @@ fun ConfirmationDialog(
     Dialog(onDismissRequest = onDismiss) {
         Card(
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = SpaceGray),
+            colors = CardDefaults.cardColors(containerColor = surfaceColor),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
@@ -92,7 +99,7 @@ fun ConfirmationDialog(
                 Icon(
                     imageVector = icon,
                     contentDescription = "Advertencia",
-                    tint = RedAlert,
+                    tint = errorColor,
                     modifier = Modifier.size(48.dp)
                 )
 
@@ -102,7 +109,7 @@ fun ConfirmationDialog(
                     text = title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    color = TextPrimary
+                    color = onSurfaceColor
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -111,7 +118,7 @@ fun ConfirmationDialog(
                     text = text,
                     textAlign = TextAlign.Center,
                     fontSize = 14.sp,
-                    color = TextPrimary.copy(alpha = 0.8f)
+                    color = onSurfaceColor.copy(alpha = 0.8f)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -126,13 +133,13 @@ fun ConfirmationDialog(
                             .weight(1f)
                             .height(40.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(NeonBlue.copy(alpha = 0.5f))
+                            .background(primaryColor.copy(alpha = 0.7f))
                             .clickable { onDismiss() },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "Cancelar",
-                            color = TextPrimary,
+                            color = onPrimaryColor,
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -151,7 +158,7 @@ fun ConfirmationDialog(
                     ) {
                         Text(
                             text = "Confirmar$countdownText",
-                            color = TextPrimary,
+                            color = onErrorColor,
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold
                         )

@@ -17,9 +17,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.ui.theme.SpaceGray
-import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.viewmodel.MetalFilterState
 
@@ -28,6 +25,10 @@ fun FilterButton(
     viewModel: MaterialViewModel,
     modifier: Modifier = Modifier
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onPrimaryColor = MaterialTheme.colorScheme.onPrimary
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+
     var showFilterMenu by remember { mutableStateOf(false) }
     val activeFilterCount = countActiveFilters(viewModel)
 
@@ -36,8 +37,8 @@ fun FilterButton(
             badge = {
                 if (activeFilterCount > 0) {
                     Badge(
-                        containerColor = NeonBlue,
-                        contentColor = TextPrimary
+                        containerColor = primaryColor,
+                        contentColor = onPrimaryColor
                     ) {
                         Text(text = activeFilterCount.toString())
                     }
@@ -48,7 +49,7 @@ fun FilterButton(
                 Icon(
                     imageVector = Icons.Default.FilterList,
                     contentDescription = "Abrir menú de filtros",
-                    tint = TextPrimary
+                    tint = onSurfaceColor
                 )
             }
         }
@@ -82,6 +83,10 @@ fun FilterMenu(
     onDismissRequest: () -> Unit,
     viewModel: MaterialViewModel
 ) {
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
+
     val availableColors by viewModel.availableColors.collectAsStateWithLifecycle()
     val selectedColors by viewModel.colorFilter.collectAsStateWithLifecycle()
 
@@ -96,7 +101,7 @@ fun FilterMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
         modifier = Modifier
-            .background(SpaceGray)
+            .background(surfaceColor)
             .widthIn(min = 250.dp)
     ) {
         Row(
@@ -110,12 +115,12 @@ fun FilterMenu(
                 onClick = { viewModel.clearFilters() },
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
             ) {
-                Icon(Icons.Default.ClearAll, contentDescription = "Limpiar Filtros", tint = NeonBlue, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.ClearAll, contentDescription = "Limpiar Filtros", tint = primaryColor, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("Limpiar Filtros", color = NeonBlue, style = MaterialTheme.typography.labelMedium)
+                Text("Limpiar Filtros", color = primaryColor, style = MaterialTheme.typography.labelMedium)
             }
         }
-        HorizontalDivider(color = TextPrimary.copy(alpha = 0.3f), modifier = Modifier.padding(horizontal = 8.dp))
+        HorizontalDivider(color = outlineVariant, modifier = Modifier.padding(horizontal = 8.dp))
 
         Column(
             Modifier
@@ -132,7 +137,7 @@ fun FilterMenu(
                     onCheckedChange = { viewModel.toggleColorFilter(color) }
                 )
             }
-            HorizontalDivider(color = TextPrimary.copy(alpha = 0.3f))
+            HorizontalDivider(color = outlineVariant)
 
             FilterSectionTitle("¿Es Metal?")
             Column(Modifier.selectableGroup()) {
@@ -152,7 +157,7 @@ fun FilterMenu(
                     onClick = { viewModel.setMetalFilter(MetalFilterState.NON_METAL) }
                 )
             }
-            HorizontalDivider(color = TextPrimary.copy(alpha = 0.3f))
+            HorizontalDivider(color = outlineVariant.copy(alpha = 0.3f))
 
             FilterSectionTitle("Categoría")
             availableCategories.forEach { category ->
@@ -173,7 +178,7 @@ fun FilterSectionTitle(title: String) {
         text = title,
         style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.Bold,
-        color = NeonBlue,
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp)
     )
 }
@@ -184,6 +189,10 @@ fun FilterCheckboxItem(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariantColor = MaterialTheme.colorScheme.onSurfaceVariant
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,15 +209,15 @@ fun FilterCheckboxItem(
             checked = checked,
             onCheckedChange = null,
             colors = CheckboxDefaults.colors(
-                checkedColor = NeonBlue,
-                uncheckedColor = TextPrimary.copy(alpha = 0.7f)
+                checkedColor = primaryColor,
+                uncheckedColor = onSurfaceVariantColor
             )
         )
         Spacer(Modifier.width(8.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
-            color = TextPrimary
+            color = onSurfaceColor
         )
     }
 }
@@ -219,6 +228,10 @@ fun FilterRadioButtonItem(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariantColor = MaterialTheme.colorScheme.onSurfaceVariant
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -235,15 +248,15 @@ fun FilterRadioButtonItem(
             selected = selected,
             onClick = null,
             colors = RadioButtonDefaults.colors(
-                selectedColor = NeonBlue,
-                unselectedColor = TextPrimary.copy(alpha = 0.7f)
+                selectedColor = primaryColor,
+                unselectedColor = onSurfaceVariantColor
             )
         )
         Spacer(Modifier.width(8.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
-            color = TextPrimary
+            color = onSurfaceColor
         )
     }
 }
