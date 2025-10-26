@@ -62,7 +62,7 @@ fun RobotTheme(
         ThemePreference.LIGHT -> false
         ThemePreference.DARK -> true
     }
-    
+
     val colorScheme = when {
         useDarkTheme -> DarkColorScheme
         else -> LightColorScheme
