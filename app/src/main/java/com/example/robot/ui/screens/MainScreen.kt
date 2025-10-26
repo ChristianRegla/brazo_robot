@@ -87,14 +87,6 @@ fun MainScreen(
     )
     val coroutineScope = rememberCoroutineScope()
 
-    val headers = remember {
-        listOf(
-            "Color",
-            "Peso",
-            "¿Es Metal?",
-            "Categoría"
-        )
-    }
 
     val materialViewModel: MaterialViewModel = viewModel()
 
@@ -478,11 +470,22 @@ fun MainScreen(
                     ) {
                         when {
                             isLoading -> {
-                                LottieAnimation(
-                                    composition = loadingComposition,
-                                    progress = { loadingProgress },
-                                    modifier = Modifier.size(150.dp)
-                                )
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    LottieAnimation(
+                                        composition = loadingComposition,
+                                        progress = { loadingProgress },
+                                        modifier = Modifier.size(150.dp)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.cargando),
+                                        color = NeonBlue,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
                             }
 
                             !isConnected -> {
@@ -544,8 +547,7 @@ fun MainScreen(
                                 ) {
                                     when (tabs[pageIndex]) {
                                         is TabScreen.Table -> RobotTable(
-                                            headers = headers,
-                                            materiales = materiales,
+                                            materialViewModel = materialViewModel,
                                             lazyListState = lazyListState,
                                             selectedItems = selectedItems,
                                             sortState = sortState,
@@ -554,6 +556,7 @@ fun MainScreen(
                                                     materialViewModel.toggleItemSelection(item)
                                                 } else {
                                                     itemDetalle = item
+                                                    scope.launch { sheetState.show() }
                                                 }
                                             },
                                             onItemLongClick = { item ->

@@ -41,18 +41,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.robot.R
 import com.example.robot.model.MaterialItem
 import com.example.robot.model.UnitType
 import com.example.robot.ui.theme.NeonBlue
+import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.viewmodel.SortDirection
 import com.example.robot.viewmodel.SortableColumn
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RobotTable(
-    headers: List<String>,
-    materiales: List<MaterialItem>,
+    materialViewModel: MaterialViewModel,
     lazyListState: LazyListState,
     selectedItems: Set<MaterialItem>,
     sortState: Pair<SortableColumn, SortDirection>?,
@@ -63,6 +64,15 @@ fun RobotTable(
     currentUnit: UnitType
 ) {
     val haptic = LocalHapticFeedback.current
+    val materiales by materialViewModel.filteredAndSortedMateriales.collectAsStateWithLifecycle()
+    val headers = remember {
+        listOf(
+            "Color",
+            "Peso",
+            "¿Es Metal?",
+            "Categoría"
+        )
+    }
 
     Surface(
         modifier = modifier,
@@ -70,176 +80,184 @@ fun RobotTable(
         shape = RoundedCornerShape(12.dp),
         shadowElevation = 6.dp
     ) {
-        Column(
-            modifier = Modifier
-                .padding(8.dp)
-                .background(MaterialTheme.colorScheme.surface),
-        ) {
-            Row(
+        Box(modifier = Modifier.padding(8.dp)) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        NeonBlue.copy(alpha = 0.15f),
-                        RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
-                    )
-                    .padding(vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .background(MaterialTheme.colorScheme.surface),
             ) {
-                headers.forEachIndexed { index, header ->
-                    val column = SortableColumn.entries[index]
-
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { onSortClick(column) }
-                            .padding(horizontal = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        AutoSizeText(
-                            text = header,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                fontSize = 12.sp
-                            ),
-                            modifier = Modifier.weight(1f, fill = false)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            NeonBlue.copy(alpha = 0.15f),
+                            RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
                         )
+                        .padding(top = 40.dp, bottom = 12.dp, start = 4.dp, end = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    headers.forEachIndexed { index, header ->
+                        val column = SortableColumn.entries[index]
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) { onSortClick(column) }
+                                .padding(horizontal = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            AutoSizeText(
+                                text = header,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 12.sp
+                                ),
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
 
-                        if (sortState?.first == column) {
-                            Icon(
-                                imageVector = if (sortState.second == SortDirection.ASC) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                                contentDescription = stringResource(id = R.string.columna_ordenada_por, header),
-                                tint = NeonBlue,
-                                modifier = Modifier.size(16.dp).padding(start = 4.dp)
+                            if (sortState?.first == column) {
+                                Icon(
+                                    imageVector = if (sortState.second == SortDirection.ASC) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                                    contentDescription = stringResource(id = R.string.columna_ordenada_por, header),
+                                    tint = NeonBlue,
+                                    modifier = Modifier.size(16.dp).padding(start = 4.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 4.dp),
+                    thickness = 2.dp,
+                    color = NeonBlue.copy(alpha = 0.6f)
+                )
+
+                LazyColumn(state = lazyListState) {
+                    itemsIndexed(
+                        items = materiales,
+                        key = { _, item -> item.id }
+                    ) { index, item ->
+                        val isSelected = selectedItems.contains(item)
+                        val shape = RoundedCornerShape(8.dp)
+
+                        val targetBackgroundColor = when {
+                            isSelected -> NeonBlue.copy(alpha = 0.4f)
+                            index % 2 == 0 -> Color.Transparent
+                            else -> Color.Black.copy(alpha = 0.09f)
+                        }
+
+                        val animatedBackgroundColor by animateColorAsState(
+                            targetValue = targetBackgroundColor,
+                            label = "RowBackgroundAnimation"
+                        )
+                        val rowModifier = if (isSelected) {
+                            Modifier.border(
+                                width = 2.dp,
+                                color = NeonBlue,
+                                shape = shape
+                            )
+                        } else {
+                            Modifier
+                        }
+
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    color = animatedBackgroundColor,
+                                    shape = shape
+                                )
+                                .then(rowModifier)
+                                .clip(shape)
+                                .combinedClickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                    onClick = {
+                                        onItemClick(item)
+                                    },
+                                    onLongClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onItemLongClick(item)
+                                    }
+                                )
+                                .padding(horizontal = 8.dp, vertical = 8.dp)
+                                .animateItem(
+                                    fadeInSpec = tween(
+                                        durationMillis = 300,
+                                        delayMillis = 30 * index
+                                    )
+                                )
+                        ) {
+                            Text(
+                                text = item.color.ifBlank { "-" },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth()
+                                    .align(Alignment.CenterVertically),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = when (currentUnit) {
+                                    UnitType.GRAMS -> stringResource(R.string.peso_valor_gr, item.pesoGramos)
+                                    UnitType.KILOGRAMS -> stringResource(R.string.peso_valor_kg, item.pesoGramos * currentUnit.conversionFactor)
+                                    UnitType.POUNDS -> stringResource(R.string.peso_valor_lb, item.pesoGramos * currentUnit.conversionFactor)
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth()
+                                    .align(Alignment.CenterVertically),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = if (item.esMetal) "Sí" else "No",
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth()
+                                    .align(Alignment.CenterVertically),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = item.categoria.ifBlank { "-" },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth()
+                                    .align(Alignment.CenterVertically),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        if (index != materiales.lastIndex) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                thickness = 1.dp,
+                                color = Color(0xFFCCCCCC).copy(alpha = 0.4f)
                             )
                         }
                     }
                 }
             }
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 4.dp),
-                thickness = 2.dp,
-                color = NeonBlue.copy(alpha = 0.6f)
+
+            FilterButton(
+                viewModel = materialViewModel,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 4.dp, end = 4.dp)
             )
 
-            LazyColumn(state = lazyListState) {
-                itemsIndexed(
-                    items = materiales,
-                    key = { _, item -> item.id }
-                ) { index, item ->
-
-                    val isSelected = selectedItems.contains(item)
-                    val shape = RoundedCornerShape(8.dp)
-
-                    val targetBackgroundColor = when {
-                        isSelected -> NeonBlue.copy(alpha = 0.4f)
-                        index % 2 == 0 -> Color.Transparent
-                        else -> Color.Black.copy(alpha = 0.09f)
-                    }
-
-                    val animatedBackgroundColor by animateColorAsState(
-                        targetValue = targetBackgroundColor,
-                        label = "RowBackgroundAnimation"
-                    )
-                    val rowModifier = if (isSelected) {
-                        Modifier.border(
-                            width = 2.dp,
-                            color = NeonBlue,
-                            shape = shape
-                        )
-                    } else {
-                        Modifier
-                    }
-
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = animatedBackgroundColor,
-                                shape = shape
-                            )
-                            .then(rowModifier)
-                            .clip(shape)
-                            .combinedClickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = {
-                                    onItemClick(item)
-                                },
-                                onLongClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onItemLongClick(item)
-                                }
-                            )
-                            .padding(horizontal = 8.dp, vertical = 8.dp)
-                            .animateItem(
-                                fadeInSpec = tween(
-                                    durationMillis = 300,
-                                    delayMillis = 30 * index
-                                )
-                            )
-                    ) {
-                        Text(
-                            text = item.color,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .align(Alignment.CenterVertically),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = when (currentUnit) {
-                                UnitType.GRAMS -> stringResource(R.string.peso_valor_gr, item.pesoGramos)
-                                UnitType.KILOGRAMS -> stringResource(R.string.peso_valor_kg, item.pesoGramos * currentUnit.conversionFactor)
-                                UnitType.POUNDS -> stringResource(R.string.peso_valor_lb, item.pesoGramos * currentUnit.conversionFactor)
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .align(Alignment.CenterVertically),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = if (item.esMetal) "Sí" else "No",
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .align(Alignment.CenterVertically),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = item.categoria,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .align(Alignment.CenterVertically),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    if (index != materiales.lastIndex) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            thickness = 1.dp,
-                            color = Color(0xFFCCCCCC).copy(alpha = 0.4f)
-                        )
-                    }
-                }
-            }
         }
     }
 }

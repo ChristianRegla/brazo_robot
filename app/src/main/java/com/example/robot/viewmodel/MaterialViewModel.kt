@@ -9,10 +9,12 @@ import com.example.robot.model.MaterialItem
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -23,6 +25,10 @@ enum class SortableColumn {
 
 enum class SortDirection {
     ASC, DESC
+}
+
+enum class MetalFilterState {
+    ALL, METAL, NON_METAL
 }
 
 class MaterialViewModel(application: Application) : AndroidViewModel(application) {
@@ -47,6 +53,43 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     private val _sortState = MutableStateFlow<Pair<SortableColumn, SortDirection>?>(null)
     val sortState: StateFlow<Pair<SortableColumn, SortDirection>?> = _sortState
 
+    private val _colorFilter = MutableStateFlow<Set<String>>(emptySet())
+    val colorFilter: StateFlow<Set<String>> = _colorFilter
+
+    private val _isMetalFilter = MutableStateFlow(MetalFilterState.ALL)
+    val isMetalFilter: StateFlow<MetalFilterState> = _isMetalFilter
+
+    private val _categoryFilter = MutableStateFlow<Set<String>>(emptySet())
+    val categoryFilter: StateFlow<Set<String>> = _categoryFilter
+
+    val availableColors: StateFlow<List<String>> = _materiales.map { materiales ->
+        // Incluye "No hay color" si hay items sin color
+        val colors = materiales.map { it.color.ifBlank { "No hay color" } }.distinct().sorted()
+        colors
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val availableCategories: StateFlow<List<String>> = _materiales.map { materiales ->
+        val categories = materiales.map { it.categoria.ifBlank { "Sin categoría" } }.distinct().sorted()
+        categories
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+
+    val filteredAndSortedMateriales: StateFlow<List<MaterialItem>> = combine(
+        _materiales,
+        _sortState,
+        _colorFilter,
+        _isMetalFilter,
+        _categoryFilter
+    ) { materials, sortState, colorFilter, isMetalFilter, categoryFilter ->
+        val filtered = applyFilters(materials, colorFilter, isMetalFilter, categoryFilter)
+        if (sortState == null) {
+            filtered
+        } else {
+            applySort(filtered, sortState.first, sortState.second)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+
     val sortedMateriales: StateFlow<List<MaterialItem>> = combine(
         _materiales,
         _sortState
@@ -56,11 +99,14 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         } else {
             applySort(materials, sortState.first, sortState.second)
         }
-    }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
         connectivityObserver.observe().onEach { isOnline ->
             _isConnected.value = isOnline
+            if (isOnline && _materiales.value.isEmpty()) {
+                fetchMateriales()
+            }
         }.launchIn(viewModelScope)
 
         fetchMateriales()
@@ -74,6 +120,59 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
             else -> null
         }
         _sortState.value = newSortState
+    }
+
+    fun toggleColorFilter(color: String) {
+        val current = _colorFilter.value.toMutableSet()
+        if (current.contains(color)) {
+            current.remove(color)
+        } else {
+            current.add(color)
+        }
+        _colorFilter.value = current
+    }
+
+    fun setMetalFilter(state: MetalFilterState) {
+        _isMetalFilter.value = state
+    }
+
+    fun toggleCategoryFilter(category: String) {
+        val current = _categoryFilter.value.toMutableSet()
+        if (current.contains(category)) {
+            current.remove(category)
+        } else {
+            current.add(category)
+        }
+        _categoryFilter.value = current
+    }
+
+    fun clearFilters() {
+        _colorFilter.value = emptySet()
+        _isMetalFilter.value = MetalFilterState.ALL
+        _categoryFilter.value = emptySet()
+    }
+
+    private fun applyFilters(
+        list: List<MaterialItem>,
+        colorFilter: Set<String>,
+        isMetalFilter: MetalFilterState,
+        categoryFilter: Set<String>
+    ): List<MaterialItem> {
+        return list.filter { item ->
+            val colorMatch = colorFilter.isEmpty() ||
+                    (item.color.ifBlank { "No hay color" } in colorFilter)
+
+            val metalMatch = when (isMetalFilter) {
+                MetalFilterState.ALL -> true
+                MetalFilterState.METAL -> item.esMetal
+                MetalFilterState.NON_METAL -> !item.esMetal
+            }
+
+            val categoryMatch = categoryFilter.isEmpty() ||
+                    (item.categoria.ifBlank { "Sin categoría" } in categoryFilter)
+
+            colorMatch && metalMatch && categoryMatch
+        }
     }
 
     private fun applySort(list: List<MaterialItem>, column: SortableColumn, direction: SortDirection): List<MaterialItem> {
@@ -91,8 +190,14 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun fetchMateriales() {
+        if (!_isConnected.value) {
+            _isLoading.value = false
+            _materiales.value = emptyList()
+            return
+        }
         _isLoading.value = true
         viewModelScope.launch {
+            delay(2000)
             materialRepository.getMateriales()
                 .catch { exception ->
                     _materiales.value = emptyList()
