@@ -153,7 +153,7 @@ fun LineChartPesos(materiales: List<MaterialItem>, currentUnit: UnitType) {
     val lbAbreviacion = stringResource(R.string.lb_abreviacion)
 
     val points = materiales.mapIndexed { index, item ->
-        Point(index.toFloat(), item.pesoGramos.toFloat())
+        Point(index.toFloat(), item.pesoGramos * currentUnit.conversionFactor)
     }
 
     val xAxisData = AxisData.Builder()
@@ -179,7 +179,7 @@ fun LineChartPesos(materiales: List<MaterialItem>, currentUnit: UnitType) {
         .axisLineColor(NeonBlue)
         .axisLabelColor(Color.White)
         .labelData { value ->
-            val scale = maxWeight / 4f
+            val scale = maxWeight / yAxisIntervals
             val labelValue = scale * value
             when (currentUnit) {
                 UnitType.GRAMS -> "${labelValue.roundToInt()} $grAbreviacion"
