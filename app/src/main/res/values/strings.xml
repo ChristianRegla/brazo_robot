@@ -81,4 +81,22 @@
     <string name="tema_sistema">Seguir configuración del sistema</string>
     <string name="tema_claro">Claro</string>
     <string name="tema_oscuro">Oscuro</string>
+
+    <string name="comportamiento_titulo">Comportamiento</string>
+    <string name="feedback_haptico">Feedback Háptico</string>
+    <string name="feedback_haptico_desc">Vibrar al realizar ciertas acciones</string>
+    <string name="duracion_deshacer">Duración del mensaje "Deshacer"</string>
+    <string name="duracion_corta">Corta (3s)</string>
+    <string name="duracion_media">Media (5s)</string>
+    <string name="duracion_larga">Larga (10s)</string>
+    <string name="confirmaciones_titulo">Confirmaciones</string>
+    <string name="confirmar_eliminar_seleccionados">Confirmar al eliminar seleccionados</string>
+    <string name="confirmar_vaciar_lista">Confirmar al vaciar lista</string>
+
+    <string name="informacion_titulo">Información</string>
+    <string name="restablecer_valores_titulo">Restablecer Valores</string>
+    <string name="restablecer_configuracion">Restablecer configuración</string>
+    <string name="restablecer_configuracion_desc">Devuelve todas las opciones a sus valores predeterminados.</string>
+    <string name="confirmar_restablecer_titulo">Restablecer Configuración</string>
+    <string name="confirmar_restablecer_texto">¿Seguro que quieres restablecer todas las configuraciones a sus valores predeterminados? Esta acción no se puede deshacer.</string>
 </resources>

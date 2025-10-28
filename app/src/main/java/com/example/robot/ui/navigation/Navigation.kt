@@ -69,7 +69,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             AboutScreen(onBackClick = { navController.popBackStack() })
         }
         composable(Destinations.SETTINGS_ROUTE) {
-            SettingsScreen(settingsViewModel = settingsViewModel, onBackClick = { navController.popBackStack() })
+            SettingsScreen(settingsViewModel = settingsViewModel,
+                onBackClick = { navController.popBackStack() },
+                onGoToAbout = { navController.navigate(Destinations.ABOUT_ROUTE) }
+            )
         }
     }
 }

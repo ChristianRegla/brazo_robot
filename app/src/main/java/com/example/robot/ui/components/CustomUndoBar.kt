@@ -34,7 +34,7 @@ fun CustomUndoBar(
     message: String,
     onUndo: () -> Unit,
     onTimeout: () -> Unit,
-    durationMillis: Long = 4000
+    durationMillis: Long
 ) {
     val surfaceColor = MaterialTheme.colorScheme.surface
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface
@@ -42,7 +42,7 @@ fun CustomUndoBar(
 
     val dismissState = rememberDismissState()
 
-    LaunchedEffect(visible) {
+    LaunchedEffect(visible, durationMillis) {
         if (visible) {
             delay(durationMillis)
             if (dismissState.currentValue != DismissValue.DismissedToEnd &&

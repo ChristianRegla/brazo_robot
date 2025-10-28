@@ -105,7 +105,8 @@ fun ConfirmationDialog(
                     text = title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    color = onSurfaceColor
+                    color = onSurfaceColor,
+                    textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))

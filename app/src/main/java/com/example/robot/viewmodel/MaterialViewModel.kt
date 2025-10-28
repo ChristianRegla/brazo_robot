@@ -223,7 +223,7 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         _selectedItems.value = emptySet()
     }
 
-    fun deleteSelectedItems() {
+    fun deleteSelectedItems(undoDurationMillis: Long) {
         viewModelScope.launch {
             val selectedIds = _selectedItems.value.map { it.id }
             val itemsToDelete = _materiales.value.filter { it.id in selectedIds }
@@ -237,34 +237,34 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
             deselectAllItems()
 
             if (itemsToDelete.isNotEmpty()) {
-                startUndoDismissTimer()
+                startUndoDismissTimer(undoDurationMillis)
             }
         }
     }
 
-    fun deleteSingleMaterial(material: MaterialItem) {
+    fun deleteSingleMaterial(material: MaterialItem, undoDurationMillis: Long) {
         viewModelScope.launch {
             materialRepository.deleteMaterialById(material.id)
             _lastDeletedItems.value = listOf(material)
-            startUndoDismissTimer()
+            startUndoDismissTimer(undoDurationMillis)
         }
     }
 
-    fun deleteAllMateriales() {
+    fun deleteAllMateriales(undoDurationMillis: Long) {
         viewModelScope.launch {
             val allItems = _materiales.value
             if (allItems.isNotEmpty()) {
                 _lastDeletedItems.value = allItems
                 materialRepository.clearMateriales()
-                startUndoDismissTimer()
+                startUndoDismissTimer(undoDurationMillis)
             }
         }
     }
 
-    private fun startUndoDismissTimer() {
+    private fun startUndoDismissTimer(durationMillis: Long) {
         undoDismissJob?.cancel()
         undoDismissJob = viewModelScope.launch {
-            delay(4500)
+            delay(durationMillis + 500L)
             dismissUndoAction()
         }
     }

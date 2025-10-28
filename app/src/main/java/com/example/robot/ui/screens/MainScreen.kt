@@ -103,7 +103,12 @@ fun MainScreen(
     val selectedItems by materialViewModel.selectedItems.collectAsState()
     val lastDeletedItems by materialViewModel.lastDeletedItems.collectAsState()
     val sortState by materialViewModel.sortState.collectAsState()
+
     val selectedUnit by settingsViewModel.unitType.collectAsStateWithLifecycle()
+    val hapticEnabled by settingsViewModel.hapticFeedbackEnabled.collectAsStateWithLifecycle()
+    val confirmDeleteSelected by settingsViewModel.confirmDeleteSelected.collectAsStateWithLifecycle()
+    val confirmDeleteAll by settingsViewModel.confirmDeleteAll.collectAsStateWithLifecycle()
+    val undoDuration by settingsViewModel.undoDurationMillis.collectAsStateWithLifecycle()
 
     var itemDetalle by remember { mutableStateOf<MaterialItem?>(null) }
 
@@ -163,8 +168,8 @@ fun MainScreen(
             title = stringResource(R.string.confirmarEliminacionTotalTitulo),
             text = stringResource(R.string.confirmacionEliminacionTotal),
             onConfirm = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                materialViewModel.deleteAllMateriales()
+                if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                materialViewModel.deleteAllMateriales(undoDuration.toLong())
             },
             onDismiss = { showClearConfirmationDialog = false }
         )
@@ -175,8 +180,8 @@ fun MainScreen(
             title = stringResource(id = R.string.confirmarEliminacionSeleccionadosTitulo),
             text = stringResource(id = R.string.confirmacionEliminarSeleccionados),
             onConfirm = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                materialViewModel.deleteSelectedItems()
+                if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                materialViewModel.deleteSelectedItems(undoDuration.toLong())
             },
             onDismiss = { showDeleteSelectedConfirmationDialog = false }
         )
@@ -210,7 +215,7 @@ fun MainScreen(
 
                 Button(
                     onClick = {
-                        materialViewModel.deleteSingleMaterial(itemDetalle!!)
+                        materialViewModel.deleteSingleMaterial(itemDetalle!!, undoDuration.toLong())
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
                                 itemDetalle = null
@@ -316,7 +321,12 @@ fun MainScreen(
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.vaciar_lista)) },
                                         onClick = {
-                                            showClearConfirmationDialog = true
+                                            if (confirmDeleteAll) {
+                                                showClearConfirmationDialog = true
+                                            } else {
+                                                if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                materialViewModel.deleteAllMateriales(undoDuration.toLong())
+                                            }
                                             showOptionsMenu = false
                                         },
                                         leadingIcon = {
@@ -361,7 +371,12 @@ fun MainScreen(
                         },
                         actions = {
                             IconButton(onClick = {
-                                showDeleteSelectedConfirmationDialog = true
+                                if (confirmDeleteSelected) {
+                                    showDeleteSelectedConfirmationDialog = true
+                                } else {
+                                    if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    materialViewModel.deleteSelectedItems(undoDuration.toLong())
+                                }
                             }) {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
@@ -581,6 +596,7 @@ fun MainScreen(
                                                 }
                                             },
                                             onItemLongClick = { item ->
+                                                if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 materialViewModel.toggleItemSelection(item)
                                             },
                                             onSortClick = { column ->
@@ -618,7 +634,8 @@ fun MainScreen(
                         },
                         onTimeout = {
                             materialViewModel.dismissUndoAction()
-                        }
+                        },
+                        durationMillis = undoDuration.toLong()
                     )
                 }
             }
