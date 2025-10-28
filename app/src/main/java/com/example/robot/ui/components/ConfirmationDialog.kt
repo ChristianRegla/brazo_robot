@@ -26,10 +26,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.robot.ui.theme.NeonBlue
-import com.example.robot.ui.theme.RedAlert
-import com.example.robot.ui.theme.SpaceGray
-import com.example.robot.ui.theme.TextPrimary
 import kotlinx.coroutines.delay
 
 @Composable

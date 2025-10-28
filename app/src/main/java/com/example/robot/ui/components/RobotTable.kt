@@ -45,7 +45,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.robot.R
 import com.example.robot.model.MaterialItem
 import com.example.robot.model.UnitType
-import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.viewmodel.SortDirection
 import com.example.robot.viewmodel.SortableColumn
@@ -66,7 +65,6 @@ fun RobotTable(
     val primaryColor = MaterialTheme.colorScheme.primary
     val surfaceColor = MaterialTheme.colorScheme.surface
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface
-    val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
     val outlineVariantColor = MaterialTheme.colorScheme.outlineVariant
 
     val haptic = LocalHapticFeedback.current
