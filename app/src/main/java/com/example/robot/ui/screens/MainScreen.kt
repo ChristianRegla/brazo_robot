@@ -118,7 +118,6 @@ fun MainScreen(
         iterations = LottieConstants.IterateForever
     )
 
-
     BackHandler(enabled = selectedItems.isNotEmpty()) {
         materialViewModel.deselectAllItems()
     }
