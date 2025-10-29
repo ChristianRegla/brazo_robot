@@ -9,9 +9,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -32,18 +30,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.example.robot.ui.components.RobotChart
-import com.example.robot.ui.components.RobotTable
 import com.example.robot.ui.navigation.TabScreen
 import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.viewmodel.MaterialViewModel
@@ -52,6 +45,7 @@ import com.example.robot.model.MaterialItem
 import com.example.robot.ui.components.CustomUndoBar
 import com.example.robot.ui.components.MainScreenBottomAppBar
 import com.example.robot.ui.components.MainScreenDialogs
+import com.example.robot.ui.components.MainScreenPagerContent
 import com.example.robot.ui.components.MainScreenTopAppBar
 import com.example.robot.ui.components.MaterialDetailsBottomSheet
 import com.example.robot.ui.navigation.tabs
@@ -67,9 +61,6 @@ fun MainScreen(
     onGoToSettings: () -> Unit,
     settingsViewModel: SettingsViewModel
 ) {
-
-    val primaryColor = MaterialTheme.colorScheme.primary
-
     val pagerState = rememberPagerState(
         pageCount = { tabs.size },
         initialPage = INITIALPAGE
@@ -228,7 +219,6 @@ fun MainScreen(
                 hapticEnabled = hapticEnabled,
                 haptic = haptic
             )
-
             MaterialDetailsBottomSheet(
                 item = itemDetalle,
                 sheetState = sheetState,
@@ -248,123 +238,40 @@ fun MainScreen(
                         .fillMaxSize()
 
                 ) { pageIndex ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(brush = backgroundBrush),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        when {
-                            isLoading -> {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    LottieAnimation(
-                                        composition = loadingComposition,
-                                        progress = { loadingProgress },
-                                        modifier = Modifier.size(150.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.cargando),
-                                        color = primaryColor,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                }
+                    MainScreenPagerContent(
+                        isLoading = isLoading,
+                        isConnected = isConnected,
+                        materiales = materiales,
+                        lastDeletedItems = lastDeletedItems,
+                        loadingComposition = loadingComposition,
+                        loadingProgress = loadingProgress,
+                        noInternetComposition = noInternetComposition,
+                        noInternetProgress = noInternetProgress,
+                        emptyListComposition = emptyListComposition,
+                        emptyListProgress = emptyListProgress,
+                        pageIndex = pageIndex,
+                        tabs = tabs,
+                        materialViewModel = materialViewModel,
+                        lazyListState = lazyListState,
+                        selectedItems = selectedItems,
+                        sortState = sortState,
+                        onItemClick = { item ->
+                            if (selectedItems.isNotEmpty()) {
+                                materialViewModel.toggleItemSelection(item)
+                            } else {
+                                itemDetalle = item
+                                scope.launch { sheetState.show() }
                             }
-
-                            !isConnected -> {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clickable { materialViewModel.fetchMateriales() },
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    LottieAnimation(
-                                        composition = noInternetComposition,
-                                        progress = { noInternetProgress },
-                                        modifier = Modifier.size(180.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.sinConexion),
-                                        color = primaryColor,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.reintentar),
-                                        color = primaryColor,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                            }
-
-                            materiales.isEmpty() && lastDeletedItems.isEmpty() -> {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    LottieAnimation(
-                                        composition = emptyListComposition,
-                                        progress = { emptyListProgress },
-                                        modifier = Modifier.size(180.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.noHayDatos),
-                                        color = primaryColor,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                }
-                            }
-
-                            else -> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(
-                                            top = 12.dp,
-                                            start = 12.dp,
-                                            end = 12.dp,
-                                            bottom = 12.dp
-                                        ),
-                                    contentAlignment = Alignment.TopCenter
-                                ) {
-                                    when (tabs[pageIndex]) {
-                                        is TabScreen.Table -> RobotTable(
-                                            materialViewModel = materialViewModel,
-                                            lazyListState = lazyListState,
-                                            selectedItems = selectedItems,
-                                            sortState = sortState,
-                                            onItemClick = { item ->
-                                                if (selectedItems.isNotEmpty()) {
-                                                    materialViewModel.toggleItemSelection(item)
-                                                } else {
-                                                    itemDetalle = item
-                                                    scope.launch { sheetState.show() }
-                                                }
-                                            },
-                                            onItemLongClick = { item ->
-                                                if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                materialViewModel.toggleItemSelection(item)
-                                            },
-                                            onSortClick = { column ->
-                                                materialViewModel.updateSortColumn(column)
-                                            },
-                                            currentUnit = selectedUnit
-                                        )
-
-                                        is TabScreen.Chart -> RobotChart(
-                                            materiales = materiales,
-                                            scrollState = scrollState,
-                                            currentUnit = selectedUnit
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
+                        },
+                        onItemLongClick = { item ->
+                            if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            materialViewModel.toggleItemSelection(item)
+                        },
+                        onSortClick = { column -> materialViewModel.updateSortColumn(column) },
+                        currentUnit = selectedUnit,
+                        scrollState = scrollState,
+                        onRetryConnection = { materialViewModel.fetchMateriales() }
+                    )
                 }
                 Box(
                     modifier = Modifier
