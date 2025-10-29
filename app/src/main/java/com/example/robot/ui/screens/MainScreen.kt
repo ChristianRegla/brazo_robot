@@ -5,10 +5,8 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,15 +16,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,16 +28,11 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,18 +45,17 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.robot.ui.components.RobotChart
 import com.example.robot.ui.components.RobotTable
 import com.example.robot.ui.navigation.TabScreen
-import com.example.robot.ui.theme.TextPrimary
 import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.R
 import com.example.robot.model.MaterialItem
-import com.example.robot.ui.components.AnimatedNavigationBarItem
-import com.example.robot.ui.components.ConfirmationDialog
 import com.example.robot.ui.components.CustomUndoBar
+import com.example.robot.ui.components.MainScreenBottomAppBar
+import com.example.robot.ui.components.MainScreenDialogs
+import com.example.robot.ui.components.MainScreenTopAppBar
+import com.example.robot.ui.components.MaterialDetailsBottomSheet
 import com.example.robot.ui.navigation.tabs
-import com.example.robot.ui.theme.RedAlert
 import com.example.robot.viewmodel.SettingsViewModel
-import kotlin.math.roundToInt
 
 private const val INITIALPAGE= 0
 
@@ -85,15 +69,12 @@ fun MainScreen(
 ) {
 
     val primaryColor = MaterialTheme.colorScheme.primary
-    val surfaceColor = MaterialTheme.colorScheme.surface
-    val errorColor = MaterialTheme.colorScheme.error
 
     val pagerState = rememberPagerState(
         pageCount = { tabs.size },
         initialPage = INITIALPAGE
     )
     val coroutineScope = rememberCoroutineScope()
-
 
     val materialViewModel: MaterialViewModel = viewModel()
 
@@ -163,79 +144,6 @@ fun MainScreen(
         }
     }
 
-    if (showClearConfirmationDialog) {
-        ConfirmationDialog(
-            title = stringResource(R.string.confirmarEliminacionTotalTitulo),
-            text = stringResource(R.string.confirmacionEliminacionTotal),
-            onConfirm = {
-                if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                materialViewModel.deleteAllMateriales(undoDuration.toLong())
-            },
-            onDismiss = { showClearConfirmationDialog = false }
-        )
-    }
-
-    if (showDeleteSelectedConfirmationDialog) {
-        ConfirmationDialog(
-            title = stringResource(id = R.string.confirmarEliminacionSeleccionadosTitulo),
-            text = stringResource(id = R.string.confirmacionEliminarSeleccionados),
-            onConfirm = {
-                if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                materialViewModel.deleteSelectedItems(undoDuration.toLong())
-            },
-            onDismiss = { showDeleteSelectedConfirmationDialog = false }
-        )
-    }
-
-    if (itemDetalle != null) {
-        ModalBottomSheet(
-            onDismissRequest = { itemDetalle = null },
-            sheetState = sheetState,
-            containerColor = surfaceColor
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Detalles del Material",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(Modifier.height(16.dp))
-
-                Text("ID: ${itemDetalle!!.id}")
-                Text("Color: ${itemDetalle!!.color}")
-                Text("Peso: ${itemDetalle!!.pesoGramos} g")
-                Text("Es Metal: ${if (itemDetalle!!.esMetal) "Sí" else "No"}")
-                Text("Categoría: ${itemDetalle!!.categoria}")
-
-                Spacer(Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
-                        materialViewModel.deleteSingleMaterial(itemDetalle!!, undoDuration.toLong())
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                itemDetalle = null
-                            }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = RedAlert,
-                        contentColor = TextPrimary
-                    )
-                ) {
-                    Icon(Icons.Default.Delete, contentDescription = "Eliminar")
-                    Spacer(Modifier.width(8.dp))
-                    Text("Eliminar este item")
-                }
-                Spacer(Modifier.height(16.dp))
-            }
-        }
-    }
-
     val infiniteTransition = rememberInfiniteTransition(label = "backgroundTransition")
     val animatedOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -259,234 +167,76 @@ fun MainScreen(
     RobotTheme {
         Scaffold(
             topBar = {
-                if (selectedItems.isEmpty()) {
-                    CenterAlignedTopAppBar(
-                        title = {
-                            Text(
-                                text = tabs[pagerState.currentPage].title,
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = onGoHome) {
-                                Icon(
-                                    imageVector = Icons.Filled.Home,
-                                    contentDescription = stringResource(R.string.Inicio),
-                                    tint = primaryColor
-                                )
-                            }
-                        },
-                        actions = {
-                            Box {
-                                IconButton(onClick = { showOptionsMenu = true }) {
-                                    Icon(
-                                        imageVector = Icons.Filled.MoreVert,
-                                        contentDescription = stringResource(R.string.mas),
-                                        tint = primaryColor
-                                    )
-                                }
-                                DropdownMenu(
-                                    expanded = showOptionsMenu,
-                                    onDismissRequest = { showOptionsMenu = false },
-                                    modifier = Modifier.background(surfaceColor)
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.configuracion_titulo)) },
-                                        onClick = {
-                                            onGoToSettings()
-                                            showOptionsMenu = false
-                                        },
-                                        leadingIcon = {
-                                            Icon(
-                                                Icons.Default.Settings,
-                                                contentDescription = stringResource(R.string.configuracion_titulo),
-                                                tint = primaryColor
-                                            )
-                                        }
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.acerca_de_titulo)) },
-                                        onClick = {
-                                            onGoToAbout() // Navega a AboutScreen
-                                            showOptionsMenu = false
-                                        },
-                                        leadingIcon = {
-                                            Icon(
-                                                Icons.Default.Info,
-                                                contentDescription = stringResource(R.string.acerca_de_titulo),
-                                                tint = primaryColor
-                                            )
-                                        }
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.vaciar_lista)) },
-                                        onClick = {
-                                            if (confirmDeleteAll) {
-                                                showClearConfirmationDialog = true
-                                            } else {
-                                                if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                materialViewModel.deleteAllMateriales(undoDuration.toLong())
-                                            }
-                                            showOptionsMenu = false
-                                        },
-                                        leadingIcon = {
-                                            Icon(
-                                                Icons.Filled.Delete,
-                                                contentDescription = stringResource(R.string.vaciar_lista),
-                                                tint = errorColor
-                                            )
-                                        }
-                                    )
-                                }
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = surfaceColor
-                        ),
-                        modifier = Modifier.clip(RoundedCornerShape(
-                            bottomStart = 12.dp,
-                            bottomEnd = 12.dp
-                        ))
-                    )
-                } else {
-                    CenterAlignedTopAppBar(
-                        title = {
-                            Text(
-                                text = pluralStringResource(
-                                    id = R.plurals.seleccionados,
-                                    count = selectedItems.size,
-                                    selectedItems.size
-                                ),
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = { materialViewModel.deselectAllItems() }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(R.string.limpiar_seleccion),
-                                    tint = primaryColor
-                                )
-                            }
-                        },
-                        actions = {
-                            IconButton(onClick = {
-                                if (confirmDeleteSelected) {
-                                    showDeleteSelectedConfirmationDialog = true
-                                } else {
-                                    if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    materialViewModel.deleteSelectedItems(undoDuration.toLong())
-                                }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = stringResource(R.string.eliminar_seleccionados),
-                                    tint = primaryColor
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = surfaceColor
-                        ),
-                        modifier = Modifier.clip(RoundedCornerShape(
-                            bottomStart = 12.dp,
-                            bottomEnd = 12.dp
-                        ))
-                    )
-                }
+                MainScreenTopAppBar(
+                    selectedItems = selectedItems,
+                    currentPageTitle = tabs[pagerState.currentPage].title,
+                    onGoHomeClick = onGoHome,
+                    onDeselectAllClick = { materialViewModel.deselectAllItems() },
+                    onDeleteSelectedClick = {
+                        if (confirmDeleteSelected) {
+                            showDeleteSelectedConfirmationDialog = true
+                        } else {
+                            if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            materialViewModel.deleteSelectedItems(undoDuration.toLong())
+                        }
+                    },
+                    showOptionsMenu = showOptionsMenu,
+                    onDismissOptionsMenu = { showOptionsMenu = false },
+                    onGoToSettings = onGoToSettings,
+                    onGoToAbout = onGoToAbout,
+                    onClearListClick = {
+                        if (confirmDeleteAll) {
+                            showClearConfirmationDialog = true
+                        } else {
+                            if (hapticEnabled) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            materialViewModel.deleteAllMateriales(undoDuration.toLong())
+                        }
+                    },
+                    onOptionsIconClick = { showOptionsMenu = true }
+                )
             },
             bottomBar = {
-                val itemCount = tabs.size
-
-                val indicatorWidth = 80.dp
-                val indicatorHeight = 32.dp
-                val indicatorVerticalPadding = 12.dp
-
-                val density = LocalDensity.current
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(24.dp),
-                        color = surfaceColor,
-                        shadowElevation = 6.dp
-                    ) {
-                        BoxWithConstraints {
-                            val screenWidthPx = with(density) { maxWidth.toPx() }
-                            val indicatorWidthPx = with(density) { indicatorWidth.toPx() }
-                            val indicatorVerticalPaddingPx = with(density) { indicatorVerticalPadding.toPx() }
-
-                            val spacePerItemPx = screenWidthPx / itemCount
-                            val pageOffset = pagerState.currentPage + pagerState.currentPageOffsetFraction
-
-                            val indicatorCenterOffset = (spacePerItemPx - indicatorWidthPx) / 2
-                            val targetOffset = pageOffset * spacePerItemPx + indicatorCenterOffset
-
-                            val animatedIndicatorOffsetPx by animateFloatAsState(
-                                targetValue = targetOffset,
-                                animationSpec = spring(stiffness = 400f, dampingRatio = 0.7f),
-                                label = stringResource(R.string.indicatorOffset)
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight()
-                                    .clip(RoundedCornerShape(24.dp))
-                                    .background(surfaceColor)
-                            ) {
-                                NavigationBar(
-                                    containerColor = Color.Transparent
-                                ) {
-                                    tabs.forEachIndexed { index, tab ->
-                                        AnimatedNavigationBarItem(
-                                            isSelected = pagerState.currentPage == index,
-                                            onClick = {
-                                                coroutineScope.launch {
-                                                    if (pagerState.currentPage == index) {
-                                                        when (tabs[index]) {
-                                                            is TabScreen.Table ->
-                                                                lazyListState.animateScrollToItem(0)
-                                                            is TabScreen.Chart ->
-                                                                scrollState.animateScrollTo(0)
-                                                        }
-                                                    } else {
-                                                        pagerState.animateScrollToPage(index)
-                                                    }
-                                                }
-                                            },
-                                            icon = tab.icon,
-                                            label = tab.label,
-                                            contentDescription = "Ir a ${'$'}{tab.title}"
-                                        )
-                                    }
+                MainScreenBottomAppBar(
+                    pagerState = pagerState,
+                    tabs = tabs,
+                    coroutineScope = coroutineScope,
+                    onTabClick = { index, tab ->
+                        coroutineScope.launch {
+                            if (pagerState.currentPage == index) {
+                                when (tab) {
+                                    is TabScreen.Table -> lazyListState.animateScrollToItem(0)
+                                    is TabScreen.Chart -> scrollState.animateScrollTo(0)
                                 }
-                                Box(
-                                    modifier = Modifier
-                                        .offset {
-                                            IntOffset(
-                                                animatedIndicatorOffsetPx.roundToInt(),
-                                                indicatorVerticalPaddingPx.roundToInt()
-                                            )
-                                        }
-                                        .size(width = indicatorWidth, height = indicatorHeight)
-                                        .background(
-                                            color = primaryColor.copy(alpha = 0.25f),
-                                            shape = MaterialTheme.shapes.medium
-                                        )
-                                )
+                            } else {
+                                pagerState.animateScrollToPage(index)
                             }
                         }
                     }
-                }
+                )
             },
             modifier = Modifier
                 .fillMaxSize()
                 .background(brush = backgroundBrush)
         ) { innerPadding ->
+            MainScreenDialogs(
+                showClearConfirmation = showClearConfirmationDialog,
+                onClearConfirm = { materialViewModel.deleteAllMateriales(undoDuration.toLong()) },
+                onClearDismiss = { showClearConfirmationDialog = false },
+                showDeleteSelectedConfirmation = showDeleteSelectedConfirmationDialog,
+                onDeleteSelectedConfirm = { materialViewModel.deleteSelectedItems(undoDuration.toLong()) },
+                onDeleteSelectedDismiss = { showDeleteSelectedConfirmationDialog = false },
+                hapticEnabled = hapticEnabled,
+                haptic = haptic
+            )
+
+            MaterialDetailsBottomSheet(
+                item = itemDetalle,
+                sheetState = sheetState,
+                onDismiss = { itemDetalle = null },
+                onDeleteClick = { itemToDelete ->
+                    materialViewModel.deleteSingleMaterial(itemToDelete, undoDuration.toLong())
+                }
+            )
             Box(
                 modifier = Modifier
                     .fillMaxSize()
