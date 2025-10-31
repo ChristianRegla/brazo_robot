@@ -28,8 +28,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Equalizer
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,6 +76,14 @@ import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.roundToInt
 
+private enum class ChartType(val title: String) {
+    METALS("Proporción de Metales"),
+    COLORS("Proporción de Colores"),
+    CATEGORIES("Cantidad por Categoría"),
+    DISTRIBUTION("Distribución de Peso"),
+    WEIGHT_LINE("Peso (Gráfico de Línea)")
+}
+
 @Composable
 fun RobotChart(
     materiales: List<MaterialItem>,
@@ -75,151 +93,89 @@ fun RobotChart(
     weightStatistics: WeightStatistics,
     weightDistribution: Map<String, Int>
 ) {
-    val onBackgroundColor = MaterialTheme.colorScheme.onBackground
-    val surfaceColor = MaterialTheme.colorScheme.surface
-
-    val numberFormatter = remember {
-        NumberFormat.getNumberInstance(Locale.getDefault()).apply {
-            maximumFractionDigits = 2
-            minimumFractionDigits = 2
-        }
-    }
+    var chartToShow by remember { mutableStateOf<ChartType?>(null) }
 
     Column(
         Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .verticalScroll(scrollState)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
             .then(modifier)
     ) {
-        Text(
-            text = stringResource(R.string.proporcionMetales),
-            style = MaterialTheme.typography.bodyLarge,
-            color = onBackgroundColor,
-            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+        StatisticsCard(
+            materialCount = materiales.size,
+            statistics = weightStatistics,
+            currentUnit = currentUnit
         )
-        Card(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = surfaceColor),
-            elevation = CardDefaults.cardElevation(4.dp)
-        ) {
-            PieChartMetales(materiales)
-        }
 
         Spacer(Modifier.height(24.dp))
 
         Text(
-            text = stringResource(R.string.proporcionColores),
-            style = MaterialTheme.typography.bodyLarge,
-            color = onBackgroundColor,
-            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
-        )
-        Card(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = surfaceColor),
-            elevation = CardDefaults.cardElevation(4.dp)
-        ) {
-            PieChartColores(materiales)
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        Text(
-            text = stringResource(R.string.cantidadMateriales),
-            style = MaterialTheme.typography.bodyLarge,
-            color = onBackgroundColor,
-            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
-        )
-        Card(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = surfaceColor),
-            elevation = CardDefaults.cardElevation(4.dp)
-        ) {
-            BarChartCategorias(materiales)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Función de Distribución de Peso",
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
-        )
-        Card(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = surfaceColor),
-            elevation = CardDefaults.cardElevation(4.dp)
-        ) {
-            BarChartDistribucion(weightDistribution = weightDistribution)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Estadísticas de Peso (g)",
+            text = "Análisis Gráfico",
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(bottom = 12.dp)
         )
-        Card(
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                .height(450.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            userScrollEnabled = false
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                @Composable
-                fun StatRow(label: String, value: Double, unit: String) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "${numberFormatter.format(value)} $unit",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                StatRow(label = "Media (Promedio):", value = weightStatistics.mean, unit = "g")
-                StatRow(label = "Varianza:", value = weightStatistics.variance, unit = "g²")
-                StatRow(label = "Desv. Estándar:", value = weightStatistics.stdDev, unit = "g")
+            item {
+                ChartNavigationCard(
+                    title = ChartType.METALS.title,
+                    icon = Icons.Default.PieChart,
+                    onClick = { chartToShow = ChartType.METALS }
+                )
+            }
+            item {
+                ChartNavigationCard(
+                    title = ChartType.COLORS.title,
+                    icon = Icons.Default.Palette,
+                    onClick = { chartToShow = ChartType.COLORS }
+                )
+            }
+            item {
+                ChartNavigationCard(
+                    title = ChartType.CATEGORIES.title,
+                    icon = Icons.Default.BarChart,
+                    onClick = { chartToShow = ChartType.CATEGORIES }
+                )
+            }
+            item {
+                ChartNavigationCard(
+                    title = ChartType.DISTRIBUTION.title,
+                    icon = Icons.Default.Equalizer,
+                    onClick = { chartToShow = ChartType.DISTRIBUTION }
+                )
+            }
+            item {
+                ChartNavigationCard(
+                    title = ChartType.WEIGHT_LINE.title,
+                    icon = Icons.AutoMirrored.Filled.ShowChart,
+                    onClick = { chartToShow = ChartType.WEIGHT_LINE }
+                )
             }
         }
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = stringResource(R.string.pesoMateriales),
-            style = MaterialTheme.typography.bodyLarge,
-            color = onBackgroundColor,
-            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
-        )
-        Card(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = surfaceColor),
-            elevation = CardDefaults.cardElevation(4.dp)
+    chartToShow?.let { currentChart ->
+        ChartDetailDialog(
+            title = currentChart.title,
+            onDismiss = { chartToShow = null }
         ) {
-            LineChartPesos(materiales, currentUnit)
+            when (currentChart) {
+                ChartType.METALS -> PieChartMetales(materiales = materiales)
+                ChartType.COLORS -> PieChartColores(materiales = materiales)
+                ChartType.CATEGORIES -> BarChartCategorias(materiales = materiales)
+                ChartType.DISTRIBUTION -> BarChartDistribucion(weightDistribution = weightDistribution)
+                ChartType.WEIGHT_LINE -> LineChartPesos(materiales = materiales, currentUnit = currentUnit)
+            }
         }
     }
 }
