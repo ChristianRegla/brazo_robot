@@ -31,15 +31,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PieChart
-import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,8 +69,6 @@ import com.example.robot.ui.theme.GreenSensor
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.RedAlert
 import com.example.robot.viewmodel.WeightStatistics
-import java.text.NumberFormat
-import java.util.Locale
 import kotlin.math.roundToInt
 
 private enum class ChartType(val title: String) {
@@ -117,49 +112,54 @@ fun RobotChart(
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(450.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            userScrollEnabled = false
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp) // Espacio vertical entre filas
         ) {
-            item {
+            val cardModifier = Modifier.weight(1f) // Para que las tarjetas compartan espacio
+
+            // Fila 1
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 ChartNavigationCard(
                     title = ChartType.METALS.title,
                     icon = Icons.Default.PieChart,
-                    onClick = { chartToShow = ChartType.METALS }
+                    onClick = { chartToShow = ChartType.METALS },
+                    modifier = cardModifier
                 )
-            }
-            item {
                 ChartNavigationCard(
                     title = ChartType.COLORS.title,
                     icon = Icons.Default.Palette,
-                    onClick = { chartToShow = ChartType.COLORS }
+                    onClick = { chartToShow = ChartType.COLORS },
+                    modifier = cardModifier
                 )
             }
-            item {
+
+            // Fila 2
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 ChartNavigationCard(
                     title = ChartType.CATEGORIES.title,
                     icon = Icons.Default.BarChart,
-                    onClick = { chartToShow = ChartType.CATEGORIES }
+                    onClick = { chartToShow = ChartType.CATEGORIES },
+                    modifier = cardModifier
                 )
-            }
-            item {
                 ChartNavigationCard(
                     title = ChartType.DISTRIBUTION.title,
                     icon = Icons.Default.Equalizer,
-                    onClick = { chartToShow = ChartType.DISTRIBUTION }
+                    onClick = { chartToShow = ChartType.DISTRIBUTION },
+                    modifier = cardModifier
                 )
             }
-            item {
+
+            // Fila 3
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 ChartNavigationCard(
                     title = ChartType.WEIGHT_LINE.title,
                     icon = Icons.AutoMirrored.Filled.ShowChart,
-                    onClick = { chartToShow = ChartType.WEIGHT_LINE }
+                    onClick = { chartToShow = ChartType.WEIGHT_LINE },
+                    modifier = cardModifier
                 )
+                // Añadimos un Spacer invisible para que la tarjeta 5 no ocupe toda la fila
+                Spacer(modifier = cardModifier)
             }
         }
     }
@@ -659,7 +659,7 @@ fun BarChartDistribucion(weightDistribution: Map<String, Int>) {
             barChartData = barChartData,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(220.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
