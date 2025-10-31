@@ -20,6 +20,7 @@ import com.example.robot.model.MaterialItem
 import com.example.robot.model.UnitType
 import com.example.robot.ui.navigation.TabScreen
 import com.example.robot.viewmodel.MaterialViewModel
+import com.example.robot.viewmodel.WeightStatistics
 
 @Composable
 fun MainScreenPagerContent(
@@ -44,7 +45,9 @@ fun MainScreenPagerContent(
     onSortClick: (com.example.robot.viewmodel.SortableColumn) -> Unit,
     currentUnit: UnitType,
     scrollState: androidx.compose.foundation.ScrollState,
-    onRetryConnection: () -> Unit
+    onRetryConnection: () -> Unit,
+    weightStatistics: WeightStatistics,
+    weightDistribution: Map<String, Int>
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
 
@@ -140,7 +143,9 @@ fun MainScreenPagerContent(
                     is TabScreen.Chart -> RobotChart(
                         materiales = materiales,
                         scrollState = scrollState,
-                        currentUnit = currentUnit
+                        currentUnit = currentUnit,
+                        weightStatistics = weightStatistics,
+                        weightDistribution = weightDistribution
                     )
                 }
             }

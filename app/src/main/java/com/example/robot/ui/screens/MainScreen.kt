@@ -76,6 +76,9 @@ fun MainScreen(
     val lastDeletedItems by materialViewModel.lastDeletedItems.collectAsState()
     val sortState by materialViewModel.sortState.collectAsState()
 
+    val weightStatistics by materialViewModel.weightStatistics.collectAsState()
+    val weightDistribution by materialViewModel.weightDistribution.collectAsState()
+
     val selectedUnit by settingsViewModel.unitType.collectAsStateWithLifecycle()
     val hapticEnabled by settingsViewModel.hapticFeedbackEnabled.collectAsStateWithLifecycle()
     val confirmDeleteSelected by settingsViewModel.confirmDeleteSelected.collectAsStateWithLifecycle()
@@ -269,7 +272,9 @@ fun MainScreen(
                         onSortClick = { column -> materialViewModel.updateSortColumn(column) },
                         currentUnit = selectedUnit,
                         scrollState = scrollState,
-                        onRetryConnection = { materialViewModel.fetchMateriales() }
+                        onRetryConnection = { materialViewModel.fetchMateriales() },
+                        weightStatistics = weightStatistics,
+                        weightDistribution = weightDistribution
                     )
                 }
                 Box(

@@ -31,6 +31,12 @@ enum class MetalFilterState {
     ALL, METAL, NON_METAL
 }
 
+data class WeightStatistics(
+    val mean: Double = 0.0,
+    val variance: Double = 0.0,
+    val stdDev: Double = 0.0
+)
+
 class MaterialViewModel(application: Application) : AndroidViewModel(application) {
     private val materialRepository = MaterialRepository()
     private val connectivityObserver = NetworkConnectivityObserver(application)
@@ -72,15 +78,19 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         categories
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-
-    val filteredAndSortedMateriales: StateFlow<List<MaterialItem>> = combine(
+    val filteredMateriales: StateFlow<List<MaterialItem>> = combine(
         _materiales,
-        _sortState,
         _colorFilter,
         _isMetalFilter,
         _categoryFilter
-    ) { materials, sortState, colorFilter, isMetalFilter, categoryFilter ->
-        val filtered = applyFilters(materials, colorFilter, isMetalFilter, categoryFilter)
+    ) { materials, colorFilter, isMetalFilter, categoryFilter ->
+        applyFilters(materials, colorFilter, isMetalFilter, categoryFilter)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val filteredAndSortedMateriales: StateFlow<List<MaterialItem>> = combine(
+        filteredMateriales,
+        _sortState
+    ) { filtered, sortState ->
         if (sortState == null) {
             filtered
         } else {
@@ -281,4 +291,49 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     fun dismissUndoAction() {
         _lastDeletedItems.value = emptyList()
     }
+
+    private fun calculateWeightStatistics(materials: List<MaterialItem>): WeightStatistics {
+        val weights = materials.map { it.pesoGramos.toDouble() }
+        if (weights.isEmpty()) {
+            return WeightStatistics()
+        }
+
+        val mean = weights.average()
+        val variance = weights.map { (it - mean) * (it - mean) }.average()
+        val stdDev = kotlin.math.sqrt(variance)
+
+        return WeightStatistics(mean = mean, variance = variance, stdDev = stdDev)
+    }
+
+    private fun calculateWeightDistribution(materials: List<MaterialItem>): Map<String, Int> {
+        // Define los rangos de peso
+        val bins = listOf(
+            "1-50g" to (1..50),
+            "51-100g" to (51..100),
+            "101-200g" to (101..200),
+            "201-500g" to (201..500),
+            "501g+" to (501..Int.MAX_VALUE)
+        )
+        val distribution = bins.associate { (label, range) ->
+            label to materials.count { it.pesoGramos in range }
+        }.filter { it.value > 0 }
+
+        return distribution
+    }
+
+    val weightStatistics: StateFlow<WeightStatistics> = filteredMateriales
+        .map { calculateWeightStatistics(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = WeightStatistics()
+        )
+
+    val weightDistribution: StateFlow<Map<String, Int>> = filteredMateriales
+        .map { calculateWeightDistribution(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
 }

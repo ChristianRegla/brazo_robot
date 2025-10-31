@@ -61,6 +61,9 @@ import com.example.robot.model.UnitType
 import com.example.robot.ui.theme.GreenSensor
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.RedAlert
+import com.example.robot.viewmodel.WeightStatistics
+import java.text.NumberFormat
+import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
@@ -68,10 +71,19 @@ fun RobotChart(
     materiales: List<MaterialItem>,
     scrollState: ScrollState,
     modifier: Modifier = Modifier,
-    currentUnit: UnitType
+    currentUnit: UnitType,
+    weightStatistics: WeightStatistics,
+    weightDistribution: Map<String, Int>
 ) {
     val onBackgroundColor = MaterialTheme.colorScheme.onBackground
     val surfaceColor = MaterialTheme.colorScheme.surface
+
+    val numberFormatter = remember {
+        NumberFormat.getNumberInstance(Locale.getDefault()).apply {
+            maximumFractionDigits = 2
+            minimumFractionDigits = 2
+        }
+    }
 
     Column(
         Modifier
@@ -128,7 +140,72 @@ fun RobotChart(
             BarChartCategorias(materiales)
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Función de Distribución de Peso",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+        )
+        Card(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = surfaceColor),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            BarChartDistribucion(weightDistribution = weightDistribution)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Estadísticas de Peso (g)",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                @Composable
+                fun StatRow(label: String, value: Double, unit: String) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "${numberFormatter.format(value)} $unit",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                StatRow(label = "Media (Promedio):", value = weightStatistics.mean, unit = "g")
+                StatRow(label = "Varianza:", value = weightStatistics.variance, unit = "g²")
+                StatRow(label = "Desv. Estándar:", value = weightStatistics.stdDev, unit = "g")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = stringResource(R.string.pesoMateriales),
@@ -541,6 +618,121 @@ fun SliceDetailDialog(
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun BarChartDistribucion(weightDistribution: Map<String, Int>) {
+    val barColor1 = MaterialTheme.colorScheme.primary
+    val barColor2 = MaterialTheme.colorScheme.secondary
+    val barColors = listOf(barColor1, barColor2, MaterialTheme.colorScheme.tertiary, MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.secondaryContainer)
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+
+    val sortedKeys = listOf("1-50g", "51-100g", "101-200g", "201-500g", "501g+")
+    val bars = sortedKeys.mapIndexedNotNull { idx, key ->
+        val value = weightDistribution[key]
+        if (value != null && value > 0) {
+            BarData(
+                point = Point(idx.toFloat(), value.toFloat()),
+                label = key,
+                color = barColors[idx % barColors.size]
+            )
+        } else {
+            null
+        }
+    }
+
+    if (bars.isEmpty()) {
+        Text(
+            text = stringResource(R.string.noHayDatos),
+            modifier = Modifier.padding(32.dp),
+            color = onSurfaceColor
+        )
+        return
+    }
+
+    val context = LocalContext.current
+    val customTypceFace = remember(context) {
+        ResourcesCompat.getFont(context, R.font.roboto_mono_regular)
+    }
+
+    val xAxisData = AxisData.Builder()
+        .axisStepSize(70.dp)
+        .bottomPadding(8.dp)
+        .axisLabelAngle(0f)
+        .labelData { index ->
+            bars.getOrNull(index)?.label?.substringBefore("-").plus("g")
+        }
+        .axisLineColor(barColor1)
+        .axisLabelColor(onSurfaceColor)
+        .startDrawPadding(30.dp)
+        .typeFace(customTypceFace ?: Typeface.DEFAULT)
+        .build()
+
+    val maxCount = bars.maxOfOrNull { it.point.y } ?: 1f
+    val yAxisIntervals = if (maxCount < 5f) maxCount.toInt() else 4
+
+    val yAxisData = AxisData.Builder()
+        .steps(yAxisIntervals)
+        .labelAndAxisLinePadding(20.dp)
+        .axisLineColor(barColor1)
+        .axisLabelColor(onSurfaceColor)
+        .labelData { value ->
+            val scale = maxCount / yAxisIntervals
+            val labelValue = scale * value
+            "%.0f".format(labelValue)
+        }
+        .build()
+
+    val barChartData = BarChartData(
+        chartData = bars,
+        xAxisData = xAxisData,
+        yAxisData = yAxisData,
+        backgroundColor = Color.Transparent,
+        barStyle = BarStyle(
+            barWidth = 40.dp,
+            cornerRadius = 4.dp
+        ),
+        horizontalExtraSpace = 20.dp
+    )
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        BarChart(
+            barChartData = barChartData,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            bars.forEachIndexed { index, barData ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "${barData.label}:",
+                        color = onSurfaceColor,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(barData.color, RoundedCornerShape(2.dp))
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "${barData.point.y.toInt()} items",
+                        color = onSurfaceColor,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }
