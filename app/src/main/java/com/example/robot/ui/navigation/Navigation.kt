@@ -12,13 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.example.robot.ui.screens.AboutScreen
 import com.example.robot.ui.screens.MainScreen
 import com.example.robot.ui.screens.SettingsScreen
 import com.example.robot.ui.screens.WelcomeScreen
 import com.example.robot.viewmodel.SettingsViewModel
-import com.google.accompanist.navigation.animation.AnimatedNavHost
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -27,7 +27,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModelFactory(context))
 
-    AnimatedNavHost(
+    NavHost(
         navController = navController,
         startDestination = Destinations.WELCOME_ROUTE,
         modifier = modifier,

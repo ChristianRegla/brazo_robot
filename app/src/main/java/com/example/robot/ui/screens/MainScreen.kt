@@ -75,7 +75,6 @@ fun MainScreen(
     val selectedItems by materialViewModel.selectedItems.collectAsState()
     val lastDeletedItems by materialViewModel.lastDeletedItems.collectAsState()
     val sortState by materialViewModel.sortState.collectAsState()
-
     val weightStatistics by materialViewModel.weightStatistics.collectAsState()
     val weightDistribution by materialViewModel.weightDistribution.collectAsState()
 
@@ -102,7 +101,7 @@ fun MainScreen(
         LottieCompositionSpec.RawRes(R.raw.loading)
     )
     val noInternetComposition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(R.raw.no_internet)
+        LottieCompositionSpec.RawRes(R.raw.no_connection)
     )
     val emptyListComposition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.empty)

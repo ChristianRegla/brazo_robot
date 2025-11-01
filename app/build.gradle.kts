@@ -63,7 +63,6 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.animation:animation")
 
-    // Accompanist (para animaciones de navegación y pagers)
     implementation("com.google.accompanist:accompanist-navigation-animation:0.34.0")
     implementation("com.google.accompanist:accompanist-pager:0.34.0")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.34.0")
