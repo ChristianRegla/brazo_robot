@@ -97,6 +97,18 @@ fun MainScreen(
 
     val haptic = LocalHapticFeedback.current
 
+    val colorFilter by materialViewModel.colorFilter.collectAsStateWithLifecycle()
+    val isMetalFilter by materialViewModel.isMetalFilter.collectAsStateWithLifecycle()
+    val categoryFilter by materialViewModel.categoryFilter.collectAsStateWithLifecycle()
+
+    LaunchedEffect(colorFilter, isMetalFilter, categoryFilter) {
+        if (materiales.isNotEmpty() && lazyListState.firstVisibleItemIndex > 0) {
+            coroutineScope.launch {
+                lazyListState.animateScrollToItem(0)
+            }
+        }
+    }
+
     val loadingComposition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.loading)
     )
