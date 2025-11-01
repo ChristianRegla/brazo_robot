@@ -114,11 +114,10 @@ fun RobotChart(
 
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp) // Espacio vertical entre filas
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            val cardModifier = Modifier.weight(1f) // Para que las tarjetas compartan espacio
+            val cardModifier = Modifier.weight(1f)
 
-            // Fila 1
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 ChartNavigationCard(
                     title = ChartType.METALS.title,
@@ -134,7 +133,6 @@ fun RobotChart(
                 )
             }
 
-            // Fila 2
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 ChartNavigationCard(
                     title = ChartType.CATEGORIES.title,
@@ -150,7 +148,6 @@ fun RobotChart(
                 )
             }
 
-            // Fila 3
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 ChartNavigationCard(
                     title = ChartType.WEIGHT_LINE.title,
@@ -158,7 +155,6 @@ fun RobotChart(
                     onClick = { chartToShow = ChartType.WEIGHT_LINE },
                     modifier = cardModifier
                 )
-                // Añadimos un Spacer invisible para que la tarjeta 5 no ocupe toda la fila
                 Spacer(modifier = cardModifier)
             }
         }
