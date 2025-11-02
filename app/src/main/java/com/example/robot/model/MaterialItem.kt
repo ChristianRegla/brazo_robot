@@ -7,5 +7,6 @@ data class MaterialItem(
     val color: String = "",
     val pesoGramos: Int = 0,
     val esMetal: Boolean = false,
-    val categoria: String = ""
+    val categoria: String = "",
+    val confirmado: Boolean = false,
 )

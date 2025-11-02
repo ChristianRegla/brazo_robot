@@ -68,6 +68,12 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     private val _categoryFilter = MutableStateFlow<Set<String>>(emptySet())
     val categoryFilter: StateFlow<Set<String>> = _categoryFilter
 
+    val itemsPendientes: StateFlow<List<MaterialItem>> = _materiales
+        .map { lista ->
+            lista.filter { !it.confirmado }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val availableColors: StateFlow<List<String>> = _materiales.map { materiales ->
         val colors = materiales.map { it.color.ifBlank { "No hay color" } }.distinct().sorted()
         colors
@@ -119,6 +125,16 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
         }.launchIn(viewModelScope)
 
         fetchMateriales()
+    }
+
+    fun confirmarMaterial(item: MaterialItem) {
+        viewModelScope.launch {
+            try {
+                materialRepository.confirmMaterial(item.id)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun updateSortColumn(column: SortableColumn) {

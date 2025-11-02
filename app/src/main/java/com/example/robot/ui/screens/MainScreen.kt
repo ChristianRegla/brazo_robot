@@ -42,6 +42,7 @@ import com.example.robot.ui.theme.RobotTheme
 import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.R
 import com.example.robot.model.MaterialItem
+import com.example.robot.ui.components.ConfirmationDialog
 import com.example.robot.ui.components.CustomUndoBar
 import com.example.robot.ui.components.MainScreenBottomAppBar
 import com.example.robot.ui.components.MainScreenDialogs
@@ -77,6 +78,9 @@ fun MainScreen(
     val sortState by materialViewModel.sortState.collectAsState()
     val weightStatistics by materialViewModel.weightStatistics.collectAsState()
     val weightDistribution by materialViewModel.weightDistribution.collectAsState()
+    val itemsPendientes by materialViewModel.itemsPendientes.collectAsStateWithLifecycle()
+
+    val itemAPreconfirmar = itemsPendientes.firstOrNull()
 
     val selectedUnit by settingsViewModel.unitType.collectAsStateWithLifecycle()
     val hapticEnabled by settingsViewModel.hapticFeedbackEnabled.collectAsStateWithLifecycle()
@@ -222,6 +226,16 @@ fun MainScreen(
                 .fillMaxSize()
                 .background(brush = backgroundBrush)
         ) { innerPadding ->
+            if (itemAPreconfirmar != null) {
+                ConfirmationDialog(
+                    title = "Acción Requerida",
+                    text = "Nuevo material detectado: ${itemAPreconfirmar.categoria}.\n¿Deseas que el robot lo acomode?",
+                    onConfirm = {
+                        materialViewModel.confirmarMaterial(itemAPreconfirmar)
+                    },
+                    onDismiss = {}
+                )
+            }
             MainScreenDialogs(
                 showClearConfirmation = showClearConfirmationDialog,
                 onClearConfirm = { materialViewModel.deleteAllMateriales(undoDuration.toLong()) },

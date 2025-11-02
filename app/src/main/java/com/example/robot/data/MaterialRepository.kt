@@ -77,4 +77,53 @@ class MaterialRepository {
             throw e
         }
     }
+
+    /**
+     * Confirma un material específico en Firestore.
+     * Esto le dice al ESP32 que puede mover el brazo.
+     */
+    suspend fun confirmMaterial(materialId: String) {
+        try {
+            db.collection("materiales").document(materialId)
+                .update("confirmado", true)
+                .await()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    /**
+     * Actualiza el estado del "Modo Automático" en Firestore.
+     * El ESP32 leerá este documento.
+     */
+    suspend fun setModoAutomatico(estaActivo: Boolean) {
+        try {
+            val configDoc = db.collection("configuracion").document("robot")
+
+            val configData = mapOf("modoAutomatico" to estaActivo)
+            configDoc.set(configData).await()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    /**
+     * Lee el estado actual del "Modo Automático" desde Firestore.
+     */
+    fun getModoAutomatico(): Flow<Boolean> = callbackFlow {
+        val configDoc = db.collection("configuracion").document("robot")
+
+        val listener = configDoc.addSnapshotListener { snapshot, exception ->
+            if (exception != null) {
+                close(exception)
+                return@addSnapshotListener
+            }
+            if (snapshot != null && snapshot.exists()) {
+                trySend(snapshot.getBoolean("modoAutomatico") ?: true)
+            } else {
+                trySend(true)
+            }
+        }
+        awaitClose { listener.remove() }
+    }
 }

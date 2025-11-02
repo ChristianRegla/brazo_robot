@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.robot.data.MaterialRepository
 import com.example.robot.model.UnitType
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +33,7 @@ object UndoDuration {
 class SettingsViewModel(context: Context) : ViewModel() {
 
     private val dataStore = context.dataStore
+    private val materialRepository = MaterialRepository()
 
     private val UNIT_TYPE_KEY = stringPreferencesKey("unit_type")
     private val THEME_PREFERENCE_KEY = stringPreferencesKey("theme_preference")
@@ -39,6 +41,19 @@ class SettingsViewModel(context: Context) : ViewModel() {
     private val UNDO_DURATION_KEY = intPreferencesKey("undo_duration_millis")
     private val CONFIRM_DELETE_SELECTED_KEY = booleanPreferencesKey("confirm_delete_selected")
     private val CONFIRM_DELETE_ALL_KEY = booleanPreferencesKey("confirm_delete_all")
+
+    val modoAutomatico: StateFlow<Boolean> = materialRepository.getModoAutomatico()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = true
+        )
+
+    fun setModoAutomatico(estaActivo: Boolean) {
+        viewModelScope.launch {
+            materialRepository.setModoAutomatico(estaActivo)
+        }
+    }
 
     val unitType = dataStore.data
         .map { preferences ->

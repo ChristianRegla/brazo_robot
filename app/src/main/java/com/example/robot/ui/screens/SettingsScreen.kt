@@ -2,6 +2,7 @@ package com.example.robot.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -53,6 +54,7 @@ fun SettingsScreen(
     val selectedUndoDuration by settingsViewModel.undoDurationMillis.collectAsStateWithLifecycle()
     val confirmDeleteSelected by settingsViewModel.confirmDeleteSelected.collectAsStateWithLifecycle()
     val confirmDeleteAll by settingsViewModel.confirmDeleteAll.collectAsStateWithLifecycle()
+    val modoAutomatico by settingsViewModel.modoAutomatico.collectAsStateWithLifecycle()
 
     var showResetDialog by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
@@ -116,6 +118,16 @@ fun SettingsScreen(
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
+                SectionCard(title = "Control del Robot") {
+                    SettingSwitchRow(
+                        text = "Modo Automático",
+                        description = "Si está activo, el robot acomodará el material inmediatamente. Si no, la app pedirá confirmación.",
+                        checked = modoAutomatico,
+                        onCheckedChange = { nuevoEstado ->
+                            settingsViewModel.setModoAutomatico(nuevoEstado)
+                        }
+                    )
+                }
                 SectionCard(title = stringResource(R.string.unidades_medida_peso)) {
                     UnitType.entries.forEach { unitType ->
                         SettingRadioButtonRow(
@@ -216,7 +228,12 @@ fun SettingClickableRow(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = if (description == null) 48.dp else 64.dp)
-            .clickable(onClick = onClick, role = Role.Button)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick,
+                role = Role.Button
+            )
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -300,7 +317,10 @@ private fun SettingRadioButtonRow(
             .selectable(
                 selected = selected,
                 onClick = onClick,
-                role = Role.RadioButton
+                role = Role.RadioButton,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+
             )
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -340,7 +360,9 @@ fun SettingSwitchRow(
             .selectable(
                 selected = checked,
                 onClick = { onCheckedChange(!checked) },
-                role = Role.Switch
+                role = Role.Switch,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
             )
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
