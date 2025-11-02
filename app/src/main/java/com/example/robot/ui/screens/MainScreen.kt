@@ -14,6 +14,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,40 +72,40 @@ fun MainScreen(
 
     val materialViewModel: MaterialViewModel = viewModel()
 
+    val sortState by materialViewModel.sortState.collectAsState()
     val isLoading by materialViewModel.isLoading.collectAsState()
     val isConnected by materialViewModel.isConnected.collectAsState()
     val materiales by materialViewModel.sortedMateriales.collectAsState()
     val selectedItems by materialViewModel.selectedItems.collectAsState()
     val lastDeletedItems by materialViewModel.lastDeletedItems.collectAsState()
-    val sortState by materialViewModel.sortState.collectAsState()
     val weightStatistics by materialViewModel.weightStatistics.collectAsState()
     val weightDistribution by materialViewModel.weightDistribution.collectAsState()
     val itemsPendientes by materialViewModel.itemsPendientes.collectAsStateWithLifecycle()
 
     val itemAPreconfirmar = itemsPendientes.firstOrNull()
 
-    val selectedUnit by settingsViewModel.unitType.collectAsStateWithLifecycle()
-    val hapticEnabled by settingsViewModel.hapticFeedbackEnabled.collectAsStateWithLifecycle()
     val confirmDeleteSelected by settingsViewModel.confirmDeleteSelected.collectAsStateWithLifecycle()
+    val hapticEnabled by settingsViewModel.hapticFeedbackEnabled.collectAsStateWithLifecycle()
     val confirmDeleteAll by settingsViewModel.confirmDeleteAll.collectAsStateWithLifecycle()
     val undoDuration by settingsViewModel.undoDurationMillis.collectAsStateWithLifecycle()
+    val selectedUnit by settingsViewModel.unitType.collectAsStateWithLifecycle()
 
     var itemDetalle by remember { mutableStateOf<MaterialItem?>(null) }
 
+    val sheetState = rememberModalBottomSheetState()
     val lazyListState = rememberLazyListState()
     val scrollState = rememberScrollState()
-    val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
+    var showOptionsMenu by remember { mutableStateOf(false) }
     var showClearConfirmationDialog by remember { mutableStateOf(false) }
     var showDeleteSelectedConfirmationDialog by remember { mutableStateOf(false) }
-    var showOptionsMenu by remember { mutableStateOf(false) }
 
     val haptic = LocalHapticFeedback.current
 
-    val colorFilter by materialViewModel.colorFilter.collectAsStateWithLifecycle()
-    val isMetalFilter by materialViewModel.isMetalFilter.collectAsStateWithLifecycle()
     val categoryFilter by materialViewModel.categoryFilter.collectAsStateWithLifecycle()
+    val isMetalFilter by materialViewModel.isMetalFilter.collectAsStateWithLifecycle()
+    val colorFilter by materialViewModel.colorFilter.collectAsStateWithLifecycle()
 
     LaunchedEffect(colorFilter, isMetalFilter, categoryFilter) {
         if (materiales.isNotEmpty() && lazyListState.firstVisibleItemIndex > 0) {
@@ -230,10 +232,13 @@ fun MainScreen(
                 ConfirmationDialog(
                     title = "Acción Requerida",
                     text = "Nuevo material detectado: ${itemAPreconfirmar.categoria}.\n¿Deseas que el robot lo acomode?",
+                    icon = Icons.Default.Info,
                     onConfirm = {
                         materialViewModel.confirmarMaterial(itemAPreconfirmar)
                     },
-                    onDismiss = {}
+                    onDismiss = {
+                        materialViewModel.deleteSingleMaterial(itemAPreconfirmar, 0L)
+                    }
                 )
             }
             MainScreenDialogs(

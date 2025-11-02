@@ -291,8 +291,8 @@ private fun SectionCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp) // Padding vertical para los items internos
-                    .selectableGroup(), // Necesario para RadioButtons
+                    .padding(vertical = 8.dp)
+                    .selectableGroup(),
                 content = content
             )
         }

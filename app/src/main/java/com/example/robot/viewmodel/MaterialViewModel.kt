@@ -322,7 +322,6 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun calculateWeightDistribution(materials: List<MaterialItem>): Map<String, Int> {
-        // Define los rangos de peso
         val bins = listOf(
             "1-50g" to (1..50),
             "51-100g" to (51..100),
