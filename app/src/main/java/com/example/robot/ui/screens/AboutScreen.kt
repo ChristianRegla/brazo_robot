@@ -110,7 +110,6 @@ fun AboutScreen(
             ) {
                 Spacer(Modifier.height(16.dp))
 
-                // Lottie Animation
                 LottieAnimation(
                     composition = composition,
                     progress = { progress },
@@ -126,7 +125,7 @@ fun AboutScreen(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = stringResource(R.string.version_app, "1.0.0"), // Ejemplo de versión
+                    text = stringResource(R.string.version_app, "1.0.0"),
                     style = MaterialTheme.typography.bodyMedium,
                     color = onSurfaceVariantColor,
                     modifier = Modifier.padding(bottom = 24.dp)
@@ -192,5 +191,7 @@ fun AboutScreen(
 @Preview(showBackground = true)
 @Composable
 fun AboutScreenPreview() {
-    AboutScreen(onBackClick = {})
+    RobotTheme {
+        AboutScreen(onBackClick = {})
+    }
 }

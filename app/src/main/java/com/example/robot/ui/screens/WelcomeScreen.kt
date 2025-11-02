@@ -348,5 +348,7 @@ fun WelcomeScreen(
 @Preview(showBackground = true)
 @Composable
 fun WelcomeScreenPreview() {
-    WelcomeScreen(onStartClick = {})
+    RobotTheme {
+        WelcomeScreen(onStartClick = {})
+    }
 }
