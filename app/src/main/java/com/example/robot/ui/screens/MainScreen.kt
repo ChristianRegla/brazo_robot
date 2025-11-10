@@ -115,11 +115,11 @@ fun MainScreen(
         }
     }
 
-    val loadingComposition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(R.raw.loading)
-    )
     val noInternetComposition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.no_connection)
+    )
+    val loadingComposition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.loading)
     )
     val emptyListComposition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.empty)
