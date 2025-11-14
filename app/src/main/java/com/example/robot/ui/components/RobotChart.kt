@@ -33,10 +33,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ShowChart
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,6 +72,8 @@ import com.example.robot.model.UnitType
 import com.example.robot.ui.theme.GreenSensor
 import com.example.robot.ui.theme.NeonBlue
 import com.example.robot.ui.theme.RedAlert
+import com.example.robot.viewmodel.GeminiUiState
+import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.viewmodel.WeightStatistics
 import kotlin.math.roundToInt
 
@@ -86,9 +92,25 @@ fun RobotChart(
     modifier: Modifier = Modifier,
     currentUnit: UnitType,
     weightStatistics: WeightStatistics,
-    weightDistribution: Map<String, Int>
+    weightDistribution: Map<String, Int>,
+    viewModel: MaterialViewModel,
+    geminiUiState: GeminiUiState
 ) {
     var chartToShow by remember { mutableStateOf<ChartType?>(null) }
+
+    var showGeminiDialog by remember { mutableStateOf(false) }
+
+    if (showGeminiDialog) {
+        GeminiSummaryDialog(
+            uiState = geminiUiState,
+            onDismiss = {
+                showGeminiDialog = false
+            },
+            onRegenerate = {
+                viewModel.forceGenerateGeminiSummary(materiales)
+            }
+        )
+    }
 
     Column(
         Modifier
@@ -158,6 +180,34 @@ fun RobotChart(
                 Spacer(modifier = cardModifier)
             }
         }
+        Spacer(Modifier.height(24.dp))
+        Button(
+            onClick = {
+                showGeminiDialog = true
+                viewModel.generateGeminiSummary(materiales)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .align(Alignment.CenterHorizontally),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+        ) {
+            Icon(
+                Icons.Default.AutoAwesome,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                "Generar Resumen con IA",
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(Modifier.height(16.dp))
     }
 
     chartToShow?.let { currentChart ->

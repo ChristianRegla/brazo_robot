@@ -3,9 +3,11 @@ package com.example.robot.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.robot.BuildConfig
 import com.example.robot.data.MaterialRepository
 import com.example.robot.data.NetworkConnectivityObserver
 import com.example.robot.model.MaterialItem
+import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +39,13 @@ data class WeightStatistics(
     val stdDev: Double = 0.0
 )
 
+sealed interface GeminiUiState {
+    object Idle : GeminiUiState
+    object Loading : GeminiUiState
+    data class Success(val summary: String) : GeminiUiState
+    data class Error(val message: String) : GeminiUiState
+}
+
 class MaterialViewModel(application: Application) : AndroidViewModel(application) {
     private val materialRepository = MaterialRepository()
     private val connectivityObserver = NetworkConnectivityObserver(application)
@@ -67,6 +76,9 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
 
     private val _categoryFilter = MutableStateFlow<Set<String>>(emptySet())
     val categoryFilter: StateFlow<Set<String>> = _categoryFilter
+
+    private val _geminiUiState = MutableStateFlow<GeminiUiState>(GeminiUiState.Idle)
+    val geminiUiState: StateFlow<GeminiUiState> = _geminiUiState
 
     val itemsPendientes: StateFlow<List<MaterialItem>> = _materiales
         .map { lista ->
@@ -351,4 +363,54 @@ class MaterialViewModel(application: Application) : AndroidViewModel(application
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyMap()
         )
+
+    fun generateGeminiSummary(materiales: List<MaterialItem>) {
+        if (geminiUiState.value is GeminiUiState.Success) return
+
+        if (geminiUiState.value is GeminiUiState.Loading) return
+
+        forceGenerateGeminiSummary(materiales)
+    }
+
+    fun forceGenerateGeminiSummary(materiales: List<MaterialItem>) {
+        _geminiUiState.value = GeminiUiState.Loading
+
+        val listaLimitada = materiales.take(100)
+
+        viewModelScope.launch {
+            try {
+                val generativeModel = GenerativeModel(
+                    modelName = "gemini-2.0-flash",
+                    apiKey = BuildConfig.API_KEY
+                )
+
+                val datosFormateados = listaLimitada.joinToString("\n") {
+                    "Color: ${it.color.ifBlank { "N/D" }}, Peso: ${it.pesoGramos}g, Metal: ${if (it.esMetal) "Sí" else "No"}, Cat: ${it.categoria.ifBlank { "N/D" }}"
+                }
+
+                val prompt = """
+                    Eres un asistente de análisis de datos para un brazo robot que clasifica materiales.
+                    Basado en la siguiente lista de ${listaLimitada.size} materiales recolectados, genera un resumen ejecutivo.
+                    Destaca tendencias clave, como el material más común, la proporción de metal vs no metal, o cualquier anomalía en los pesos.
+                    Sé amigable y directo. Omite presentaciones pues lo que proporciones será algo definitivo, solo incluye la información. Aquí están los datos:
+                                        
+                    $datosFormateados
+                """.trimIndent()
+
+                val response = generativeModel.generateContent(prompt)
+
+                response.text?.let {
+                    _geminiUiState.value = GeminiUiState.Success(it)
+                } ?: run {
+                    _geminiUiState.value = GeminiUiState.Error("No se recibió respuesta.")
+                }
+            } catch (e: Exception) {
+                _geminiUiState.value = GeminiUiState.Error(e.message ?: "Error desconocido")
+            }
+        }
+    }
+
+    fun resetGeminiState() {
+        _geminiUiState.value = GeminiUiState.Idle
+    }
 }

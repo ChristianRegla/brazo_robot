@@ -81,6 +81,7 @@ fun MainScreen(
     val weightStatistics by materialViewModel.weightStatistics.collectAsState()
     val weightDistribution by materialViewModel.weightDistribution.collectAsState()
     val itemsPendientes by materialViewModel.itemsPendientes.collectAsStateWithLifecycle()
+    val geminiUiState by materialViewModel.geminiUiState.collectAsStateWithLifecycle()
 
     val itemAPreconfirmar = itemsPendientes.firstOrNull()
 
@@ -304,7 +305,8 @@ fun MainScreen(
                         scrollState = scrollState,
                         onRetryConnection = { materialViewModel.fetchMateriales() },
                         weightStatistics = weightStatistics,
-                        weightDistribution = weightDistribution
+                        weightDistribution = weightDistribution,
+                        geminiUiState = geminiUiState
                     )
                 }
                 Box(

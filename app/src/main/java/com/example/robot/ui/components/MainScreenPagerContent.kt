@@ -19,6 +19,7 @@ import com.example.robot.R
 import com.example.robot.model.MaterialItem
 import com.example.robot.model.UnitType
 import com.example.robot.ui.navigation.TabScreen
+import com.example.robot.viewmodel.GeminiUiState
 import com.example.robot.viewmodel.MaterialViewModel
 import com.example.robot.viewmodel.WeightStatistics
 
@@ -47,7 +48,8 @@ fun MainScreenPagerContent(
     scrollState: androidx.compose.foundation.ScrollState,
     onRetryConnection: () -> Unit,
     weightStatistics: WeightStatistics,
-    weightDistribution: Map<String, Int>
+    weightDistribution: Map<String, Int>,
+    geminiUiState: GeminiUiState
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
 
@@ -145,7 +147,9 @@ fun MainScreenPagerContent(
                         scrollState = scrollState,
                         currentUnit = currentUnit,
                         weightStatistics = weightStatistics,
-                        weightDistribution = weightDistribution
+                        weightDistribution = weightDistribution,
+                        viewModel = materialViewModel,
+                        geminiUiState = geminiUiState
                     )
                 }
             }
