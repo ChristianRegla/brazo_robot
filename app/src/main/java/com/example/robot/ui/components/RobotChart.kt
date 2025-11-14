@@ -181,7 +181,7 @@ fun RobotChart(
             }
         }
         Spacer(Modifier.height(24.dp))
-        Button(
+        AnimatedAiButton(
             onClick = {
                 showGeminiDialog = true
                 viewModel.generateGeminiSummary(materiales)
@@ -189,24 +189,8 @@ fun RobotChart(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
-                .align(Alignment.CenterHorizontally),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-        ) {
-            Icon(
-                Icons.Default.AutoAwesome,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                "Generar Resumen con IA",
-                fontWeight = FontWeight.Bold
-            )
-        }
+                .align(Alignment.CenterHorizontally)
+        )
         Spacer(Modifier.height(16.dp))
     }
 
